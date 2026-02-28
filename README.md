@@ -1,3 +1,13 @@
+---
+title: README
+description: 
+published: true
+date: 2026-02-28T17:55:17.584Z
+tags: 
+editor: markdown
+dateCreated: 2026-02-28T17:36:23.462Z
+---
+
 # Engineering Portfolio – Cloud Engineer
 
 I am an aspiring Cloud Engineer with a background in technical support,
@@ -57,3 +67,5 @@ Docker · Proxmox · Infrastructure as Code · Monitoring & Operations
 
 Cloud Engineer / Azure Administrator
 Long‑term interest in platform engineering and automation.
+
+...

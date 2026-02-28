@@ -1,0 +1,15 @@
+# Secrets & environment
+.env
+*.pem
+*.key
+
+# Terraform / IaC
+.terraform/
+*.tfstate
+*.tfstate.backup
+
+# Logs
+*.log
+
+# OS / editor
+.DS_Store

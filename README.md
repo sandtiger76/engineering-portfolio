@@ -131,3 +131,4 @@ engineering-portfolio/
 ---
 
 *All projects include architecture decisions, setup steps, issues encountered, and lessons learned.*
+

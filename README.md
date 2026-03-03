@@ -31,7 +31,7 @@ An end-to-end automated job discovery and research system, hosted entirely on lo
 
 ---
 
-### ☁️ SME On-Premise to Azure Migration
+### ☁️ SME On-Premise to Azure Migration (📋 Planning)
 `azure` `microsoft 365` `cloud migration` `Entra ID` `Exchange Online`
 
 Documented end-to-end migration for a small business moving from local servers and third-party hosted email to Microsoft Azure and Microsoft 365 Business. Covers assessment, planning, identity migration, data migration, cutover, and post-migration documentation — based on a real-world engagement.
@@ -42,7 +42,7 @@ Documented end-to-end migration for a small business moving from local servers a
 
 ---
 
-### 🧪 Azure Lab Projects *(In Progress)*
+### 🧪 Azure Lab Projects (📋 Planning)
 `AZ-104` `azure` `IaC` `cloud labs`
 
 Hands-on Azure labs built alongside AZ-104 exam preparation. Each lab is documented as a standalone, reproducible guide covering real-world scenarios — not just exam theory.
@@ -53,7 +53,7 @@ Topics: Virtual networking · RBAC · Azure Backup · Azure Monitor · Policy & 
 
 ---
 
-### 🛠️ Infrastructure Guides
+### 🛠️ Infrastructure Guides (📋 Planning)
 `Proxmox` `Docker` `Linux` `LXC` `homelab`
 
 Practical setup and configuration documentation for the infrastructure tooling used across these projects. Written to be reproducible by anyone building similar environments.
@@ -68,29 +68,17 @@ Topics: Proxmox VE · LXC container management · Docker & Docker Compose · Lin
 
 | Domain | Experience |
 |---|---|
-| Operating Systems | Windows Server 2003–2022, Debian, Ubuntu, RHEL |
+| Operating Systems | Windows Server, Debian, Ubuntu, NetApp ONTAP|
 | Identity & Access | Active Directory, Group Policy, Entra ID |
-| Virtualisation | Proxmox VE, VMware ESXi, Hyper-V |
-| Containers | LXC/LXD, Docker, Docker Compose, Portainer |
-| Automation & Scripting | n8n, PowerShell, Bash, Ansible |
+| Virtualisation | Proxmox VE, VMware ESX |
+| Containers | VM/LXC, Docker, Docker Compose, Portainer |
+| Automation & Scripting | n8n, PowerShell, Bash|
 | Storage | NetApp NAS/SAN, enterprise backup (NetBackup), Azure Files |
-| Cloud | Azure (AZ-104 in progress), Microsoft 365, SharePoint Online |
+| Cloud | Azure, Microsoft 365, SharePoint Online |
 | Monitoring | Grafana, Prometheus, Loki, Uptime Kuma |
 | Version Control | Git, GitHub, Gitea (self-hosted) |
 | Networking | VLANs, DNS/DHCP, UFW, VPN (Tailscale/WireGuard), Nginx |
 | Security | Fail2Ban, Vault (HashiCorp), Let's Encrypt / Certbot |
-
----
-
-## Certifications
-
-| Certification | Year |
-|---|---|
-| NetApp Certified Data Management Administrator (ONTAP) | 2024 |
-| NetApp Certified Data Management Administrator (7-Mode) | 2008 |
-| Microsoft Certified Systems Engineer (MCSE) | 2000 |
-| CompTIA A+ | 1998 |
-| AZ-104 Microsoft Azure Administrator | *In progress* |
 
 ---
 
@@ -119,8 +107,8 @@ engineering-portfolio/
 |---|---|
 | Job Intelligence Pipeline | 🔨 In progress |
 | SME Azure Migration | 📋 Planning |
-| Azure Lab Projects | 🔨 In progress |
-| Infrastructure Guides | ✍️ Ongoing |
+| Azure Lab Projects | 📋 Planning |
+| Infrastructure Guides | 📋 Planning |
 
 ---
 

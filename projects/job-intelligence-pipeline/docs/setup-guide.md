@@ -1,6 +1,6 @@
 Here's the updated `setup-guide.md` — the main addition is the new **Gitea Configuration** section at the end, plus the `systemctl is-enabled` verification added to Step 8:
 
-```markdown
+
 # Setup Guide — Homelab Automation Stack
 
 **Date:** 2026-03-02

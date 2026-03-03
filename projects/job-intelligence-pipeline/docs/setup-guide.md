@@ -575,3 +575,79 @@ git add .
 git commit -m "docs: add Gitea setup section and full troubleshooting guide"
 git push gitea main
 ```
+
+## Grafana & cAdvisor Configuration
+
+### Overview
+
+Prometheus scrapes metrics from cAdvisor, which monitors all running Docker containers. Grafana queries Prometheus to visualise those metrics on dashboards.
+```
+cAdvisor (container) → Prometheus (scrape) → Grafana (visualise)
+```
+
+### Step 1 — Add cAdvisor to docker-compose.yml
+
+Add the following service to `/opt/automation/docker-compose.yml` before the `volumes:` section:
+```yaml
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - automation
+```
+
+### Step 2 — Add cAdvisor scrape job to Prometheus
+
+Add the following job to `/opt/automation/prometheus/prometheus.yml`:
+```yaml
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+```
+
+> ⚠️ Indentation matters in YAML. Ensure `static_configs` is at 4 spaces, aligned with `job_name`.
+
+### Step 3 — Apply the changes
+```bash
+cd /opt/automation
+docker compose up -d
+docker compose restart prometheus
+docker compose ps
+```
+
+Verify cAdvisor is running:
+```bash
+docker logs cadvisor --tail 20
+```
+
+> The error `Failed to get system UUID: open /etc/machine-id: no such file or directory` is harmless in an LXC container environment and can be ignored.
+
+### Step 4 — Verify Prometheus is scraping cAdvisor
+
+Open `http://192.168.1.9:9090/targets` — confirm the `cadvisor` job shows state **UP**.
+
+> Note: The `docker` job will show as DOWN (`host.docker.internal` does not resolve on Linux). This is expected and can be addressed in a later phase. It does not affect container monitoring.
+
+### Step 5 — Add Prometheus as a Grafana data source
+
+1. In Grafana (`http://192.168.1.9:3001`): **Connections** → **Data sources** → **Add data source**
+2. Select **Prometheus**
+3. Set URL to `http://prometheus:9090`
+4. Click **Save & test**
+
+Expected: green **"Successfully queried the Prometheus API"** message.
+
+### Step 6 — Import the container monitoring dashboard
+
+1. In Grafana: **Dashboards** → **New** → **Import**
+2. Enter ID `19792` → **Load**
+3. Select your Prometheus data source
+4. Click **Import**
+
+You should see a live dashboard with CPU, memory, network, and disk stats for all running containers.

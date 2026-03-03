@@ -147,7 +147,8 @@ apt update && apt install -y \
   docker-ce-cli \
   containerd.io \
   docker-buildx-plugin \
-  docker-compose-plugin
+  docker-compose-pluginker compose ps
+
 ```
 
 ### Step 7 — Verify Docker Installation
@@ -514,29 +515,44 @@ git push gitea main
 
 ## Useful Commands
 
+
+### Enter the LXC from the Proxmox host
 ```bash
-# Enter the LXC from the Proxmox host
 pct enter 103
+```
 
-# Navigate to the stack directory
+### Navigate to the stack directory
+```bash
 cd /opt/automation
+```
 
-# Check status of all containers
+### Check status of all containers
+```bash
 docker compose ps
+```
 
-# View logs for a specific service (last 30 lines)
+### View logs for a specific service (last 30 lines)
+```bash
 docker logs n8n --tail 30
+```
 
-# Follow logs in real time
+### Follow logs in real time
+```bash
 docker logs -f n8n
+```
 
-# Restart a single service
+### Restart a single service
+```bash
 docker compose restart n8n
+```
 
-# Full stack restart
+### Full stack restart
+```bash
 docker compose down && docker compose up -d
+```
 
-# Check resource usage
+### Check resource usage
+```bash
 docker stats
 ```
 

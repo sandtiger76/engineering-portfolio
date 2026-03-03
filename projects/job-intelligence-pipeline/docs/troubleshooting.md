@@ -13,7 +13,8 @@
 | 3 | n8n: Secure cookie error | n8n requires HTTPS for cookies by default; no TLS in local environment | Set `N8N_SECURE_COOKIE=false` in `.env`, then `docker compose down && docker compose up -d` |
 | 4 | Grafana: Password not updating after `.env` change | PostgreSQL retains the original initialised password | Reset via `docker exec -it grafana grafana-cli admin reset-admin-password` |
 | 5 | Gitea: SSH git push prompts for password | SSH connecting to port 22 (LXC host) instead of port 2222 (Gitea container) | Updated remote URL to use port 2222 and added SSH key to Gitea |
-
+| 6 | Grafana dashboard 193: container metrics blank | Dashboard 193 is outdated — metric names don't match current cAdvisor | Use dashboard ID 19792 instead |
+| 7 | Prometheus: docker job DNS failure | `host.docker.internal` does not resolve on Linux Docker | Not required for container monitoring — defer to later phase |
 ---
 
 ## Issue Detail
@@ -124,6 +125,39 @@ git remote set-url gitea ssh://git@192.168.1.9:2222/admin/engineering-portfolio.
 ssh -T git@192.168.1.9 -p 2222
 # Expected: Hi there, admin! You've successfully authenticated...
 ```
+
+---
+
+### Issue 6 — Grafana dashboard 193: container metrics blank
+
+**Symptom:**
+Imported Grafana dashboard ID 193 (Docker container monitoring) but all panels showed no data.
+
+**Root cause:**
+Dashboard 193 is outdated and uses metric names that no longer match current cAdvisor output.
+
+**Fix:**
+Use dashboard ID **19792** instead — this is a modern cAdvisor dashboard compatible with current metric names.
+
+1. In Grafana: **Dashboards** → **New** → **Import**
+2. Enter ID `19792` → **Load**
+3. Select Prometheus data source → **Import**
+
+---
+
+### Issue 7 — Prometheus: docker job DNS failure
+
+**Symptom:**
+Prometheus targets page shows the `docker` job as DOWN with error:
+```
+dial tcp: lookup host.docker.internal on 127.0.0.11:53: no such host
+```
+
+**Root cause:**
+`host.docker.internal` is a Docker Desktop convention for resolving the host machine. It does not resolve in Linux Docker environments.
+
+**Fix:**
+This job is not required for container monitoring — cAdvisor covers that. The `docker` job is for Docker daemon metrics which requires a separate exporter. Leave it for now and address in a later phase.
 
 ---
 

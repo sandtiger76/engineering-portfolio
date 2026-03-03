@@ -61,17 +61,6 @@ All services communicate over a private Docker bridge network. A self-hosted Git
 | Backup Disk | 111.8 GB SATA SSD |
 | Sync Disk | 238.5 GB USB |
 
-### LXC Container: automation (VMID 103)
-
-| Setting | Value |
-|---|---|
-| OS | Debian 12 (Bookworm) |
-| IP | 192.168.1.9 |
-| vCPU | 2 |
-| RAM | 3072 MiB |
-| Disk | 40 GB (local-lvm) |
-| Docker | Docker CE + Compose plugin |
-
 ---
 
 ## Services

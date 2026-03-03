@@ -544,7 +544,8 @@ docker stats
 
 *See [troubleshooting.md](./troubleshooting.md) for issues encountered during setup.*
 *← [Back to Project README](../README.md)*
-```
+
+---
 
 Copy that into:
 ```bash

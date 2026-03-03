@@ -1,8 +1,11 @@
+Here's the updated `setup-guide.md` — the main addition is the new **Gitea Configuration** section at the end, plus the `systemctl is-enabled` verification added to Step 8:
+
+```markdown
 # Setup Guide — Homelab Automation Stack
 
-**Date:** 2026-03-02  
-**Author:** Quintin Boshoff  
-**Host:** proxmox (192.168.1.2)  
+**Date:** 2026-03-02
+**Author:** Quintin Boshoff
+**Host:** proxmox (192.168.1.2)
 **Container:** automation LXC (192.168.1.9)
 
 > ← [Back to Project README](../README.md)
@@ -17,6 +20,7 @@
 - [Configuration Files](#configuration-files)
 - [Starting the Stack](#starting-the-stack)
 - [Verification](#verification)
+- [Gitea Configuration](#gitea-configuration)
 - [Useful Commands](#useful-commands)
 
 ---
@@ -158,6 +162,8 @@ docker run hello-world
 
 ```bash
 systemctl enable docker
+systemctl is-enabled docker
+# Expected output: enabled
 ```
 
 ### Step 9 — Create Directory Structure
@@ -381,13 +387,138 @@ Expected output of `docker compose ps` — all 7 containers with state `running`
 
 ---
 
+## Gitea Configuration
+
+Gitea acts as a self-hosted Git server, mirroring to and from GitHub for redundancy and visibility.
+
+### Step 1 — Complete the Gitea Setup Wizard
+
+Open `http://192.168.1.9:3000` in a browser. On the initial configuration page set:
+
+| Field | Value |
+|---|---|
+| Database Type | SQLite3 |
+| Site Title | Engineering Portfolio |
+| Server Domain | `192.168.1.9` |
+| Gitea Base URL | `http://192.168.1.9:3000/` |
+
+Scroll down to **Administrator Account Settings**, create the admin account, then click **Install Gitea**.
+
+### Step 2 — Generate an SSH Key on the Automation Container
+
+> ⚠️ Gitea's SSH service is mapped to port **2222** on the host. Port 22 belongs to the LXC container itself — connecting to port 22 will not reach Gitea.
+
+```bash
+ssh-keygen -t ed25519 -C "automation@homelab" -f ~/.ssh/id_ed25519
+# Press Enter twice to skip passphrase
+
+cat ~/.ssh/id_ed25519.pub
+```
+
+### Step 3 — Add the SSH Key to Gitea
+
+1. Profile icon → **Settings** → **SSH / GPG Keys** → **Add Key**
+2. Title: `automation-container`
+3. Paste the public key output from Step 2
+4. Click **Add Key**
+
+### Step 4 — Add the SSH Key to GitHub
+
+1. Go to `https://github.com/settings/keys` → **New SSH key**
+2. Title: `automation-homelab`
+3. Paste the same public key
+4. Click **Add SSH key**
+
+### Step 5 — Verify SSH Access to Gitea
+
+```bash
+ssh -T git@192.168.1.9 -p 2222
+# Expected: Hi there, admin! You've successfully authenticated...
+```
+
+### Step 6 — Configure Git Identity
+
+```bash
+git config --global user.name "Quintin Boshoff"
+git config --global user.email "your@email.com"
+```
+
+### Step 7 — Create the Repository in Gitea
+
+1. In Gitea: **+** → **New Repository**
+2. Name: `engineering-portfolio`, Visibility: Private
+3. Leave **Initialise repository** unticked
+4. Click **Create Repository**
+
+### Step 8 — Clone from GitHub and Push to Gitea
+
+```bash
+cd ~
+git clone git@github.com:sandtiger76/engineering-portfolio.git
+cd engineering-portfolio
+
+# Add Gitea as a second remote using port 2222
+git remote add gitea ssh://git@192.168.1.9:2222/admin/engineering-portfolio.git
+
+# Verify both remotes
+git remote -v
+
+# Push all branches and tags to Gitea
+git push gitea --all
+git push gitea --tags
+```
+
+### Step 9 — Configure Push Mirror to GitHub
+
+This automatically syncs Gitea commits to GitHub.
+
+1. Repository → **Settings** → **Mirror Settings**
+2. Under **Push Mirrors** → **Add Push Mirror**
+
+| Field | Value |
+|---|---|
+| Remote URL | `https://github.com/sandtiger76/engineering-portfolio.git` |
+| Username | `sandtiger76` |
+| Password | GitHub Personal Access Token (repo scope) |
+| Sync on commit | ✅ Enabled |
+
+3. Click **Add Push Mirror**
+
+To generate the GitHub token: `https://github.com/settings/tokens` → **Generate new token (classic)** → tick `repo` scope.
+
+### Step 10 — Verify the Mirror
+
+```bash
+cd ~/engineering-portfolio
+echo "" >> README.md
+git add README.md
+git commit -m "test: verify Gitea to GitHub push mirror"
+git push gitea main
+```
+
+Check `https://github.com/sandtiger76/engineering-portfolio` — the commit should appear within seconds.
+
+### Working with the Repo Going Forward
+
+All commits are made from the `automation` container and pushed to Gitea. The push mirror syncs to GitHub automatically.
+
+```bash
+cd ~/engineering-portfolio
+
+git add .
+git commit -m "docs: description of change"
+git push gitea main
+```
+
+---
+
 ## Useful Commands
 
 ```bash
 # Enter the LXC from the Proxmox host
 pct enter 103
 
-# Navigate to the project directory
+# Navigate to the stack directory
 cd /opt/automation
 
 # Check status of all containers
@@ -411,5 +542,19 @@ docker stats
 
 ---
 
-*See [troubleshooting.md](./troubleshooting.md) for issues encountered during setup.*  
+*See [troubleshooting.md](./troubleshooting.md) for issues encountered during setup.*
 *← [Back to Project README](../README.md)*
+```
+
+Copy that into:
+```bash
+nano ~/engineering-portfolio/projects/job-intelligence-pipeline/docs/setup-guide.md
+```
+
+Once done, commit both files:
+```bash
+cd ~/engineering-portfolio
+git add .
+git commit -m "docs: add Gitea setup section and full troubleshooting guide"
+git push gitea main
+```

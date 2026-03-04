@@ -350,6 +350,18 @@ services:
     networks:
       - automation
 
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - automation
+
 volumes:
   prometheus_data:
   grafana_data:
@@ -357,8 +369,6 @@ volumes:
 networks:
   automation:
     driver: bridge
-```
-
 ---
 
 ## Starting the Stack

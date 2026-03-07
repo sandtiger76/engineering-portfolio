@@ -201,11 +201,14 @@ graph TD
 |---|---|---|
 | **AD Sync** | Cloud-only Entra ID users | Entra Connect Sync or Cloud Sync with on-premises AD during transition |
 | **Licensing** | Microsoft 365 Business Premium trial | Purchased via CSP partner or Microsoft direct |
+| **Custom domain** | `qcbhomelab.online` — registered domain owned by portfolio author | Client's own domain (e.g. `apexdd.co.uk`) |
+| **M365 tenant** | `qcbazoutlook362.onmicrosoft.com` | Dedicated client tenant |
 | **Email source** | IMAP simulation | Live third-party IMAP migration with DNS cutover coordination |
-| **Internal domain** | apex.local (non-routable) | Public registered domain (e.g. apexdd.co.uk) |
+| **Internal domain** | `apex.local` with `@qcbhomelab.online` UPN suffix | Public registered domain throughout |
 | **Devices** | Single test device enrolled in Intune | Full fleet enrolment, potentially with Windows Autopilot |
 | **SPMT H: drive migration** | Process documented with SPMT UI screenshots | Production run against live mapped drives with pre-migration cleanup |
 | **Backup** | Not implemented — gap explicitly documented | Third-party M365 backup solution (e.g. Veeam, Dropsuite, Acronis) |
+| **Company** | Apex Drafting & Design Ltd — **fictional** | Real client — confidential |
 
 ---
 

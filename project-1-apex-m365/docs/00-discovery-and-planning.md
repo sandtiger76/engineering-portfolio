@@ -8,11 +8,21 @@ Before touching a single Microsoft 365 setting, we documented the existing envir
 
 > ## ⚠️ Lab Simulation Notice
 >
-> **The Apex Drafting & Design on-premises environment is a purpose-built homelab simulation.**
+> **Apex Drafting & Design Ltd is a fictional company. This entire environment is a purpose-built homelab simulation.**
 >
 > It does not represent a live client. It was built specifically for this portfolio to provide real, demonstrable, screenshot-evidenced infrastructure — rather than describing a migration theoretically.
 >
-> The simulation runs on a two-node Proxmox homelab cluster. Windows Server 2022 Evaluation runs as a VM on Node 1 (HP ProDesk 400 G3, Intel i5-7500T, 16GB RAM). Every component — Active Directory, DNS, DHCP, SMB shares, NTFS permissions, user accounts — was built from scratch and configured to reflect what you would genuinely find in a real 15-person SME.
+> | Detail | Value |
+> |---|---|
+> | **Homelab platform** | Two-node Proxmox cluster |
+> | **Server VM** | Windows Server 2022 Evaluation — HP ProDesk 400 G3 (i5-7500T, 16GB RAM) |
+> | **Internal domain** | `apex.local` |
+> | **UPN / email domain** | `qcbhomelab.online` (registered domain — owned by portfolio author) |
+> | **Microsoft 365 tenant** | `qcbazoutlook362.onmicrosoft.com` |
+> | **Company name** | Apex Drafting & Design Ltd — fictional |
+> | **Staff** | 15 fictional user accounts — not real people |
+>
+> Every component — Active Directory, DNS, DHCP, SMB shares, NTFS permissions, user accounts — was built from scratch and configured to reflect what you would genuinely find in a real 15-person SME.
 >
 > **From this point forward, the documentation is written as a real engagement.** Lab differences from production are called out where they are relevant to technical decisions.
 
@@ -24,11 +34,13 @@ Before touching a single Microsoft 365 setting, we documented the existing envir
 |---|---|---|
 | Server hardware | Proxmox VM on HP ProDesk 400 G3 (i5-7500T, 16GB RAM) | Physical or virtualised Windows Server on-premises |
 | Windows Server | Server 2022 Standard Evaluation (180-day) | Licensed Windows Server 2022 |
-| Active Directory | Fully functional AD DS — apex.local | Production domain with years of accumulated users/GPOs |
+| Active Directory | Fully functional AD DS — `apex.local` | Production domain with years of accumulated users/GPOs |
+| UPN suffix | `@qcbhomelab.online` — registered domain | `@clientdomain.co.uk` — client's own domain |
 | File shares | SMB/CIFS with realistic NTFS permissions | Production shares with complex inherited permissions |
 | Email | Simulated via placeholder accounts | Live IMAP mailboxes on third-party hosting |
 | User data | Realistic dummy documents and CAD placeholders | Real client files — confidential, requires careful handling |
 | Network | DHCP reservation at 192.168.1.10 | Static IP, DNS A record, internal DNS zone |
+| M365 tenant | `qcbazoutlook362.onmicrosoft.com` | Dedicated client tenant |
 
 ---
 
@@ -105,7 +117,7 @@ apex.local
 
 ### User Accounts
 
-15 user accounts across four departments. All accounts are enabled, have UPNs in the format `firstname.lastname@apex.local`, and are assigned to department OUs.
+15 user accounts across four departments. All accounts are enabled, have UPNs in the format `firstname.lastname@qcbhomelab.online`, and are assigned to department OUs. The UPN suffix `qcbhomelab.online` was added to the AD forest and applied to all users — matching the registered domain that will be used in the Microsoft 365 tenant.
 
 | Department | Users | Count |
 |---|---|---|
@@ -114,6 +126,23 @@ apex.local
 | Projects | Emma Clarke, Marcus Reid, Sophie Turner, Oliver Nash, Priya Sharma | 5 |
 | Admin | David Owen, Claire Morton, Ben Ashworth, Karen Doyle | 4 |
 | **Total** | | **15** |
+
+**UPN suffix updated via PowerShell:**
+
+```powershell
+# Add qcbhomelab.online as a UPN suffix to the forest
+Get-ADForest | Set-ADForest -UPNSuffixes @{Add="qcbhomelab.online"}
+
+# Update all 15 users
+Get-ADUser -Filter * -SearchBase "OU=Apex Drafting and Design,DC=apex,DC=local" |
+  ForEach-Object {
+    $newUPN = $_.SamAccountName + "@qcbhomelab.online"
+    Set-ADUser $_ -UserPrincipalName $newUPN
+  }
+```
+
+![UPN suffix updated to qcbhomelab.online](../screenshots/00-discovery/07_upn_updated_qcbhomelab.png)
+*All 15 user UPNs updated to @qcbhomelab.online — matching the registered M365 domain*
 
 **Security groups in place:**
 

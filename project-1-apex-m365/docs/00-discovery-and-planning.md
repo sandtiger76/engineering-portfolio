@@ -1,80 +1,83 @@
 # 00 — Discovery & Planning
 
-## What We Did and Why
+## Overview
 
-Before touching a single Microsoft 365 setting, we documented the existing environment in full. In a real engagement this is where you find the surprises — the undocumented shares, the user who has files nowhere else, the DNS record nobody remembers creating. Getting this right protects the client and protects you as the consultant.
+Discovery is the foundation of every successful migration. Before any Microsoft 365 configuration begins, the source environment must be fully understood and documented. This phase establishes what exists, identifies risks, defines the target architecture, and sets the success criteria that will be used to confirm the migration is complete.
+
+Skipping or rushing discovery is the single most common cause of migration problems — undocumented shares, users with data in unexpected locations, stale accounts that create security gaps, and permission structures that don't map cleanly to SharePoint.
 
 ---
 
 > ## ⚠️ Lab Simulation Notice
 >
-> **Apex Drafting & Design Ltd is a fictional company. This entire environment is a purpose-built homelab simulation.**
+> **QCB Homelab Consultants is a fictional company created specifically for this portfolio project.**
 >
-> It does not represent a live client. It was built specifically for this portfolio to provide real, demonstrable, screenshot-evidenced infrastructure — rather than describing a migration theoretically.
+> The environment does not represent a real organisation. It was purpose-built in a homelab to provide genuine, screenshot-evidenced infrastructure — rather than describing the migration process theoretically.
 >
 > | Detail | Value |
 > |---|---|
-> | **Homelab platform** | Two-node Proxmox cluster |
-> | **Server VM** | Windows Server 2022 Evaluation — HP ProDesk 400 G3 (i5-7500T, 16GB RAM) |
-> | **Internal domain** | `apex.local` |
-> | **UPN / email domain** | `qcbhomelab.online` (registered domain — owned by portfolio author) |
-> | **Microsoft 365 tenant** | `qcbazoutlook362.onmicrosoft.com` |
-> | **Company name** | Apex Drafting & Design Ltd — fictional |
-> | **Staff** | 15 fictional user accounts — not real people |
+> | **Lab platform** | Proxmox homelab — two nodes |
+> | **Domain controller** | Windows Server 2022 Evaluation VM |
+> | **Internal AD domain** | `apex.local` |
+> | **UPN / email domain** | `qcbhomelab.online` — registered domain |
+> | **M365 tenant** | Personal lab tenant — `[tenant].onmicrosoft.com` |
+> | **NetBIOS domain** | `APEX\` — set at domain creation, not modified |
+> | **Company** | QCB Homelab Consultants — fictional |
+> | **Staff** | 15 fictional accounts — not real people |
 >
-> Every component — Active Directory, DNS, DHCP, SMB shares, NTFS permissions, user accounts — was built from scratch and configured to reflect what you would genuinely find in a real 15-person SME.
->
-> **From this point forward, the documentation is written as a real engagement.** Lab differences from production are called out where they are relevant to technical decisions.
+> From this point forward the documentation is written as a real engagement. Lab differences from production are called out where relevant.
 
 ---
 
-## Lab Environment — What Was Built vs What Production Looks Like
+## Lab vs Production
 
-| Component | Lab Implementation | Production Equivalent |
+| Component | Lab | Production |
 |---|---|---|
-| Server hardware | Proxmox VM on HP ProDesk 400 G3 (i5-7500T, 16GB RAM) | Physical or virtualised Windows Server on-premises |
-| Windows Server | Server 2022 Standard Evaluation (180-day) | Licensed Windows Server 2022 |
-| Active Directory | Fully functional AD DS — `apex.local` | Production domain with years of accumulated users/GPOs |
-| UPN suffix | `@qcbhomelab.online` — registered domain | `@clientdomain.co.uk` — client's own domain |
-| File shares | SMB/CIFS with realistic NTFS permissions | Production shares with complex inherited permissions |
-| Email | Simulated via placeholder accounts | Live IMAP mailboxes on third-party hosting |
-| User data | Realistic dummy documents and CAD placeholders | Real client files — confidential, requires careful handling |
-| Network | DHCP reservation at 192.168.1.10 | Static IP, DNS A record, internal DNS zone |
-| M365 tenant | `qcbazoutlook362.onmicrosoft.com` | Dedicated client tenant |
+| Windows Server | Server 2022 Standard Evaluation | Licensed Windows Server |
+| Active Directory | Purpose-built, clean structure | Years of accumulated users, GPOs, legacy objects |
+| UPN suffix | `@qcbhomelab.online` | Client's own registered domain |
+| File share data | Realistic dummy documents | Real client files — confidential, requires careful handling |
+| Email | Simulated IMAP accounts | Live mailboxes on third-party hosting |
+| Network | DHCP reservation | Static IP, internal DNS zone |
+| M365 tenant | Personal lab tenant | Dedicated client tenant |
 
 ---
 
 ## The Client Scenario
 
-**Apex Drafting & Design Ltd** is a 15-person architectural and engineering consultancy based in Birmingham. Staff work primarily from client sites and home, with occasional use of a small office. They produce CAD drawings, planning documents, and client reports.
+**QCB Homelab Consultants** is a fictional 15-person IT consultancy. Staff work primarily from client sites and home. They produce project reports, network diagrams, technical documentation, and client correspondence.
 
 Their infrastructure at the point of engagement:
 
-- A single Windows Server 2022 running Active Directory, DNS, DHCP, and SMB file shares
-- Company documents and project files stored on mapped network drives (`\\APEX-DC01\Company`)
-- Personal files stored on mapped H: drives (`\\APEX-DC01\Home`)
-- Email hosted by a third-party IMAP provider — no central management, no archiving
+- A single Windows Server running Active Directory, DNS, DHCP, and SMB file shares
+- Company documents and project files on mapped network drives (`\\QCBHC-DC01\Company`)
+- Personal files on mapped `H:` drives (`\\QCBHC-DC01\Home`) — no offsite backup
+- Email on a third-party IMAP provider — no central management, no archiving
 - Video conferencing via a third-party tool — no integration with documents or calendar
-- Remote access via a third-party VPN — required for any file access outside the office
-- No mobile device management
+- Remote file access requiring a third-party VPN
+- No device management policy
 - No MFA anywhere
 
-The director's brief was straightforward: *"I want to get rid of the server entirely. I want staff to be able to work from anywhere without needing IT support."*
+**The business objective:** eliminate on-premises hardware entirely and consolidate onto a single managed cloud platform accessible from anywhere, on any device, without VPN or server maintenance overhead.
 
 ---
 
 ## Infrastructure Discovery
 
-### Server — APEX-DC01
+### Domain Controller
 
-![APEX-DC01 hostname confirmed](../screenshots/00-discovery/01_hostname_confirmed.png)
-*PowerShell confirming hostname APEX-DC01 — pre-configuration baseline*
+```powershell
+$env:COMPUTERNAME
+```
 
-### Active Directory
+![QCBHC-DC01 hostname confirmed](../screenshots/00-discovery/01_hostname_confirmed.png)
+*Domain controller hostname confirmed — QCBHC-DC01*
 
-The domain `apex.local` was audited prior to migration planning. The structure was clean — a single domain, single site, single domain controller. No trusts, no RODC, no legacy 2003/2008 functional level baggage.
+---
 
-**Domain details confirmed via PowerShell:**
+### Active Directory Domain
+
+The domain `apex.local` is audited before migration planning begins. Key checks: domain functional level, single vs multi-domain, trust relationships, RODC presence, and any legacy functional level baggage from older domain promotions.
 
 ```powershell
 Get-ADDomain
@@ -86,21 +89,25 @@ Get-ADDomain
 | NetBIOS Name | APEX |
 | Forest | apex.local |
 | Domain Mode | Windows2016Domain |
-| PDC Emulator | APEX-DC01.apex.local |
-| Infrastructure Master | APEX-DC01.apex.local |
+| PDC Emulator | QCBHC-DC01.apex.local |
+| Infrastructure Master | QCBHC-DC01.apex.local |
 
-![Get-ADDomain output confirming apex.local domain](../screenshots/00-discovery/02_get-addomain.png)
-*APEX-DC01 confirmed as PDC Emulator and Infrastructure Master for apex.local*
+A clean result: single domain, single DC, Windows 2016 functional level. No trusts, no RODC, no legacy baggage to remediate before migration.
+
+![Get-ADDomain output](../screenshots/00-discovery/02_get-addomain.png)
+*apex.local domain confirmed — single DC, clean structure*
 
 ---
 
 ### Organisational Unit Structure
 
-Four department OUs under a single company OU — clean and logical. No legacy flat structure, no users sitting in the default CN=Users container.
+The OU structure determines how users, computers, and groups are organised — and how Group Policy is applied. A clean OU structure makes the Entra ID provisioning significantly easier.
+
+Best practice: users should be in department OUs, not the default `CN=Users` container. Group Policy should be applied at OU level, not domain level where avoidable.
 
 ```
 apex.local
-└── Apex Drafting and Design (OU)
+└── QCB Homelab Consultants (OU)
     ├── Computers
     ├── Groups
     └── Users
@@ -111,13 +118,15 @@ apex.local
 ```
 
 ![ADUC OU structure](../screenshots/00-discovery/03_aduc_ou_structure.png)
-*apex.local — Apex Drafting and Design OU with department sub-OUs visible*
+*Active Directory Users and Computers — QCB Homelab Consultants OU with department sub-OUs*
 
 ---
 
 ### User Accounts
 
-15 user accounts across four departments. All accounts are enabled, have UPNs in the format `firstname.lastname@qcbhomelab.online`, and are assigned to department OUs. The UPN suffix `qcbhomelab.online` was added to the AD forest and applied to all users — matching the registered domain that will be used in the Microsoft 365 tenant.
+15 user accounts across four departments. All accounts enabled, assigned to department OUs, with UPNs matching the registered domain used for Microsoft 365.
+
+> **Production note:** In a real engagement, expect stale accounts, shared mailboxes, service accounts, and accounts in the default Users container. A full audit should identify all of these before Entra ID provisioning begins.
 
 | Department | Users | Count |
 |---|---|---|
@@ -127,115 +136,122 @@ apex.local
 | Admin | David Owen, Claire Morton, Ben Ashworth, Karen Doyle | 4 |
 | **Total** | | **15** |
 
-**UPN suffix updated via PowerShell:**
+The UPN suffix `@qcbhomelab.online` is added to the AD forest and applied to all user accounts. This ensures the on-premises UPN matches the domain verified in Microsoft 365 — which is a requirement for a clean identity migration.
 
 ```powershell
-# Add qcbhomelab.online as a UPN suffix to the forest
+# Add the custom domain as a UPN suffix
 Get-ADForest | Set-ADForest -UPNSuffixes @{Add="qcbhomelab.online"}
 
-# Update all 15 users
-Get-ADUser -Filter * -SearchBase "OU=Apex Drafting and Design,DC=apex,DC=local" |
+# Apply to all users
+Get-ADUser -Filter * -SearchBase "OU=QCB Homelab Consultants,DC=apex,DC=local" |
   ForEach-Object {
-    $newUPN = $_.SamAccountName + "@qcbhomelab.online"
-    Set-ADUser $_ -UserPrincipalName $newUPN
+    Set-ADUser $_ -UserPrincipalName ($_.SamAccountName + "@qcbhomelab.online")
   }
+
+# Verify
+Get-ADUser -Filter * -SearchBase "OU=QCB Homelab Consultants,DC=apex,DC=local" `
+    -Properties Title, Company, UserPrincipalName |
+    Select-Object Name, Title, Company, UserPrincipalName |
+    Format-Table -AutoSize
 ```
 
-![UPN suffix updated to qcbhomelab.online](../screenshots/00-discovery/07_upn_updated_qcbhomelab.png)
-*All 15 user UPNs updated to @qcbhomelab.online — matching the registered M365 domain*
+![Users verified with UPNs and titles](../screenshots/00-discovery/04_users_verified.png)
+*All 15 users confirmed — correct titles, company attribute, and @qcbhomelab.online UPNs*
 
-**Security groups in place:**
+---
+
+### Security Groups
+
+Security groups are the permission mechanism for SMB share access. The same group structure informs the SharePoint permission design in the target environment.
 
 | Group | Purpose |
 |---|---|
 | GRP-AllStaff | Company-wide access to shared resources |
 | GRP-Management | Management department |
-| GRP-Design | Design team — architects and CAD technicians |
+| GRP-Design | Design team |
 | GRP-Projects | Project managers and coordinators |
 | GRP-Admin | Administration — office, finance, HR |
-| GRP-CADUsers | CAD Library access — Design team only |
+| GRP-CADUsers | Technical library access — Design team only |
+
+> **Design decision:** `GRP-CADUsers` is a separate group from `GRP-Design`. This allows non-Design staff to be granted Technical Library access without being added to the Design department group — a common real-world requirement.
 
 ---
 
 ### File Share Audit
 
-Two SMB shares identified on `\\APEX-DC01`:
+Two SMB shares on `\\QCBHC-DC01`:
 
 | Share | Path | Purpose |
 |---|---|---|
 | `Company` | `C:\Shares\Company` | Group documents — all staff |
 | `Home` | `C:\Shares\Home` | Personal home folders — H: drives |
 
+```powershell
+Get-SmbShare | Where-Object {$_.Name -in @("Company","Home")} |
+    Format-Table Name, Path, Description -AutoSize
+```
+
+![SMB shares confirmed](../screenshots/00-discovery/05_smb_shares.png)
+*Company and Home shares confirmed via Get-SmbShare*
+
 **Company share structure:**
 
 ```
-\\APEX-DC01\Company
+\\QCBHC-DC01\Company
 ├── Projects
-│   ├── PROJ001_HighStreet_Renovation
-│   │   ├── Drawings          (DWG/DXF files)
-│   │   ├── Correspondence    (email threads, letters)
-│   │   └── Reports           (feasibility, design statements)
-│   └── PROJ002_Residential_Development
-│       ├── Drawings
+│   ├── PROJ001_Network_Infrastructure
+│   │   ├── Diagrams
+│   │   ├── Correspondence
+│   │   └── Reports
+│   └── PROJ002_Cloud_Migration
+│       ├── Diagrams
 │       ├── Correspondence
 │       └── Reports
-├── CAD_Library
-│   ├── Standard_Details      (reusable CAD details)
-│   └── Templates             (drawing templates)
-├── Company_Templates         (letterheads, report templates)
+├── Technical_Library
+│   ├── Standard_Configs
+│   └── Templates
+├── Company_Templates
 └── Administration
-    ├── HR                    (confidential — HR group only)
+    ├── HR                    (confidential — Admin group only)
     └── Finance               (confidential — Admin group only)
 ```
 
-![Company share structure](../screenshots/00-discovery/05_company_share.png)
-*\\\\apex-dc01\\Company — group file share root*
+![Company share structure](../screenshots/00-discovery/06_company_share.png)
+*\\QCBHC-DC01\Company — group file share root*
 
-**NTFS permission summary:**
+**NTFS permission matrix:**
 
 | Folder | GRP-AllStaff | GRP-Design | GRP-Projects | GRP-Admin | GRP-CADUsers |
 |---|---|---|---|---|---|
 | Company (root) | Read | — | — | — | — |
 | Projects | Read | Modify | Modify | — | — |
-| CAD_Library | Read | — | — | — | Modify |
+| Technical_Library | Read | — | — | — | Modify |
 | Company_Templates | Read | — | — | — | — |
-| Administration | ❌ No access | ❌ | ❌ | Modify | — |
-| Administration\HR | ❌ No access | ❌ | ❌ | Modify | — |
-| Administration\Finance | ❌ No access | ❌ | ❌ | Modify | — |
+| Administration | ❌ | ❌ | ❌ | Modify | — |
 
-**Key permission decisions:**
-- Administration folder breaks inheritance — explicitly denies access to all non-Admin groups. This is intentional: HR and Finance data is confidential and must not be accessible to Design or Projects staff.
-- CAD Library uses a dedicated `GRP-CADUsers` group rather than `GRP-Design` directly. This allows non-Design staff (e.g. a Project Manager reviewing drawings) to be granted CAD access without being added to the Design department group.
-- Share-level permissions grant `Authenticated Users` Change access — NTFS is the enforcement layer, not the share. This is standard best practice for SMB shares.
+**Permission design decisions:**
+
+**Administration breaks inheritance.** HR and Finance data is confidential. Rather than relying on users not navigating there, inheritance is explicitly broken and access denied to all non-Admin groups. This is the correct approach — least privilege by design.
+
+**Share permissions vs NTFS permissions.** Share-level permissions grant `Authenticated Users` Change access. NTFS is the enforcement layer. This is standard SMB best practice — manage access through NTFS, not the share ACL.
+
+**GRP-CADUsers as a separate group.** Allows fine-grained access control to the Technical Library without coupling it to department membership.
 
 **Home folders:**
 
+Each user has an individual home folder with inheritance broken. Only the user and Domain Admins have access. The `H:` drive mapping is set via AD user account attributes (`homeDirectory` + `homeDrive`).
+
 ```
-\\APEX-DC01\Home
-├── b.ashworth
-├── c.morton
-├── d.fletcher
-├── d.owen
-├── e.clarke
-├── j.hartley
-├── k.doyle
-├── l.simmons
-├── m.reid
-├── o.nash
-├── p.sharma
-├── r.wong
-├── s.mitchell
-├── s.turner
-└── t.bradley
+\\QCBHC-DC01\Home
+├── b.ashworth    ├── k.doyle     ├── p.sharma
+├── c.morton      ├── l.simmons   ├── r.wong
+├── d.fletcher    ├── m.reid      ├── s.mitchell
+├── d.owen        ├── o.nash      ├── s.turner
+├── e.clarke      ├── j.hartley   └── t.bradley
 ```
 
-Each home folder has inheritance broken. Only the individual user and Domain Admins have access. H: drive mapped via AD user account attribute (`homeDirectory` + `homeDrive`).
-
-![Home folders](../screenshots/00-discovery/06_home_folders.png)
-*\\\\apex-dc01\\Home — all 15 user H: drive folders*
-
-![SMB shares confirmed](../screenshots/00-discovery/04_smb_shares.png)
-*Get-SmbShare — Company and Home shares confirmed*
+![Home folders](../screenshots/00-discovery/07_home_folders.png)
+*\\QCBHC-DC01\Home — all 15 user H: drive folders*
 
 ---
 
@@ -243,19 +259,19 @@ Each home folder has inheritance broken. Only the individual user and Domain Adm
 
 | Risk | Likelihood | Impact | Mitigation |
 |---|---|---|---|
-| Data loss during file migration | Low | High | SPMT pre-migration scan, validate file counts before decommission |
-| Email loss during MX cutover | Low | High | Migrate historical email before cutover, keep IMAP live for 2 weeks post-cutover |
-| User disruption — unfamiliar platform | Medium | Medium | User guides prepared, phased rollout, IT available on cutover day |
-| CAD files not rendering correctly in SharePoint | Medium | Low | DWG files stored and accessed as downloads — no browser rendering dependency |
-| H: drive paths broken post-migration | Low | Medium | Communicate OneDrive sync client replaces H: drive, update any mapped drive GPOs |
-| NTFS permissions not mapping cleanly to SharePoint | Medium | Medium | Manual permission review post-SPMT, validate against permission matrix |
-| Single DC — no redundancy | High (existing) | High (existing) | Mitigated by migration — DC decommissioned, cloud platform has built-in redundancy |
+| Data loss during file migration | Low | High | SPMT pre-migration scan — validate file counts before and after. Do not decommission until validated. |
+| Email loss during MX cutover | Low | High | Migrate historical email before cutover. Keep IMAP source live for two weeks post-cutover as fallback. |
+| User disruption — unfamiliar platform | Medium | Medium | User guides prepared before cutover. Phased rollout where possible. |
+| H: drive paths broken post-migration | Low | Medium | OneDrive sync client briefed to users before migration. Mapped drive GPOs updated or removed. |
+| NTFS permissions not mapping to SharePoint | Medium | Medium | Review SPMT permission mapping report post-migration. Validate against permission matrix. |
+| Single DC — no redundancy | High | High | Existing risk. Mitigated by migration — on-premises DC is decommissioned and replaced by cloud platform with built-in redundancy. |
+| Stale accounts creating security gaps | Medium | Medium | Full AD user audit before Entra ID provisioning. Disable stale accounts before migration. |
 
 ---
 
 ## Licensing Decision
 
-Three Microsoft 365 SKUs were evaluated for a 15-seat SME:
+Three Microsoft 365 SKUs are relevant for an SME of this size. The decision should be driven by security and device management requirements — not just cost.
 
 | Feature | Business Basic | Business Standard | **Business Premium** |
 |---|---|---|---|
@@ -265,66 +281,67 @@ Three Microsoft 365 SKUs were evaluated for a 15-seat SME:
 | Office Apps (desktop) | ❌ | ✅ | ✅ |
 | Intune device management | ❌ | ❌ | ✅ |
 | Entra ID P1 (Conditional Access) | ❌ | ❌ | ✅ |
-| Azure AD P1 (MFA per-user) | Basic only | Basic only | ✅ Full CA |
 | Defender for Business | ❌ | ❌ | ✅ |
-| **Price (approx)** | £4.90/user/mo | £10.30/user/mo | **£18.60/user/mo** |
-| **Monthly cost (15 users)** | £73.50 | £154.50 | **£279.00** |
 
-**Decision: Microsoft 365 Business Premium**
+**Recommendation: Microsoft 365 Business Premium**
 
-The premium cost is justified by three specific requirements:
+Three requirements make Business Premium the correct choice for any SME with remote workers:
 
-1. **Intune** — Apex has no device management whatsoever. Staff use personal and company devices with no policy enforcement. Intune is not a nice-to-have; it's a security requirement given remote working across client sites.
+**1 — Intune is not optional.** Without device management, there is no way to enforce security policy on the devices connecting to company data. Staff using personal devices on client sites with no compliance policy is not an acceptable security posture. Intune provides device enrolment, compliance enforcement, and conditional access integration.
 
-2. **Conditional Access (Entra ID P1)** — Basic MFA is insufficient for a firm handling confidential client data and planning documents. Conditional Access allows us to enforce compliant device + MFA as a combined requirement, and to block legacy authentication protocols entirely.
+**2 — Conditional Access requires Entra ID P1.** Per-user MFA (available in lower SKUs) is a blunt instrument. Conditional Access allows enforcement of MFA plus compliant device as a combined requirement, location-based policies, and complete blocking of legacy authentication protocols. These are not advanced features — they are baseline security for any organisation handling client data remotely.
 
-3. **Defender for Business** — Included at no extra cost at Business Premium. Replaces the need for a separate endpoint protection product.
+**3 — Defender for Business is included.** At Business Premium, endpoint protection is included at no additional cost. This removes the need for a separate endpoint security product and brings device threat intelligence into the Microsoft 365 security centre.
 
-The difference between Standard and Premium is £8.30/user/month — £124.50/month for 15 users. Against the cost of a single security incident or the ongoing cost of managing separate endpoint protection, this is straightforward to justify to the client.
+> **The cost difference between Business Standard and Business Premium is marginal against the cost of a single security incident or a separate endpoint protection product.**
 
 ---
 
-## Project Phases & Timeline
+## Project Phases
 
-| Phase | Description | Duration | Dependencies |
-|---|---|---|---|
-| **0 — Discovery** | Infrastructure audit, licensing, planning | Week 1 | Client access |
-| **1 — Identity** | Entra ID users, MFA, admin accounts | Week 1–2 | M365 tenant live |
-| **2 — Email** | Exchange Online, IMAP migration, MX cutover | Week 2 | Identity complete |
-| **3 — File Shares** | SharePoint architecture, SPMT migration | Week 2–3 | Identity complete |
-| **4 — Home Folders** | OneDrive setup, H: drive migration via SPMT | Week 3 | SharePoint complete |
-| **5 — Teams** | Team/channel structure, SharePoint integration | Week 3 | File migration complete |
-| **6 — Intune** | Device enrolment, compliance policies, Conditional Access | Week 3–4 | Identity complete |
-| **7 — Security** | Hardening, EOP, validation | Week 4 | All workstreams complete |
-| **8 — Decommission** | Server retirement, DNS cleanup, sign-off | Week 4–5 | UAT signed off |
+The migration is delivered in the following sequence. The order is deliberate — each phase has dependencies on the one before it.
+
+| Phase | Workstream | Dependencies |
+|---|---|---|
+| **0 — Discovery** | Infrastructure audit, licensing, risk assessment | Client access to AD and file shares |
+| **1 — Identity** | Entra ID users, MFA, admin account separation | M365 tenant active, domain verified |
+| **2 — Email** | Exchange Online, IMAP migration, MX cutover | Identity complete — users need mailboxes |
+| **3 — File Shares** | SharePoint architecture, SPMT group share migration | Identity complete — permissions tied to users |
+| **4 — Home Folders** | OneDrive, H: drive migration via SPMT | SharePoint complete |
+| **5 — Teams** | Team structure, SharePoint integration, adoption | File migration complete |
+| **6 — Intune** | Device enrolment, compliance policies, Conditional Access | Identity complete |
+| **7 — Security** | EOP hardening, Conditional Access validation, backup review | All workstreams complete |
+| **8 — Decommission** | Server retirement, DNS cleanup, sign-off | User acceptance testing signed off |
 
 ---
 
 ## Success Criteria
 
-The migration will be considered complete when all of the following are confirmed:
+The migration is complete when all of the following are confirmed:
 
-- [ ] All 15 users can sign in to Microsoft 365 with MFA
+- [ ] All users can sign in to Microsoft 365 with MFA enforced
 - [ ] All mailboxes live on Exchange Online with historical email accessible
 - [ ] All Company share content migrated to SharePoint with permissions validated
 - [ ] All H: drive content migrated to individual OneDrive accounts
-- [ ] At least one device enrolled in Intune and compliant
-- [ ] Conditional Access policy enforcing MFA + compliant device
+- [ ] At least one device enrolled in Intune and showing compliant
+- [ ] Conditional Access policy enforcing MFA and compliant device
 - [ ] Legacy authentication blocked
-- [ ] APEX-DC01 powered off with no user impact
-- [ ] Third-party email, conferencing, and VPN contracts cancelled or scheduled for cancellation
+- [ ] Domain controller powered off with no user-reported impact
+- [ ] Third-party email, conferencing, and VPN contracts cancelled
 
 ---
 
 ## Communication Plan
 
-| Audience | Message | Timing | Channel |
-|---|---|---|---|
-| All staff | "We're moving to Microsoft 365 — what's changing and when" | 2 weeks before cutover | Email + team meeting |
-| All staff | OneDrive sync client install guide | 1 week before cutover | Email |
-| All staff | New email settings + Teams install guide | Cutover day | Email (sent from old system) |
-| James Hartley (Director) | Progress updates | Weekly | Direct |
-| Individual users | H: drive migration confirmation | Post-migration | Email |
+User communication is as important as the technical migration. Unexpected change is the primary cause of user resistance.
+
+| Audience | Message | Channel |
+|---|---|---|
+| All staff | What is changing, why, and what to expect — before the migration begins | Email and team briefing |
+| All staff | How to install and use the OneDrive sync client | Email with guide attached |
+| All staff | New email settings, Teams setup instructions | Email sent from old system on cutover day |
+| Management | Progress updates at each phase completion | Direct — verbal or written |
+| Individual users | Confirmation that their H: drive content is in OneDrive | Email post-migration |
 
 ---
 

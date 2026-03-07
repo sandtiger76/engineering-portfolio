@@ -53,6 +53,11 @@ The director's brief was straightforward: *"I want to get rid of the server enti
 
 ## Infrastructure Discovery
 
+### Server — APEX-DC01
+
+![APEX-DC01 hostname confirmed](../screenshots/00-discovery/01_hostname_confirmed.png)
+*PowerShell confirming hostname APEX-DC01 — pre-configuration baseline*
+
 ### Active Directory
 
 The domain `apex.local` was audited prior to migration planning. The structure was clean — a single domain, single site, single domain controller. No trusts, no RODC, no legacy 2003/2008 functional level baggage.
@@ -72,7 +77,8 @@ Get-ADDomain
 | PDC Emulator | APEX-DC01.apex.local |
 | Infrastructure Master | APEX-DC01.apex.local |
 
-> 📷 **Screenshot:** `Get-ADDomain` output confirming apex.local domain, PDC Emulator and Infrastructure Master on APEX-DC01
+![Get-ADDomain output confirming apex.local domain](../screenshots/00-discovery/02_get-addomain.png)
+*APEX-DC01 confirmed as PDC Emulator and Infrastructure Master for apex.local*
 
 ---
 
@@ -92,7 +98,8 @@ apex.local
         └── Projects
 ```
 
-> 📷 **Screenshot:** Active Directory Users and Computers — OU structure showing Apex Drafting and Design, with Admin, Design, Management and Projects department OUs
+![ADUC OU structure](../screenshots/00-discovery/03_aduc_ou_structure.png)
+*apex.local — Apex Drafting and Design OU with department sub-OUs visible*
 
 ---
 
@@ -152,7 +159,8 @@ Two SMB shares identified on `\\APEX-DC01`:
     └── Finance               (confidential — Admin group only)
 ```
 
-> 📷 **[Screenshot: Explorer — \\apex-dc01\Company share structure]**
+![Company share structure](../screenshots/00-discovery/05_company_share.png)
+*\\\\apex-dc01\\Company — group file share root*
 
 **NTFS permission summary:**
 
@@ -194,8 +202,11 @@ Two SMB shares identified on `\\APEX-DC01`:
 
 Each home folder has inheritance broken. Only the individual user and Domain Admins have access. H: drive mapped via AD user account attribute (`homeDirectory` + `homeDrive`).
 
-> 📷 **[Screenshot: Explorer — \\apex-dc01\Home showing all 15 user folders]**
-> 📷 **Screenshot:** PowerShell `Get-SmbShare` output confirming Company and Home shares with paths and descriptions
+![Home folders](../screenshots/00-discovery/06_home_folders.png)
+*\\\\apex-dc01\\Home — all 15 user H: drive folders*
+
+![SMB shares confirmed](../screenshots/00-discovery/04_smb_shares.png)
+*Get-SmbShare — Company and Home shares confirmed*
 
 ---
 

@@ -93,20 +93,30 @@ Entra ID credential entry and authentication
 
 ### Step 4 — Configure Service Account
 
-Enter domain administrator credentials. The wizard uses these to create a service account in Active Directory that the provisioning agent will use to read the directory.
+Enter domain administrator credentials. 
+
+The wizard uses these to create a service account in Active Directory that the provisioning agent will use to read the directory.
 
 - **Account:** `APEX\Administrator`
 - **Password:** *(credentials not recorded in documentation)*
 
-> **Screenshot:** `04_service_account_config.png` — Service account configuration with domain admin credentials
+![Service account configuration with domain admin credentials](../screenshots/01a-entra-connect/04_service_account_config.png)
+
+Service account configuration with domain admin credentials
 
 ---
 
 ### Step 5 — Connect Active Directory
 
-The wizard presents the detected Active Directory domains. Select `apex.local` to confirm it as the directory to synchronise.
+The wizard presents the detected Active Directory domains. 
 
-> **Screenshot:** `05_connect_active_directory.png` — Active Directory domain selection showing apex.local
+Select `apex.local` to confirm it as the directory to synchronise.
+
+> **Screenshot:**
+> 
+> ![Active Directory domain selection showing apex.local](../screenshots/01a-entra-connect/05_connect_active_directory.png)
+> 
+> Active Directory domain selection showing apex.local
 
 ---
 
@@ -114,7 +124,11 @@ The wizard presents the detected Active Directory domains. Select `apex.local` t
 
 The wizard confirms the agent is installed, registered, and running.
 
-> **Screenshot:** `06_installation_complete.png` — Installation complete confirmation screen
+> **Screenshot:**
+> 
+> ![Installation complete confirmation screen](../screenshots/01a-entra-connect/06_installation_complete.png)
+> 
+>  — Installation complete confirmation screen
 ---
 
 ## Post-Installation Configuration
@@ -127,9 +141,15 @@ Return to the Entra admin centre:
 
 **Identity → Hybrid management → Microsoft Entra Connect → Cloud Sync**
 
-The newly registered agent will appear under **Agents**. Confirm it shows as **Healthy** before proceeding.
+The newly registered agent will appear under **Agents**. 
 
-> **Screenshot:** `09_agent_healthy_portal.png` — Entra portal showing provisioning agent as Healthy
+Confirm it shows as **Healthy** before proceeding.
+
+> **Screenshot:**
+> 
+> ![Entra portal showing provisioning agent as Healthy](../screenshots/01a-entra-connect/09_agent_healthy_portal.png)
+> 
+> Entra portal showing provisioning agent as Healthy
 
 Select **New configuration** and choose **Microsoft Entra ID sync (formerly Azure Active Directory)**.
 
@@ -143,7 +163,11 @@ Configure the sync scope for the `apex.local` domain:
 - **Scope:** All users — no OU filtering required for this deployment (all 15 users are in scope)
 - **Attribute mapping:** Accept defaults
 
-> **Screenshot:** `10_sync_scope_configured.png` — Sync scope configuration showing apex.local in scope
+> **Screenshot:**
+> 
+> ![Sync scope configuration showing apex.local in scope](../screenshots/01a-entra-connect/10_sync_scope_configured.png)
+> 
+> Sync scope configuration showing apex.local in scope
 
 ---
 
@@ -151,7 +175,11 @@ Configure the sync scope for the `apex.local` domain:
 
 Review the configuration summary and select **Enable**. Cloud Sync will begin its initial synchronisation cycle immediately.
 
-> **Screenshot:** `11_sync_enabled.png` — Configuration enabled confirmation in Entra portal
+> **Screenshot:**
+> 
+> ![Configuration enabled confirmation in Entra portal](../screenshots/01a-entra-connect/11_sync_enabled.png)
+> 
+> Configuration enabled confirmation in Entra portal
 
 ---
 
@@ -167,7 +195,11 @@ In the Entra admin centre under Cloud Sync, confirm:
 | Last sync | Completed without errors |
 | Sync status | Active |
 
-> **Screenshot:** `12_sync_status_confirmed.png` — Portal showing healthy agent and completed initial sync
+> **Screenshot:**
+> 
+> ![Portal showing healthy agent and completed initial sync](../screenshots/01a-entra-connect/12_sync_status_confirmed.png)
+> 
+> Portal showing healthy agent and completed initial sync
 
 ### Confirm Service Running on QCBHC-DC01
 
@@ -181,7 +213,11 @@ On the domain controller, open **Services** (`services.msc`) and confirm:
 Get-Service -Name "AADConnectProvisioningAgent"
 ```
 
-> **Screenshot:** `13_provisioning_agent_service_running.png` — Services console showing agent as Running
+> **Screenshot:**
+> 
+> ![Services console showing provisioning agent as Running](../screenshots/01a-entra-connect/13_provisioning_agent_service_running.png)
+> 
+> Services console showing agent as Running
 
 ---
 

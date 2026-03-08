@@ -51,6 +51,7 @@ QCB Homelab Consultants has a single forest (`apex.local`), a single domain, no 
 ### Step 1 — Launch the Installer
 
 Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01. 
+
 Accept the licence agreement to proceed.
 
 > **Screenshot:**
@@ -63,9 +64,15 @@ Accept the licence agreement to proceed.
 
 ### Step 2 — Provisioning Agent Configuration Wizard
 
-The installer launches the provisioning agent configuration wizard. This wizard handles all remaining installation steps.
+The installer launches the provisioning agent configuration wizard. 
 
-> **Screenshot:** `02_provisioning_wizard_welcome.png` — Provisioning agent configuration wizard welcome screen
+This wizard handles all remaining installation steps.
+
+> **Screenshot:** 
+> 
+> ![Provisioning agent configuration wizard welcome screen](../screenshots/01a-entra-connect/02_provisioning_wizard_welcome.png)
+> 
+> Provisioning agent configuration wizard welcome screen
 
 ---
 
@@ -76,7 +83,11 @@ Enter the Entra ID Global Administrator credentials to register the agent agains
 - **Username:** `m365admin@qcbhomelab.online`
 - **Password:** *(credentials not recorded in documentation)*
 
-> **Screenshot:** `03_entra_authentication.png` — Entra ID credential entry and authentication
+> **Screenshot:** 
+> 
+![Entra ID credential entry and authentication](../screenshots/01a-entra-connect/03_entra_authentication.png)
+
+Entra ID credential entry and authentication
 
 ---
 

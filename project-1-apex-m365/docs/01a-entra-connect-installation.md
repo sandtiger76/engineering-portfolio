@@ -48,75 +48,57 @@ QCB Homelab Consultants has a single forest (`apex.local`), a single domain, no 
 
 ## Installation Procedure
 
-### Step 1 — Download the Provisioning Agent
+### Step 1 — Launch the Installer
 
-New versions of the provisioning agent are released exclusively via the Microsoft Entra admin centre — not the Microsoft Download Centre.
+Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01. Accept the licence agreement to proceed.
 
-Navigate to:
-
-**Microsoft Entra admin centre → Identity → Hybrid management → Microsoft Entra Connect → Cloud Sync**
-
-Select **Download agent** to download the installer.
-
-File: `AADConnectProvisioningAgentSetup.exe`
-
-Save to QCBHC-DC01 before proceeding.
-
-> **Screenshot:** `01_entra_portal_cloud_sync_blade.png` — Cloud Sync blade in Entra admin centre showing Download agent option
+> **Screenshot:** `01_installer_launch.png` — Installer launch screen with licence agreement
 
 ---
 
-### Step 2 — Launch the Installer
+### Step 2 — Provisioning Agent Configuration Wizard
 
-Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01. Accept the licence agreement on the welcome screen and proceed.
+The installer launches the provisioning agent configuration wizard. This wizard handles all remaining installation steps.
 
-> **Screenshot:** `02_installer_welcome.png` — Installer welcome screen with licence agreement
-
----
-
-### Step 3 — Select Extension: Microsoft Entra ID P2 / HR Provisioning
-
-The installer will ask which extension to install. Select **HR provisioning and directory sync (Microsoft Entra ID P2)**.
-
-> **Screenshot:** `03_extension_selection.png` — Extension selection screen
+> **Screenshot:** `02_provisioning_wizard_welcome.png` — Provisioning agent configuration wizard welcome screen
 
 ---
 
-### Step 4 — Authenticate to Microsoft Entra ID
+### Step 3 — Connect to Microsoft Entra ID
 
-The installer will prompt for Entra ID credentials to register the agent against the tenant.
+Enter the Entra ID Global Administrator credentials to register the agent against the tenant.
 
 - **Username:** `m365admin@qcbhomelab.online`
 - **Password:** *(credentials not recorded in documentation)*
 
-The agent authenticates and registers itself with the `qcbhomelab.online` tenant.
-
-> **Screenshot:** `04_entra_authentication.png` — Entra ID authentication prompt  
-> **Screenshot:** `05_agent_registered.png` — Confirmation that the agent is registered to the tenant
+> **Screenshot:** `03_entra_authentication.png` — Entra ID credential entry and authentication
 
 ---
 
-### Step 5 — Configure Active Directory Connectivity
+### Step 4 — Configure Service Account
 
-The installer will prompt for the Active Directory domain to connect to.
+Enter domain administrator credentials. The wizard uses these to create a service account in Active Directory that the provisioning agent will use to read the directory.
 
-- **Domain:** `apex.local`
-- **Account:** `APEX\Administrator` (Enterprise Admin privileges required)
+- **Account:** `APEX\Administrator`
 - **Password:** *(credentials not recorded in documentation)*
 
-The agent validates connectivity to `apex.local` and confirms it can read the directory.
+> **Screenshot:** `04_service_account_config.png` — Service account configuration with domain admin credentials
 
-> **Screenshot:** `06_ad_domain_entry.png` — AD domain and credentials entry screen  
-> **Screenshot:** `07_ad_connectivity_confirmed.png` — apex.local validated successfully
+---
+
+### Step 5 — Connect Active Directory
+
+The wizard presents the detected Active Directory domains. Select `apex.local` to confirm it as the directory to synchronise.
+
+> **Screenshot:** `05_connect_active_directory.png` — Active Directory domain selection showing apex.local
 
 ---
 
 ### Step 6 — Installation Complete
 
-The installer confirms the agent is installed and running. The agent is now registered in the Entra admin centre and awaiting configuration of a sync scope.
+The wizard confirms the agent is installed, registered, and running.
 
-> **Screenshot:** `08_installation_complete.png` — Installation complete confirmation screen
-
+> **Screenshot:** `06_installation_complete.png` — Installation complete confirmation screen
 ---
 
 ## Post-Installation Configuration

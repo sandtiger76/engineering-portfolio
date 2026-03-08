@@ -139,9 +139,9 @@ Installing the agent does not start synchronisation. The sync scope — which OU
 
 Return to the Entra admin centre:
 
-**Identity → Hybrid management → Microsoft Entra Connect → Cloud Sync**
+**Search for Microsoft Entra Connect → Select Cloud Sync in the left pane**
 
-The newly registered agent will appear under **Agents**. 
+The newly registered agent will appear under **Agents** in the left pane. 
 
 Confirm it shows as **Healthy** before proceeding.
 
@@ -156,6 +156,14 @@ Select **New configuration** and choose **Microsoft Entra ID sync (formerly Azur
 ---
 
 ### Step 8 — Define the Sync Scope
+
+We want to configure AD → Entra ID (sync users up to the cloud).
+The 15 users live on-prem and you're creating their cloud identities.
+Note - The second option (Microsoft Entra ID to AD sync) runs in the opposite direction (we do not need this).
+
+**Click on configurations in the left pane, New configration, AD to Microsoft Entra sync**
+
+
 
 Configure the sync scope for the `apex.local` domain:
 

@@ -52,7 +52,9 @@ QCB Homelab Consultants has a single forest (`apex.local`), a single domain, no 
 
 Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01. Accept the licence agreement to proceed.
 
-> **Screenshot:** `01_installer_launch.png` — Installer launch screen with licence agreement
+> **Screenshot:**
+> ![Installer launch screen](../screenshots/01a-entra-connect/01_installer_launch.png)
+> Installer launch screen with licence agreement
 
 ---
 

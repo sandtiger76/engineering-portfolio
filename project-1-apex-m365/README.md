@@ -38,7 +38,7 @@ The business objective: eliminate on-premises hardware entirely and move to a si
 
 | Source — On-Premises | | Target — Microsoft 365 | Method |
 |---|---|---|---|
-| Active Directory | → | Entra ID — cloud-only identities | PowerShell / Admin Portal |
+| Active Directory (apex.local) | → | Entra ID — synced via Entra Connect | Microsoft Entra Connect |
 | Third-party IMAP email | → | Exchange Online | IMAP migration via Exchange Admin Center |
 | Third-party video conferencing | → | Microsoft Teams | Decommission + Teams rollout |
 | SMB/CIFS group file shares | → | SharePoint Online document libraries | SharePoint Migration Tool (SPMT) |
@@ -147,7 +147,7 @@ The migration is delivered in the following sequence. Each phase has documented 
 | Phase | Workstream | Dependencies |
 |---|---|---|
 | **0 — Discovery** | Infrastructure audit, licensing decision, risk assessment | Client access |
-| **1 — Identity** | Entra ID users, MFA enforcement, admin account separation | M365 tenant active |
+| **1 — Identity** | Entra Connect sync, MFA enforcement, admin account separation | M365 tenant active, domain verified |
 | **2 — Email** | Exchange Online setup, IMAP migration, MX cutover | Identity complete |
 | **3 — File Shares** | SharePoint information architecture, SPMT group share migration | Identity complete |
 | **4 — Home Folders** | OneDrive provisioning, H: drive migration via SPMT | SharePoint complete |
@@ -160,23 +160,64 @@ The migration is delivered in the following sequence. Each phase has documented 
 
 ## Project Index — Workstream Documentation
 
+### Foundation
+
 | # | Workstream | Description |
 |---|---|---|
-| [00](./docs/00-discovery-and-planning.md) | **Discovery & Planning** | Infrastructure audit, licensing decision, risk assessment |
-| [01](./docs/01-identity-migration.md) | **Identity Migration** | AD export, Entra ID provisioning, MFA enforcement, admin separation |
-| [02](./docs/02-email-migration.md) | **Email Migration** | IMAP source prep, Exchange Online, historical migration, MX cutover |
+| [00](./docs/00-discovery-and-planning.md) | **Discovery & Planning** | Infrastructure audit, licensing decision, risk assessment, success criteria |
+
+### Identity
+
+| # | Workstream | Description |
+|---|---|---|
+| [01](./docs/01-identity-overview.md) | **Identity — Overview** | What identity means in M365 and what the end state looks like |
+| [01a](./docs/01a-entra-connect-installation.md) | **Entra Connect — Installation** | Installing and configuring Microsoft Entra Connect on the DC |
+| [01b](./docs/01b-entra-connect-sync-verification.md) | **Entra Connect — Sync Verification** | Verifying all users synced correctly into Entra ID |
+| [01c](./docs/01c-user-provisioning-methods.md) | **User Provisioning Methods** | Three methods compared — Entra Connect, PowerShell, Admin Center |
+| [01d](./docs/01d-group-creation-and-licensing.md) | **Group Creation & Licensing** | Security groups in Entra ID, group-based licence assignment |
+| [01e](./docs/01e-admin-account-separation.md) | **Admin Account Separation** | Break-glass account, working admin account, least privilege |
+| [01f](./docs/01f-mfa-and-security-defaults.md) | **MFA & Security Defaults** | Enforcing MFA via Conditional Access, disabling security defaults |
+
+### Email
+
+| # | Workstream | Description |
+|---|---|---|
+| [02](./docs/02-email-migration.md) | **Email Migration** | Exchange Online setup, IMAP migration, MX cutover |
+
+### File Migration
+
+| # | Workstream | Description |
+|---|---|---|
 | [03](./docs/03-file-share-migration.md) | **File Share Migration** | NTFS audit, SPMT migration of group shares to SharePoint |
 | [04](./docs/04-onedrive-home-folders.md) | **OneDrive & Home Folders** | H: drive migration to OneDrive via SPMT |
-| [05](./docs/05-sharepoint-libraries.md) | **SharePoint Libraries** | Document library design, metadata, versioning |
+
+### SharePoint & Collaboration
+
+| # | Workstream | Description |
+|---|---|---|
+| [05](./docs/05-sharepoint-design-and-pitfalls.md) | **SharePoint Design & Pitfalls** | Information architecture, platform limits, real-world migration pitfalls |
 | [06](./docs/06-teams-setup.md) | **Microsoft Teams** | Team and channel structure, SharePoint integration, user adoption |
-| [07](./docs/07-intune-device-management.md) | **Intune Device Management** | Enrolment, compliance policies, GPO-to-Intune mapping |
+
+### Security & Devices
+
+| # | Workstream | Description |
+|---|---|---|
+| [07](./docs/07-intune-device-management.md) | **Intune Device Management** | Device enrolment, compliance policies, GPO-to-Intune mapping |
 | [08](./docs/08-security.md) | **Security** | Zero Trust design, Conditional Access, EOP, backup gap |
-| [09](./docs/09-decommission.md) | **Decommission** | Server retirement, DNS cleanup, sign-off |
+
+### Closeout
+
+| # | Workstream | Description |
+|---|---|---|
+| [09](./docs/09-decommission.md) | **Decommission** | Server retirement, DNS cleanup, third-party cancellations, sign-off |
 | [10](./docs/10-lessons-learned.md) | **Lessons Learned** | What worked, what to do differently, lab vs production |
 
-**Runbooks:**
-- [MX Record Cutover Runbook](./runbooks/mx-record-cutover.md)
-- [User Onboarding Runbook](./runbooks/user-onboarding.md)
+### Runbooks
+
+| Runbook | Description |
+|---|---|
+| [DNS & MX Record Reference](./runbooks/mx-record-cutover.md) | DNS records added automatically via Cloudflare Domain Connect — this runbook documents what was added and why |
+| [User Onboarding Runbook](./runbooks/user-onboarding.md) | Step-by-step guide for onboarding a new user post-migration |
 
 ---
 
@@ -216,10 +257,11 @@ This project is built in a homelab environment. The following differences from a
 
 | Area | Lab Approach | Production Approach |
 |---|---|---|
-| **AD Sync** | Cloud-only Entra ID users | Entra Connect Sync or Cloud Sync during transition period |
+| **AD Sync** | Entra Connect installed on DC — syncing apex.local to Entra ID | Entra Connect Sync or Cloud Sync — same approach |
 | **Licensing** | Microsoft 365 Business Premium trial | Purchased via CSP partner or Microsoft direct |
 | **Custom domain** | `qcbhomelab.online` — owned by portfolio author | Client's own registered domain |
 | **M365 tenant** | Personal lab tenant | Dedicated client tenant |
+| **DNS records** | Added automatically via Cloudflare Domain Connect | Same — or manually added if DNS not on Cloudflare |
 | **Internal AD domain** | `apex.local` with `@qcbhomelab.online` UPN suffix | Client's public domain throughout |
 | **NetBIOS domain** | `APEX\` — set at domain creation, not changed | Inherited from client environment |
 | **Email source** | Simulated IMAP accounts | Live third-party IMAP with DNS cutover coordination |

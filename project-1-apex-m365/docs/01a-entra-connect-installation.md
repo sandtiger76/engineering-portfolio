@@ -50,7 +50,8 @@ QCB Homelab Consultants has a single forest (`apex.local`), a single domain, no 
 
 ### Step 1 — Launch the Installer
 
-Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01. Accept the licence agreement to proceed.
+Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01. 
+Accept the licence agreement to proceed.
 
 > **Screenshot:**
 > 

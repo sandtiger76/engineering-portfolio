@@ -51,7 +51,7 @@ From the Microsoft Entra portal ([https://entra.microsoft.com](https://entra.mic
 
 Download the **Cloud Sync Agent** installer.
 
-> <img src="../screenshots/01a-entra-cloud-sync/01_entra_portal_cloud_sync_blade.png" width="75%" alt="Entra portal Cloud Sync agents blade showing download option" />
+> <img src="../screenshots/01a-entra-cloud-sync/01_entra_portal_cloud_sync_blade.png" width="50%" alt="Entra portal Cloud Sync agents blade showing download option" />
 >
 > Entra portal — Cloud Sync agents blade
 
@@ -61,7 +61,7 @@ Download the **Cloud Sync Agent** installer.
 
 Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01 and accept the licence agreement.
 
-> <img src="../screenshots/01a-entra-cloud-sync/02_installer_launch.png" width="75%" alt="Installer launch screen with licence agreement" />
+> <img src="../screenshots/01a-entra-cloud-sync/02_installer_launch.png" width="50%" alt="Installer launch screen with licence agreement" />
 >
 > Installer launch screen
 
@@ -71,7 +71,7 @@ Run `AADConnectProvisioningAgentSetup.exe` on QCBHC-DC01 and accept the licence 
 
 The installer launches the provisioning agent configuration wizard, which handles all remaining setup steps.
 
-> <img src="../screenshots/01a-entra-cloud-sync/03_provisioning_wizard_welcome.png" width="75%" alt="Provisioning agent configuration wizard welcome screen" />
+> <img src="../screenshots/01a-entra-cloud-sync/03_provisioning_wizard_welcome.png" width="50%" alt="Provisioning agent configuration wizard welcome screen" />
 >
 > Configuration wizard welcome screen
 
@@ -84,7 +84,7 @@ Enter the Entra ID Global Administrator credentials to register the agent agains
 - **Username:** `m365admin@qcbhomelab.online`
 - **Password:** *(not recorded)*
 
-> <img src="../screenshots/01a-entra-cloud-sync/04_entra_authentication.png" width="75%" alt="Entra ID credential entry screen" />
+> <img src="../screenshots/01a-entra-cloud-sync/04_entra_authentication.png" width="50%" alt="Entra ID credential entry screen" />
 >
 > Entra ID authentication
 
@@ -97,7 +97,7 @@ Enter domain administrator credentials. The wizard uses these to create a **Grou
 - **Account:** `APEX\Administrator`
 - **Password:** *(not recorded)*
 
-> <img src="../screenshots/01a-entra-cloud-sync/05_service_account_config.png" width="75%" alt="Service account configuration screen" />
+> <img src="../screenshots/01a-entra-cloud-sync/05_service_account_config.png" width="50%" alt="Service account configuration screen" />
 >
 > Service account configuration
 
@@ -107,7 +107,7 @@ Enter domain administrator credentials. The wizard uses these to create a **Grou
 
 The wizard detects available Active Directory domains. Select `apex.local` to confirm it as the directory to synchronise.
 
-> <img src="../screenshots/01a-entra-cloud-sync/06_connect_active_directory.png" width="75%" alt="Active Directory domain selection showing apex.local" />
+> <img src="../screenshots/01a-entra-cloud-sync/06_connect_active_directory.png" width="50%" alt="Active Directory domain selection showing apex.local" />
 >
 > Active Directory domain selection
 
@@ -117,7 +117,7 @@ The wizard detects available Active Directory domains. Select `apex.local` to co
 
 The wizard confirms the agent is installed, registered, and running. Click **Exit**.
 
-> <img src="../screenshots/01a-entra-cloud-sync/07_installation_complete.png" width="75%" alt="Installation complete confirmation screen" />
+> <img src="../screenshots/01a-entra-cloud-sync/07_installation_complete.png" width="50%" alt="Installation complete confirmation screen" />
 >
 > Installation complete
 
@@ -133,7 +133,7 @@ Return to the Entra admin centre and navigate to **Entra Connect → Cloud Sync 
 
 Confirm the agent shows as **Healthy** before creating a configuration. If it shows as inactive, restart the `AADConnectProvisioningAgent` service on QCBHC-DC01 and wait 2 minutes.
 
-> <img src="../screenshots/01a-entra-cloud-sync/08_agent_healthy_portal.png" width="75%" alt="Entra portal showing provisioning agent as Healthy" />
+> <img src="../screenshots/01a-entra-cloud-sync/08_agent_healthy_portal.png" width="50%" alt="Entra portal showing provisioning agent as Healthy" />
 >
 > Agent showing as Healthy in the portal
 
@@ -145,7 +145,7 @@ Click **Configurations** in the left pane → **New configuration** → **AD to 
 
 > **Note:** The second option (Microsoft Entra ID to AD) runs in the opposite direction — do not select this.
 
-> <img src="../screenshots/01a-entra-cloud-sync/09_new_configuration.png" width="75%" alt="New configuration screen showing AD to Microsoft Entra sync option selected" />
+> <img src="../screenshots/01a-entra-cloud-sync/09_new_configuration.png" width="50%" alt="New configuration screen showing AD to Microsoft Entra sync option selected" />
 >
 > New configuration — AD to Microsoft Entra sync
 
@@ -169,7 +169,7 @@ Enter the Distinguished Name of a test user, for example:
 CN=Emma Clarke,OU=Projects,OU=Users,OU=QCB Homelab Consultants,DC=apex,DC=local
 ```
 
-> <img src="../screenshots/01a-entra-cloud-sync/10_provision_on_demand.png" width="75%" alt="Provision on demand test using Emma Clarke DN" />
+> <img src="../screenshots/01a-entra-cloud-sync/10_provision_on_demand.png" width="50%" alt="Provision on demand test using Emma Clarke DN" />
 >
 > Provision on demand test
 
@@ -179,13 +179,13 @@ CN=Emma Clarke,OU=Projects,OU=Users,OU=QCB Homelab Consultants,DC=apex,DC=local
 
 Review the configuration summary and select **Enable**. Cloud Sync will begin its initial synchronisation cycle immediately.
 
-> <img src="../screenshots/01a-entra-cloud-sync/11_sync_enabled.png" width="75%" alt="Configuration enabled confirmation in Entra portal" />
+> <img src="../screenshots/01a-entra-cloud-sync/11_sync_enabled.png" width="50%" alt="Configuration enabled confirmation in Entra portal" />
 >
 > Configuration enabled
 
 ---
 
-## ✅ Validation
+### Validation
 
 If the agent shows as **Healthy** and users appear in Entra ID within 5–10 minutes, the deployment is complete. Confirm the service is running on QCBHC-DC01:
 
@@ -195,13 +195,13 @@ Get-Service -Name "AADConnectProvisioningAgent"
 
 Expected: `Status: Running`
 
-> <img src="../screenshots/01a-entra-cloud-sync/12_sync_status_confirmed.png" width="75%" alt="Portal showing healthy agent and completed initial sync" />
+> <img src="../screenshots/01a-entra-cloud-sync/12_sync_status_confirmed.png" width="50%" alt="Portal showing healthy agent and completed initial sync" />
 >
 > Sync confirmed in portal
 
 ---
 
-## ⚠️ Troubleshooting — Provisioning Quarantine
+### Troubleshooting — Provisioning Quarantine
 
 In this lab environment, the agent entered quarantine immediately after installation. This section documents the investigation and findings.
 

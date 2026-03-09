@@ -193,12 +193,6 @@ If the agent shows as **Healthy** and users appear in Entra ID within 5–10 min
 Get-Service -Name "AADConnectProvisioningAgent"
 ```
 
-Expected: `Status: Running`
-
-> <img src="../screenshots/01a-entra-cloud-sync/12_sync_status_confirmed.png" width="50%" alt="Portal showing healthy agent and completed initial sync" />
->
-> Sync confirmed in portal
-
 ---
 
 ### Troubleshooting — Provisioning Quarantine

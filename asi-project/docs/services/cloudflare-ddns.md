@@ -77,6 +77,19 @@ Expected log output when working correctly:
 
 When an IP change is detected it will show `✅ Updated` instead of `🤷 already up to date`.
 
+### Security Hardening
+
+The container runs with maximum restriction:
+
+```yaml
+read_only: true
+cap_drop: [ALL]
+security_opt:
+  - no-new-privileges:true
+```
+
+All Linux capabilities dropped, filesystem read-only, privilege escalation prevented. The container only makes outbound HTTPS calls — it needs no filesystem writes and no special privileges.
+
 ### Ansible Role
 
 Provisioned by: `ansible/roles/cloudflare_ddns/`
@@ -86,6 +99,8 @@ The role uses `blockinfile` to inject the service block into `docker-compose.yml
 ```bash
 ansible-galaxy collection install community.docker
 ```
+
+> **Note:** `blockinfile` adds Ansible marker comments inside `docker-compose.yml`. This is fine for idempotency but makes the file slightly less clean for manual reading. On a greenfield deploy the role is the right path — the markers won't be noticeable. For this project we deployed manually first and the role serves as the documented repeatable procedure.
 
 ---
 

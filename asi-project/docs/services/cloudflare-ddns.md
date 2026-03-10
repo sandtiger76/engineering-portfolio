@@ -1,30 +1,36 @@
 # Cloudflare DDNS
 
-[← Back to README](../../README.md) | [← Gitea](gitea.md)
+[← Back to README](../../README.md)
 
 ---
 
 ## What Is It?
 
-DDNS stands for Dynamic DNS. Most home internet connections are assigned a dynamic IP address — meaning the public IP address your router uses can change at any time when your ISP renews it.
+Dynamic DNS (DDNS) is a service that automatically updates DNS records when a server's public IP address changes. Most residential and small business internet connections are assigned a dynamic IP — one that can change at any time when the router reconnects to the ISP.
 
-This is a problem for hosting services — if your IP changes, your domain name stops resolving to your server.
+Without DDNS, a changing IP would make the hosted services unreachable until the DNS records were manually updated. With DDNS, the update happens automatically within minutes of the IP changing.
 
-Cloudflare DDNS solves this by running a lightweight background process that monitors your current public IP address and automatically updates your DNS record via the Cloudflare API whenever it changes. Your domain always points to the right place, without any manual intervention.
-
-**Why it's in this project:** It is a prerequisite for hosting anything publicly on a home internet connection. It also demonstrates API-driven automation — a fundamental infrastructure skill.
+**Why it's in this project:** `qcbhomelab.online` is hosted on a residential internet connection with a dynamic IP. The DDNS container ensures Nextcloud and Gitea remain reachable even after an IP change, with zero manual intervention.
 
 ---
 
 ## Why We Need It
 
-Without DDNS, `qcbhomelab.online` would stop working every time the ISP assigns a new IP address. With DDNS, the update happens automatically within minutes of any IP change, and the platform remains accessible without any manual action.
+The three public-facing DNS records must always point to the current public IP:
+
+| Record | Purpose |
+|---|---|
+| `qcbhomelab.online` | Apex domain |
+| `nextcloud.qcbhomelab.online` | Nextcloud |
+| `gitea.qcbhomelab.online` | Gitea |
+
+The DDNS container checks the current public IP every 5 minutes and updates any Cloudflare A records that have drifted.
 
 ---
 
 ## Technical Implementation
 
-The `cloudflare-ddns` Docker image handles this automatically.
+### Container Configuration
 
 ```yaml
 cloudflare-ddns:
@@ -32,44 +38,74 @@ cloudflare-ddns:
   container_name: cloudflare-ddns
   restart: unless-stopped
   environment:
-    - CF_API_TOKEN=${CLOUDFLARE_API_TOKEN}
+    - CLOUDFLARE_API_TOKEN=${CLOUDFLARE_API_TOKEN}
     - DOMAINS=qcbhomelab.online,nextcloud.qcbhomelab.online,gitea.qcbhomelab.online
     - PROXIED=true
-    - UPDATE_CRON=@every5m
+    - IP6_PROVIDER=none
   networks:
     - internal
 ```
 
-### How It Works
+### Environment Variables
 
-1. Every 5 minutes the container checks your current public IP
-2. If the IP has changed, it calls the Cloudflare API to update the DNS A record
-3. Cloudflare propagates the change globally within seconds
-4. `PROXIED=true` ensures the Cloudflare proxy remains active — your real IP is never in the DNS record
+| Variable | Value | Purpose |
+|---|---|---|
+| `CLOUDFLARE_API_TOKEN` | from `.env` | Cloudflare API authentication |
+| `DOMAINS` | comma-separated list | Records to keep updated |
+| `PROXIED` | true | Keep orange cloud on — don't expose real IP |
+| `IP6_PROVIDER` | none | Suppress IPv6 probing on IPv4-only connection |
 
-### Required Cloudflare API Token Permissions
+### Verification
 
-The API token needs minimal permissions — principle of least privilege:
+```bash
+# Check container logs
+docker logs cloudflare-ddns
 
-| Permission | Reason |
-|---|---|
-| Zone — DNS — Edit | To update A records |
-| Zone — Zone — Read | To find the zone ID |
+# Confirm DNS resolves via Cloudflare proxy (should return Cloudflare IPs, not real IP)
+dig qcbhomelab.online +short
+dig nextcloud.qcbhomelab.online +short
+```
 
-This token is stored in Ansible Vault, never in plaintext.
+Expected log output when working correctly:
+```
+🌐 Detected the IPv4 address 62.68.174.87
+🤷 The A records of qcbhomelab.online are already up to date
+🤷 The A records of nextcloud.qcbhomelab.online are already up to date
+🤷 The A records of gitea.qcbhomelab.online are already up to date
+⏰ Checking the IP addresses in about 4m57s . . .
+```
+
+When an IP change is detected it will show `✅ Updated` instead of `🤷 already up to date`.
 
 ### Ansible Role
 
-Provisioned by: `ansible/roles/cloudflare-ddns/`
+Provisioned by: `ansible/roles/cloudflare_ddns/`
+
+The role uses `blockinfile` to inject the service block into `docker-compose.yml`. Requires the `community.docker` collection:
+
+```bash
+ansible-galaxy collection install community.docker
+```
 
 ---
 
 ## Gotchas & Notes
 
-- Use `PROXIED=true` — this is critical. Without it, the real IP address would be exposed in DNS records, defeating the Cloudflare security model
-- The API token must be a **scoped API token**, not the global API key — scoped tokens follow least privilege and can be revoked independently
-- Verify the DDNS container is working by checking its logs after first deployment: `docker logs cloudflare-ddns`
+**`CF_API_TOKEN` is deprecated — use `CLOUDFLARE_API_TOKEN`**
+Older documentation and examples use `CF_API_TOKEN` as the environment variable name. The current `favonia/cloudflare-ddns` image expects `CLOUDFLARE_API_TOKEN`. Using the old name causes silent authentication failures.
+
+**`IP6_PROVIDER=none` required on IPv4-only connections**
+Without this, the container repeatedly attempts to detect an IPv6 address, logs errors, and clutters the output. Setting `IP6_PROVIDER=none` suppresses IPv6 probing entirely on networks that don't have IPv6.
+
+**`PROXIED=true` is critical for security**
+Without this, the DDNS container would update records with the orange cloud OFF, exposing the real public IP directly. Always set `PROXIED=true` to ensure Cloudflare continues proxying traffic.
+
+**Cloudflare API token scope**
+The token only needs `Zone → DNS → Edit` permission scoped to `qcbhomelab.online`. The same token used for SSL certificate issuance (Certbot) works here — no separate token needed.
+
+**Check interval**
+The container checks every ~5 minutes. An IP change will be reflected in DNS within 5 minutes of the router reconnecting.
 
 ---
 
-[Next: Proxmox LXC Setup →](../tasks/proxmox-lxc.md)
+[← Back to README](../../README.md)

@@ -1,0 +1,21 @@
+# Ansible Vault password files — NEVER commit these
+.vault_pass
+*.vault_pass
+vault_pass.txt
+
+# Environment files with secrets
+.env
+!.env.example
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ansible retry files
+*.retry

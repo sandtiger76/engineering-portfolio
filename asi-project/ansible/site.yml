@@ -1,0 +1,25 @@
+---
+# ASI Platform — Master Playbook
+# Usage: ansible-playbook site.yml -i inventory/hosts.yml --ask-vault-pass
+
+- name: Provision LXC on Proxmox
+  hosts: localhost
+  roles:
+    - { role: proxmox_lxc, tags: ['lxc'] }
+
+- name: Configure ASI Platform
+  hosts: asi-platform
+  become: true
+  roles:
+    - { role: docker_setup,    tags: ['docker'] }
+    - { role: ssl,             tags: ['ssl'] }
+    - { role: nginx,           tags: ['nginx'] }
+    - { role: postgresql,      tags: ['postgresql'] }
+    - { role: nextcloud,       tags: ['nextcloud'] }
+    - { role: gitea,           tags: ['gitea'] }
+    - { role: portainer,       tags: ['portainer'] }
+    - { role: uptime_kuma,     tags: ['monitoring'] }
+    - { role: cloudflare_ddns, tags: ['ddns'] }
+    - { role: tailscale,       tags: ['tailscale'] }
+    - { role: security,        tags: ['security'] }
+    - { role: backup,          tags: ['backup'] }

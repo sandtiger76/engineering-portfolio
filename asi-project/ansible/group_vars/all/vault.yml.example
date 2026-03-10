@@ -1,0 +1,12 @@
+# Copy to vault.yml and encrypt: ansible-vault encrypt vault.yml
+# NEVER commit vault.yml
+
+proxmox_api_token_secret: "YOUR_PROXMOX_API_TOKEN_SECRET"
+cloudflare_api_token: "YOUR_CLOUDFLARE_API_TOKEN"
+tailscale_auth_key: "tskey-auth-YOUR_KEY_HERE"
+postgres_root_password: "ChangeMe_StrongPassword"
+nextcloud_db_password: "ChangeMe_StrongPassword"
+nextcloud_admin_password: "ChangeMe_StrongPassword"
+gitea_db_password: "ChangeMe_StrongPassword"
+gitea_admin_password: "ChangeMe_StrongPassword"
+admin_email: "your@email.com"

@@ -1,0 +1,9 @@
+# Non-sensitive variables
+proxmox_host: "192.168.1.7"
+proxmox_node: "proxmox2"
+lxc_vmid: 100
+lxc_ip: "192.168.1.11"
+lxc_hostname: "asi-platform"
+domain: "qcbhomelab.online"
+nextcloud_domain: "nextcloud.qcbhomelab.online"
+gitea_domain: "gitea.qcbhomelab.online"

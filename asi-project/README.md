@@ -55,6 +55,7 @@ Dynamic DNS (auto-updated via Cloudflare API)
 Nginx Reverse Proxy (SSL termination — Let's Encrypt)
     │
     ├──► Nextcloud (collaboration platform)
+    │
     ├──► Gitea (self-hosted Git)
     │
     └──► [Management plane — Tailscale only]
@@ -95,6 +96,8 @@ ansible-vault encrypt ansible/group_vars/all/vault.yml
 ansible-playbook ansible/site.yml -i ansible/inventory/hosts.yml --ask-vault-pass
 ```
 
+That's it. The entire platform builds itself.
+
 ---
 
 ## Documentation Index
@@ -105,13 +108,13 @@ ansible-playbook ansible/site.yml -i ansible/inventory/hosts.yml --ask-vault-pas
 - [Security Overview](docs/SECURITY.md)
 
 ### Services
-- [Nextcloud](docs/services/nextcloud.md)
-- [PostgreSQL](docs/services/postgresql.md)
-- [Nginx](docs/services/nginx.md)
-- [Portainer](docs/services/portainer.md)
-- [Uptime Kuma](docs/services/uptime-kuma.md)
-- [Gitea](docs/services/gitea.md)
-- [Cloudflare DDNS](docs/services/cloudflare-ddns.md)
+- [Nextcloud](docs/services/nextcloud.md) — Self-hosted collaboration platform
+- [PostgreSQL](docs/services/postgresql.md) — Relational database backend
+- [Nginx](docs/services/nginx.md) — Reverse proxy and SSL termination
+- [Portainer](docs/services/portainer.md) — Container management UI
+- [Uptime Kuma](docs/services/uptime-kuma.md) — Service monitoring
+- [Gitea](docs/services/gitea.md) — Self-hosted Git platform
+- [Cloudflare DDNS](docs/services/cloudflare-ddns.md) — Dynamic DNS automation
 
 ### Tasks
 - [Proxmox LXC Setup](docs/tasks/proxmox-lxc.md)
@@ -120,6 +123,7 @@ ansible-playbook ansible/site.yml -i ansible/inventory/hosts.yml --ask-vault-pas
 - [Tailscale Setup](docs/tasks/tailscale.md)
 - [SSL Certificate Setup](docs/tasks/ssl-certificates.md)
 - [Ansible Vault — Secrets Management](docs/tasks/ansible-vault.md)
+- [Nginx + Nextcloud Reverse Proxy Gotchas](docs/tasks/nginx-nextcloud-gotchas.md)
 
 ### Operations
 - [Monitoring](docs/operations/monitoring.md)
@@ -132,7 +136,7 @@ ansible-playbook ansible/site.yml -i ansible/inventory/hosts.yml --ask-vault-pas
 ## Author
 
 **Quintin** — Infrastructure Engineer
-[qcbhomelab.online](https://qcbhomelab.online)
+[qcbhomelab.online](https://qcbhomelab.online) · [GitHub](https://github.com/qcb)
 
 ---
 

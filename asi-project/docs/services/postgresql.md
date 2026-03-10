@@ -39,7 +39,7 @@ postgresql:
   environment:
     - POSTGRES_PASSWORD=${POSTGRES_ROOT_PASSWORD}
   volumes:
-    - postgresql_data:/var/lib/postgresql/data
+    - asi_postgresql:/var/lib/postgresql/data
   networks:
     - internal
 ```
@@ -48,14 +48,32 @@ The Alpine-based image is used for its smaller footprint — important on constr
 
 ### Database Layout
 
-| Database | Owner | Used By |
-|---|---|---|
-| nextcloud | nextcloud_user | Nextcloud application |
-| gitea | gitea_user | Gitea application |
+| Database | Owner | Used By | Created By |
+|---|---|---|---|
+| nextcloud | nextcloud_user | Nextcloud application | Auto-created by Nextcloud container on first run |
+| gitea | gitea_user | Gitea application | Manual — see post-deploy steps below |
 
-### Initialisation
+### Important: Nextcloud DB is auto-created, Gitea DB is not
 
-Database creation and user provisioning is handled by the Ansible role on first deployment. Subsequent runs skip this step (idempotent).
+The Nextcloud container creates its own database automatically using the `POSTGRES_*` env vars.
+The Gitea database must be created manually after PostgreSQL is running:
+
+```bash
+# Create Gitea database and user
+docker exec -it postgresql psql -U postgres -c \
+  "CREATE USER gitea WITH PASSWORD 'your_gitea_db_password';"
+docker exec -it postgresql psql -U postgres -c \
+  "CREATE DATABASE gitea OWNER gitea ENCODING 'UTF8' LC_COLLATE 'en_US.utf8' LC_CTYPE 'en_US.utf8' TEMPLATE template0;"
+docker exec -it postgresql psql -U postgres -c \
+  "GRANT ALL PRIVILEGES ON DATABASE gitea TO gitea;"
+```
+
+### Credential Separation
+
+`POSTGRES_PASSWORD` in the compose file is the **superuser** password — used only by the
+`postgres` admin user to create other databases. Application users (nextcloud_user, gitea)
+are created separately with access only to their own database. This is the principle of
+least privilege applied to database access.
 
 ### Ansible Role
 
@@ -64,19 +82,19 @@ Provisioned by: `ansible/roles/postgresql/`
 The role handles:
 - Starting the PostgreSQL container
 - Waiting for the database to accept connections
-- Creating application databases and users
+- Creating the Gitea database and user (Nextcloud's DB is handled by the Nextcloud role)
 - Setting appropriate permissions
 
 ---
 
 ## Backup
 
-PostgreSQL data is backed up using `pg_dump` — the standard PostgreSQL backup utility. Backups run nightly via a cron job, stored to the secondary drive (`/mnt/backup`), and rotated to keep 7 days of history.
+PostgreSQL data is backed up using `pg_dump` nightly via cron, stored to `/mnt/backup`,
+and rotated to keep 7 days of history:
 
 ```bash
-# Backup command (run via cron, managed by Ansible)
-pg_dump -U nextcloud_user nextcloud > /mnt/backup/nextcloud_$(date +%Y%m%d).sql
-pg_dump -U gitea_user gitea > /mnt/backup/gitea_$(date +%Y%m%d).sql
+pg_dump -U nextcloud_user nextcloud | gzip > /mnt/backup/nextcloud_$(date +%Y%m%d).sql.gz
+pg_dump -U gitea_user gitea | gzip > /mnt/backup/gitea_$(date +%Y%m%d).sql.gz
 ```
 
 See [Backup & Disaster Recovery](../operations/backup-dr.md) for the full backup strategy.
@@ -85,9 +103,25 @@ See [Backup & Disaster Recovery](../operations/backup-dr.md) for the full backup
 
 ## Gotchas & Notes
 
-- PostgreSQL 15 is pinned rather than using `latest` — prevents unexpected breaking changes during container updates
-- The `POSTGRES_PASSWORD` in the compose file is the superuser password — application users are created separately with least-privilege access
-- Never expose the PostgreSQL port (5432) to the host network — it is internal only
+**PostgreSQL 15 pinned — not `latest`**
+Prevents unexpected breaking changes during container updates.
+
+**Locale on Alpine — use TEMPLATE template0**
+`postgres:15-alpine` has a limited locale set. If `LC_COLLATE='en_US.utf8'` causes errors
+during database creation, use this safe fallback:
+```sql
+CREATE DATABASE mydb OWNER myuser ENCODING 'UTF8' TEMPLATE template0;
+```
+This omits the explicit locale — defaults to the server locale which is typically `en_US.UTF-8`
+on the Alpine image if `LANG` is set, or `C` if not. Verified working in this deployment.
+
+**Never expose port 5432 to the host**
+PostgreSQL is `internal` network only — no `ports:` mapping in the compose file.
+
+**`community.docker` collection required for Ansible**
+```bash
+ansible-galaxy collection install community.docker
+```
 
 ---
 

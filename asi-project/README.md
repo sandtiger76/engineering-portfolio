@@ -81,6 +81,127 @@ Nginx Reverse Proxy (SSL termination — Let's Encrypt)
 
 ---
 
+## Network & Traffic Flow
+
+```mermaid
+flowchart TD
+    User(["👤 User / Browser"])
+    CF["☁️ Cloudflare\nProxy + WAF + SSL"]
+    Router["🔀 OpenWrt Router\nPort Forward 80/443"]
+    Nginx["🔀 Nginx\nReverse Proxy + SSL Termination\n192.168.1.11"]
+    NC["📦 Nextcloud\nnextcloud.qcbhomelab.online"]
+    GT["📦 Gitea\ngitea.qcbhomelab.online"]
+    TS["🔒 Tailscale\nManagement Plane"]
+    Admin(["👤 Admin"])
+    PX["🖥️ Proxmox\n192.168.1.7:8006"]
+    PT["📦 Portainer\n:9000"]
+    UK["📦 Uptime Kuma\n:3001"]
+
+    User -->|"HTTPS 443"| CF
+    CF -->|"Proxied — real IP hidden"| Router
+    Router -->|"Port Forward 443"| Nginx
+    Nginx -->|"HTTP proxy_pass"| NC
+    Nginx -->|"HTTP proxy_pass"| GT
+
+    Admin -->|"Tailscale VPN\n100.x.x.x"| TS
+    TS --> PX
+    TS --> PT
+    TS --> UK
+
+    style CF fill:#F6821F,color:#fff
+    style TS fill:#205299,color:#fff
+    style Nginx fill:#269539,color:#fff
+```
+
+---
+
+## Service Architecture
+
+```mermaid
+graph TB
+    subgraph Public["🌐 Public (via Cloudflare)"]
+        Nginx["nginx:alpine\nPorts 80, 443"]
+    end
+
+    subgraph Proxy_Network["🔗 proxy network (172.19.0.0/16)"]
+        NC["nextcloud:apache"]
+        GT["gitea/gitea"]
+    end
+
+    subgraph Internal_Network["🔒 internal network"]
+        PG["postgres:16"]
+        RD["redis:alpine"]
+        PT["portainer/portainer-ce"]
+        UK["louislam/uptime-kuma"]
+        CF["favonia/cloudflare-ddns"]
+    end
+
+    subgraph Host["🖥️ LXC Host (192.168.1.11)"]
+        TS["tailscaled\nTailscale IP: 100.114.7.81"]
+        CB["certbot\nAuto-renew timer"]
+    end
+
+    Nginx --> NC
+    Nginx --> GT
+    NC --> PG
+    NC --> RD
+    GT --> PG
+
+    style Public fill:#fff3e0
+    style Proxy_Network fill:#e8f5e9
+    style Internal_Network fill:#e3f2fd
+    style Host fill:#f3e5f5
+```
+
+---
+
+## Ansible Deployment Flow
+
+```mermaid
+flowchart TD
+    Start(["▶ ansible-playbook site.yml"])
+
+    subgraph Play1["Play 1 — localhost → Proxmox API"]
+        P1["proxmox_lxc\nCreate LXC, configure TUN, wait for SSH"]
+    end
+
+    subgraph Play2["Play 2 — SSH → asi-platform"]
+        SEC["security\nUFW + fail2ban"]
+        DOC["docker\nDocker CE + networks + directory tree"]
+        SSL["ssl\ncertbot + Cloudflare DNS-01\nWildcard cert *.qcbhomelab.online"]
+        PG["postgresql\ndocker-compose.yml + .env from vault"]
+        NC["nextcloud\nContainer + occ post-config"]
+        GT["gitea\nContainer + admin user + repo"]
+        NX["nginx\nvhost configs + container"]
+        PO["portainer\nManagement UI :9000"]
+        UK["uptime_kuma\nMonitoring :3001"]
+        DD["cloudflare_ddns\nDDNS container"]
+        TS["tailscale\nInstall + idempotent auth"]
+        BK["backup\nDaily cron — pg_dump + tar"]
+    end
+
+    Start --> P1
+    P1 --> SEC
+    SEC --> DOC
+    DOC --> SSL
+    SSL --> PG
+    PG --> NC
+    PG --> GT
+    NC --> NX
+    GT --> NX
+    NX --> PO
+    NX --> UK
+    NX --> DD
+    NX --> TS
+    TS --> BK
+
+    style Play1 fill:#fff3e0
+    style Play2 fill:#e8f5e9
+    style Start fill:#205299,color:#fff
+```
+
+---
+
 ## Quick Start (Full Stack Deployment)
 
 ```bash

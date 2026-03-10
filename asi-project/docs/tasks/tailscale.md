@@ -6,69 +6,142 @@
 
 ## What Is It?
 
-Tailscale is a zero-trust overlay network built on WireGuard — a modern, audited VPN protocol. It creates a private, encrypted network between your authorised devices, regardless of where they are physically located.
+Tailscale is a zero-configuration VPN built on WireGuard. It creates a private encrypted network (called a "Tailnet") between your devices, regardless of where they are physically located or what network they're on.
 
-Unlike a traditional VPN that routes all traffic through a central server, Tailscale creates direct peer-to-peer connections between devices — making it fast, reliable, and simple to operate.
+Unlike a traditional VPN, Tailscale is peer-to-peer — devices connect directly to each other rather than routing all traffic through a central server. It requires no port forwarding, no firewall rules, and no public IP address.
 
-**Why it's in this project:** Tailscale is the access mechanism for everything that should never be publicly accessible — Proxmox, Portainer, Uptime Kuma, and SSH. It provides strong authentication (device must be enrolled and authorised) with zero configuration complexity.
+**Why it's in this project:** Management interfaces (Proxmox, Portainer, Uptime Kuma) must never be exposed to the public internet. Tailscale provides secure access to these interfaces from anywhere without opening a single port on the router.
 
 ---
 
 ## Why We Need It
 
-The management plane — the tools used to operate and maintain the infrastructure — must never be exposed to the internet. Tailscale achieves this without requiring complex firewall rules, VPN servers, or certificate management. Any device enrolled in the Tailnet can reach the management services. Any device not enrolled cannot, regardless of where it is.
+The management plane is completely separated from the public plane:
+
+| Access type | How it works |
+|---|---|
+| Nextcloud, Gitea | Public via Cloudflare proxy — no direct IP exposure |
+| Proxmox, Portainer, Uptime Kuma, SSH | Tailscale only — never reachable from the public internet |
+
+Even if someone discovers the server's public IP, the management interfaces are unreachable — they only respond on the Tailscale network.
 
 ---
 
 ## Technical Implementation
 
-### Installation
+### Tailscale IP Addresses
 
-Tailscale is installed on the LXC container via the official installation script.
+| Device | Tailscale IP |
+|---|---|
+| asi-platform | 100.114.7.81 |
+| quintin-m70q (laptop) | 100.123.183.26 |
+
+### Installation (Debian 12 Bookworm)
+
+```bash
+# Add Tailscale GPG key
+curl -fsSL https://pkgs.tailscale.com/stable/debian/bookworm.noarmor.gpg \
+  | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+
+# Add apt repository
+echo "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] \
+  https://pkgs.tailscale.com/stable/debian bookworm main" \
+  | tee /etc/apt/sources.list.d/tailscale.list
+
+# Install
+apt update && apt install -y tailscale
+
+# Enable daemon
+systemctl enable --now tailscaled
+
+# Authenticate (unattended)
+tailscale up \
+  --authkey=tskey-auth-YOURKEY \
+  --hostname=asi-platform \
+  --accept-routes=false
+```
+
+### Proxmox LXC — TUN Device Setup
+
+Tailscale requires `/dev/net/tun` inside the LXC container. This must be configured on the **Proxmox host** before starting Tailscale.
+
+> **Note:** `pct set <vmid> --features tun=1` does not work on Proxmox 6.17+ — the `tun` feature was removed from the schema. Use the direct config file method instead:
+
+```bash
+# On the Proxmox host (not inside the LXC)
+echo "lxc.cgroup2.devices.allow: c 10:200 rwm" >> /etc/pve/lxc/100.conf
+echo "lxc.mount.entry: /dev/net/tun dev/net/tun none bind,create=file" >> /etc/pve/lxc/100.conf
+
+# Restart the LXC for changes to take effect
+pct restart 100
+```
+
+Verify the device exists inside the container:
+```bash
+ls -la /dev/net/tun
+# crw-rw-rw- 1 root root 10, 200 ...
+```
+
+### Auth Key Settings
+
+| Setting | Value | Reason |
+|---|---|---|
+| Reusable | OFF | Single-use is more secure for a known host |
+| Ephemeral | OFF | Device must persist across reboots |
+| Pre-authorized | ON | Skips admin approval — required for unattended install |
+
+Generate at: https://login.tailscale.com/admin/settings/keys
+
+### Tailscale Flags
+
+| Flag | Value | Reason |
+|---|---|---|
+| `--authkey` | from Vault | Unattended authentication |
+| `--hostname` | `asi-platform` | Matches LXC hostname in admin console |
+| `--accept-routes` | `false` | Management access only — no traffic routing |
+
+### Verification
+
+```bash
+tailscale ip -4       # Shows 100.x.x.x address
+tailscale status      # Shows all peers on the Tailnet
+```
+
+Check admin console: https://login.tailscale.com/admin/machines — `asi-platform` should show as Connected.
 
 ### Ansible Role
 
 Provisioned by: `ansible/roles/tailscale/`
 
+The role uses idempotency via `tailscale status --json` — checks `.BackendState == "Running"` before running `tailscale up`. This prevents consuming a single-use auth key on re-runs.
+
+The `tailscale up` task uses `no_log: true` — the auth key never appears in Ansible output or logs.
+
+The Proxmox LXC config entries (`lxc.cgroup2.devices.allow` and `lxc.mount.entry`) must be applied to the Proxmox host **before** running the Ansible role — these are not automated since they require Proxmox host access and an LXC restart.
+
+Key variables (stored in Ansible Vault):
 ```yaml
-- name: Install Tailscale
-  ansible.builtin.shell: |
-    curl -fsSL https://tailscale.com/install.sh | sh
-  args:
-    creates: /usr/bin/tailscale
-
-- name: Authenticate Tailscale
-  ansible.builtin.command:
-    cmd: "tailscale up --authkey={{ tailscale_auth_key }} --hostname=asi-platform"
-  changed_when: false
+tailscale_auth_key: "{{ vault_tailscale_auth_key }}"
 ```
-
-### Auth Key
-
-A Tailscale auth key is required for unattended (non-interactive) device enrollment. This is generated in the Tailscale admin console and stored in Ansible Vault.
-
-**Generate auth key:**
-1. Log into [tailscale.com/admin](https://tailscale.com/admin)
-2. Settings → Keys → Generate auth key
-3. Set expiry to 90 days, mark as reusable
-4. Store in Ansible Vault as `tailscale_auth_key`
-
-### What Is Accessible via Tailscale
-
-| Service | Tailscale URL |
-|---|---|
-| Proxmox UI | https://[tailscale-ip]:8006 |
-| Portainer | http://[tailscale-ip]:9000 |
-| Uptime Kuma | http://[tailscale-ip]:3001 |
-| SSH | ssh root@[tailscale-ip] |
 
 ---
 
 ## Gotchas & Notes
 
-- Auth keys expire — if rebuilding the platform after key expiry, generate a new one and update Ansible Vault
-- `--hostname=asi-platform` sets a friendly name in the Tailscale admin console — makes it easy to identify the device
-- Tailscale works behind NAT without any port forwarding — this is one of its key advantages
+**`pct set --features tun=1` fails on Proxmox 6.17+**
+The `tun` feature was removed from the LXC schema in newer Proxmox versions. Use the direct `/etc/pve/lxc/100.conf` method instead. The error message is: `features.tun: property is not defined in schema`.
+
+**LXC must be restarted after adding TUN device**
+Adding the cgroup and mount entries to `/etc/pve/lxc/100.conf` does not take effect until `pct restart 100` is run. Tailscale will fail with `503 Service Unavailable: no backend` until this is done.
+
+**`503 Service Unavailable: no backend` error**
+This means `tailscaled` is running but cannot access `/dev/net/tun`. The fix is to add the TUN device to the LXC config and restart the container — not to restart tailscaled.
+
+**Auth key is consumed on first use**
+Tailscale single-use auth keys cannot be reused. If the playbook needs to re-authenticate (e.g. after a reinstall), generate a new key. The Ansible idempotency check prevents accidentally consuming the key on re-runs when already authenticated.
+
+**`--accept-routes=false` is explicit**
+Without this flag, Tailscale may accept subnet routes advertised by other nodes on the Tailnet. Setting it explicitly ensures this host only uses Tailscale for direct peer access.
 
 ---
 

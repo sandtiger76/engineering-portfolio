@@ -1,3 +1,13 @@
+---
+title: Home
+description: 
+published: true
+date: 2026-03-11T11:25:33.580Z
+tags: 
+editor: markdown
+dateCreated: 2026-02-28T17:22:22.636Z
+---
+
 # Quintin Boshoff — Engineering Portfolio
 
 **IT Infrastructure Engineer & Cloud Migration Consultant**
@@ -35,7 +45,7 @@ Lab environments and fictional scenarios are clearly labelled throughout. No rea
 
 ---
 
-### 📁 [m365-project](./m365-project/README.md) — Microsoft 365 Migration
+### 📁 [Microsoft 365 Migration](./m365-project/README.md)
 
 > *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on-premises Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
 
@@ -49,7 +59,7 @@ This project documents the kind of migration I've delivered in the real world fo
 
 ---
 
-### 🖥️ [asi-project](./asi-project/README.md) — Automated Self-Hosted Infrastructure
+### 🖥️ [Automated Self-Hosted Infrastructure](./asi-project/README.md)
 
 > *A self-hosted infrastructure platform running on a Proxmox homelab — containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
 
@@ -67,7 +77,7 @@ The stack runs Nextcloud as the core application — a self-hosted cloud collabo
 
 ---
 
-### ☁️ [aca-project](./aca-project/README.md) — Azure Cloud Architecture
+### ☁️ [Azure Cloud Architecture](./aca-project/README.md)
 
 > *A hands-on Azure learning project — implementing a connected infrastructure across the core Azure domains, documented as I go.*
 
@@ -85,7 +95,9 @@ The documentation focuses on not just what was built, but why — covering the d
 
 **[→ View Project](./aca-project/README.md)**
 
+
 ---
+
 
 ## Background
 

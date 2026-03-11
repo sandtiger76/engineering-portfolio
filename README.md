@@ -1,16 +1,6 @@
----
-title: README
-description: 
-published: true
-date: 2026-03-11T10:57:54.264Z
-tags: 
-editor: markdown
-dateCreated: 2026-02-28T17:36:23.462Z
----
-
 # Quintin Boshoff — Engineering Portfolio
 
-**IT Infrastructure & Cloud Migration | Learning in Public**
+**IT Infrastructure Engineer & Cloud Migration Consultant**
 
 [LinkedIn](https://www.linkedin.com/in/quintin-boshoff-1905033/)
 
@@ -45,7 +35,7 @@ Lab environments and fictional scenarios are clearly labelled throughout. No rea
 
 ---
 
-### 📁 [m365-project](./m365-project/README.md) — Microsoft 365 Migration
+### 📁 [Microsoft 365 Migration](./m365-project/README.md)
 
 > *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on-premises Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
 
@@ -59,7 +49,7 @@ This project documents the kind of migration I've delivered in the real world fo
 
 ---
 
-### 🖥️ [asi-project](./asi-project/README.md) — Automated Self-Hosted Infrastructure
+### 🖥️ [Automated Self-Hosted Infrastructure](./asi-project/README.md)
 
 > *A self-hosted infrastructure platform running on a Proxmox homelab — containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
 
@@ -77,7 +67,7 @@ The stack runs Nextcloud as the core application — a self-hosted cloud collabo
 
 ---
 
-### ☁️ [aca-project](./aca-project/README.md) — Azure Cloud Architecture
+### ☁️ [Azure Cloud Architecture](./aca-project/README.md)
 
 > *A hands-on Azure learning project — implementing a connected infrastructure across the core Azure domains, documented as I go.*
 
@@ -95,23 +85,26 @@ The documentation focuses on not just what was built, but why — covering the d
 
 **[→ View Project](./aca-project/README.md)**
 
+
 ---
+
 
 ## Background
 
 | Area | Experience |
 |---|---|
-| **Cloud Migration** | Global data centre decommissions, NetApp NAS/SAN to cloud, Azure NetApp Files, Cloud Volumes ONTAP, AWS migration tooling, StorageX, SPMT, Sharegate |
+| **Cloud Migration** | Global data centre decommissions · NetApp NAS/SAN to cloud · Azure NetApp Files · Cloud Volumes ONTAP · AWS migration tooling · StorageX · SPMT · Sharegate |
 | **Microsoft 365** | Entra ID · Exchange Online · SharePoint Online · OneDrive · Teams · Intune · Conditional Access |
-| **Enterprise Storage** | NetApp NAS/SAN architect and administrator |
-| **Infrastructure** | Windows Server · Linux Server · Active Directory · DNS · DHCP · Proxmox |
-| **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively building hands-on experience)* |
-| **Automation & IaC** | Ansible · PowerShell · Bash *(actively building hands-on experience)* |
-| **Monitoring** | Prometheus · Grafana · cAdvisor *(ctively building hands-on experience)* |
-| **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT (actively building hands-on experience) |
-| **Cloud Platforms** | Microsoft Azure · AWS *(actively building hands-on experience)* |
-| **Version Control** | Git · GitHub *(actively building hands-on experience)* |
+| **Enterprise Storage** | NetApp NAS/SAN — architecture, administration, and global operational support |
+| **Infrastructure** | Windows Server · Linux · Active Directory · DNS · DHCP · Proxmox · VMware |
+| **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively learning)* |
+| **Automation & IaC** | Ansible · PowerShell · Bash *(actively learning)* |
+| **Monitoring** | Prometheus · Grafana · cAdvisor *(actively learning)* |
+| **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT *(actively learning)* |
+| **Cloud Platforms** | Microsoft Azure · AWS *(actively learning)* |
+| **Version Control** | Git · GitHub *(actively learning)* |
 
 ---
 
 *All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly documented. No client data, credentials, or confidential information is included anywhere in this repository.*
+```

@@ -96,7 +96,7 @@ aca-project/
 
 | Phase | Topic | Key Services | Status |
 |-------|-------|--------------|--------|
-| [00](docs/00-prerequisites.md) | Prerequisites & Setup | Azure CLI, PowerShell Az, conventions | 🔲 Planned |
+| [00](docs/00-prerequisites.md) | Prerequisites & Setup | Azure CLI, PowerShell Az, conventions | ✅ Complete |
 | [01](docs/01-resource-groups.md) | Resource Groups | Resource Groups, Tags, Subscriptions | 🔲 Planned |
 | [02](docs/02-networking.md) | Networking | VNet, Subnets, NSGs, DNS | 🔲 Planned |
 | [03](docs/03-compute.md) | Compute | Linux VM, Windows VM, Load Balancer | 🔲 Planned |
@@ -117,11 +117,11 @@ qcb-<resource-type>-<descriptor>-<number>
 | Resource | Name |
 |----------|------|
 | Resource Group | `qcb-rg-lab` |
-| Virtual Network | `qcb-vnet-main` |
-| Subnet (web) | `qcb-snet-web` |
-| Subnet (app) | `qcb-snet-app` |
-| Subnet (data) | `qcb-snet-data` |
-| NSG | `qcb-nsg-web`, `qcb-nsg-app` |
+| Virtual Network | `qcb-vnet-lab` |
+| Subnet (web) | `snet-web` |
+| Subnet (app) | `snet-app` |
+| Subnet (data) | `snet-data` |
+| NSG | `nsg-web`, `nsg-app` |
 | Linux VM | `qcb-vm-web-01` |
 | Windows VM | `qcb-vm-app-01` |
 | Load Balancer | `qcb-lb-web` |

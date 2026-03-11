@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Phase** | 03 |
-| **Topic** | Virtual Machines & Load Balancer |
-| **Services** | Azure VMs, Load Balancer, Availability Sets, `az vm run-command` |
-| **Est. Cost** | Low — `Standard_B1s` VMs, delete after each session |
+| **Topic** | Virtual Machines |
+| **Services** | Azure VMs, `az vm run-command` |
+| **Est. Cost** | Free tier — `Standard_B1s` Linux (750 hrs/month) + Windows (750 hrs/month) |
 
 ---
 
@@ -17,7 +17,38 @@
 
 ## What We're Building
 
-Two virtual machines — a Linux VM in the web subnet and a Windows VM in the app subnet — plus a load balancer in front of the web VM. No public IPs are assigned to the VMs themselves. All VM access is handled via `az vm run-command`, which lets you run commands inside a VM through the Azure control plane without needing SSH or RDP.
+Two virtual machines — a Linux VM (`vm-web`) in the web subnet and a Windows VM (`vm-app`) in the app subnet. Neither VM has a public IP address. All VM access and verification is handled via `az vm run-command`, which runs commands inside a VM through the Azure control plane without needing SSH, RDP, or any open inbound ports.
+
+---
+
+## Design Decision — No Public IPs on VMs
+
+This project deliberately omits public IPs on VMs. This is the correct enterprise pattern, not a simplification.
+
+**Why no public IPs:**
+
+- **Security** — directly exposing a VM to the internet creates an attack surface. Every public IP on a VM is a target for brute-force, port scanning, and exploitation.
+- **Cost** — Standard SKU public IPs are billed per hour. For a tear-down-and-rebuild lab, this adds up across sessions for no practical benefit.
+- **Realism** — in production, VMs sit behind a load balancer or Application Gateway. The load balancer holds the public IP; VMs have private IPs only. This project mirrors that architecture.
+
+**How we access VMs instead:**
+
+`az vm run-command invoke` sends a script to the VM agent — a lightweight service running on every Azure VM. The agent executes the script locally and returns output. The VM agent communicates *outbound* to Azure over port 443. No inbound ports need to be open, no public IP is required.
+
+```
+Your terminal
+    │
+    ▼  HTTPS (port 443 outbound from VM)
+Azure Control Plane
+    │
+    ▼
+VM Agent (running inside the VM)
+    │
+    ▼
+Script executes locally, output returned
+```
+
+This is also how Azure Automation, Azure Policy guest configuration, and most enterprise VM management tooling works under the hood.
 
 ---
 
@@ -27,221 +58,166 @@ Two virtual machines — a Linux VM in the web subnet and a Windows VM in the ap
 
 An Azure VM is an on-demand, scalable compute resource. You choose the OS image, size (CPU/RAM), and the network it connects to. The VM runs inside your VNet and gets a private IP from the subnet it's placed in.
 
-**VM sizes:** Azure has hundreds of VM sizes. For this lab we use `Standard_B1s` — 1 vCPU, 1GB RAM. It's the cheapest burstable size, adequate for testing, and costs very little per hour.
+**VM sizes:** For this lab we use `Standard_B1s` — 1 vCPU, 1GB RAM. It's the cheapest burstable size and falls within the Azure free tier (750 hrs/month each for Linux and Windows).
 
-### No Public IPs on VMs
+### NICs
 
-Normally you'd assign a public IP to a VM to SSH or RDP into it. We're deliberately avoiding this for two reasons:
+A Network Interface Card (NIC) is the Azure resource that connects a VM to a subnet. You create the NIC separately and pass it to `az vm create` with `--nics`. This gives you explicit control over the NIC configuration — in this case, no public IP is attached.
 
-1. **Cost** — public IPs have a small hourly charge
-2. **Security** — exposing VMs directly to the internet is poor practice
-
-Instead, we use `az vm run-command invoke` to run commands inside the VM through the Azure management plane. Azure handles the connection internally — no open ports, no public IP required.
-
-### Load Balancer
-
-A load balancer distributes incoming traffic across multiple backend VMs. In QCB's case, it sits in front of the web tier and provides a single public endpoint. The load balancer itself has a public IP — the VMs behind it do not.
-
-**Azure Load Balancer (Basic SKU)** is free for lab use and sufficient for single-VM testing.
-
-### Availability
-
-In production, you'd use an Availability Set or Availability Zones to protect against hardware failures. We create an Availability Set here for the web tier to demonstrate the concept, even though we only have one VM.
+When `az vm create` creates a NIC automatically (without `--nics`), it attaches a public IP by default. Creating the NIC manually first lets us avoid that.
 
 ---
 
-## Step 1 — Create the Load Balancer Public IP
+## Step 1 — Create the NICs
 
 ```bash
-az network public-ip create \
+# Web NIC — no public IP, NSG from subnet
+az network nic create \
   --resource-group qcb-rg-lab \
-  --name qcb-pip-lb \
-  --sku Basic \
-  --allocation-method Static \
-  --tags Project=QCBLab
+  --name nic-web \
+  --vnet-name qcb-vnet-lab \
+  --subnet snet-web \
+  --network-security-group nsg-web
+
+# App NIC — no public IP, NSG from subnet
+az network nic create \
+  --resource-group qcb-rg-lab \
+  --name nic-app \
+  --vnet-name qcb-vnet-lab \
+  --subnet snet-app \
+  --network-security-group nsg-app
 ```
 
 ```powershell
-New-AzPublicIpAddress `
+$vnet = Get-AzVirtualNetwork -ResourceGroupName "qcb-rg-lab" -Name "qcb-vnet-lab"
+$subnetWeb = Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet -Name "snet-web"
+$subnetApp = Get-AzVirtualNetworkSubnetConfig -VirtualNetwork $vnet -Name "snet-app"
+$nsgWeb = Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" -Name "nsg-web"
+$nsgApp = Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" -Name "nsg-app"
+
+New-AzNetworkInterface `
   -ResourceGroupName "qcb-rg-lab" `
-  -Name "qcb-pip-lb" `
+  -Name "nic-web" `
   -Location "eastus" `
-  -Sku "Basic" `
-  -AllocationMethod "Static" `
-  -Tag @{Project="QCBLab"}
+  -Subnet $subnetWeb `
+  -NetworkSecurityGroup $nsgWeb
+
+New-AzNetworkInterface `
+  -ResourceGroupName "qcb-rg-lab" `
+  -Name "nic-app" `
+  -Location "eastus" `
+  -Subnet $subnetApp `
+  -NetworkSecurityGroup $nsgApp
 ```
+
+> Notice there is no `-PublicIpAddress` parameter. This is intentional — both VMs are private-only.
 
 ---
 
-## Step 2 — Create the Load Balancer
-
-```bash
-az network lb create \
-  --resource-group qcb-rg-lab \
-  --name qcb-lb-web \
-  --sku Basic \
-  --public-ip-address qcb-pip-lb \
-  --frontend-ip-name qcb-lb-frontend \
-  --backend-pool-name qcb-lb-backend \
-  --tags Project=QCBLab
-```
-
-```powershell
-$pip = Get-AzPublicIpAddress -ResourceGroupName "qcb-rg-lab" -Name "qcb-pip-lb"
-
-$frontend = New-AzLoadBalancerFrontendIpConfig -Name "qcb-lb-frontend" -PublicIpAddress $pip
-$backend = New-AzLoadBalancerBackendAddressPoolConfig -Name "qcb-lb-backend"
-
-New-AzLoadBalancer `
-  -ResourceGroupName "qcb-rg-lab" `
-  -Name "qcb-lb-web" `
-  -Location "eastus" `
-  -Sku "Basic" `
-  -FrontendIpConfiguration $frontend `
-  -BackendAddressPool $backend `
-  -Tag @{Project="QCBLab"}
-```
-
----
-
-## Step 3 — Create an Availability Set
-
-```bash
-az vm availability-set create \
-  --resource-group qcb-rg-lab \
-  --name qcb-avset-web \
-  --platform-fault-domain-count 2 \
-  --platform-update-domain-count 2 \
-  --tags Project=QCBLab
-```
-
-```powershell
-New-AzAvailabilitySet `
-  -ResourceGroupName "qcb-rg-lab" `
-  -Name "qcb-avset-web" `
-  -Location "eastus" `
-  -PlatformFaultDomainCount 2 `
-  -PlatformUpdateDomainCount 2 `
-  -Sku "Aligned" `
-  -Tag @{Project="QCBLab"}
-```
-
----
-
-## Step 4 — Create the Linux VM (Web Tier)
+## Step 2 — Create the Linux VM (Web Tier)
 
 ```bash
 az vm create \
   --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
+  --name vm-web \
+  --nics nic-web \
   --image Ubuntu2204 \
   --size Standard_B1s \
-  --vnet-name qcb-vnet-main \
-  --subnet qcb-snet-web \
-  --availability-set qcb-avset-web \
-  --public-ip-address "" \
-  --nsg "" \
+  --storage-sku Standard_LRS \
   --admin-username qcbadmin \
   --generate-ssh-keys \
   --tags Project=QCBLab Environment=Lab
 ```
 
-> `--public-ip-address ""` explicitly sets no public IP.
-> `--nsg ""` skips creating a new NSG — our subnet NSG handles traffic.
-
 ```powershell
+$nicWeb = Get-AzNetworkInterface -ResourceGroupName "qcb-rg-lab" -Name "nic-web"
 $cred = Get-Credential -UserName "qcbadmin" -Message "Enter VM admin password"
 
 New-AzVM `
   -ResourceGroupName "qcb-rg-lab" `
-  -Name "qcb-vm-web-01" `
+  -Name "vm-web" `
   -Location "eastus" `
+  -NetworkInterface $nicWeb `
   -Image "Ubuntu2204" `
   -Size "Standard_B1s" `
-  -VirtualNetworkName "qcb-vnet-main" `
-  -SubnetName "qcb-snet-web" `
   -Credential $cred `
   -Tag @{Project="QCBLab"; Environment="Lab"}
 ```
 
-> PowerShell will prompt for credentials. Use a strong password — Azure enforces complexity requirements.
+> `--generate-ssh-keys` creates an SSH key pair at `~/.ssh/id_rsa` if one doesn't exist. The key is stored but never used in this project — all access is via `run-command`.
 
 ---
 
-## Step 5 — Create the Windows VM (App Tier)
+## Step 3 — Create the Windows VM (App Tier)
 
 ```bash
 az vm create \
   --resource-group qcb-rg-lab \
-  --name qcb-vm-app-01 \
+  --name vm-app \
+  --nics nic-app \
   --image Win2022Datacenter \
   --size Standard_B1s \
-  --vnet-name qcb-vnet-main \
-  --subnet qcb-snet-app \
-  --public-ip-address "" \
-  --nsg "" \
+  --storage-sku Standard_LRS \
   --admin-username qcbadmin \
-  --admin-password "<YourSecurePassword123!>" \
+  --admin-password "QCBLab2024!Secure" \
   --tags Project=QCBLab Environment=Lab
 ```
 
-> Replace `<YourSecurePassword123!>` with a real password. In Phase 06 we move secrets to Key Vault.
-
 ```powershell
+$nicApp = Get-AzNetworkInterface -ResourceGroupName "qcb-rg-lab" -Name "nic-app"
 $cred = Get-Credential -UserName "qcbadmin" -Message "Enter VM admin password"
 
 New-AzVM `
   -ResourceGroupName "qcb-rg-lab" `
-  -Name "qcb-vm-app-01" `
+  -Name "vm-app" `
   -Location "eastus" `
+  -NetworkInterface $nicApp `
   -Image "Win2022Datacenter" `
   -Size "Standard_B1s" `
-  -VirtualNetworkName "qcb-vnet-main" `
-  -SubnetName "qcb-snet-app" `
   -Credential $cred `
   -Tag @{Project="QCBLab"; Environment="Lab"}
 ```
 
+> In Phase 06, the password is moved to Key Vault. Hardcoding it in the script is a deliberate starting point that the identity phase then improves on.
+
 ---
 
-## Step 6 — Test VM Access with run-command
-
-This is how we verify VMs are working without SSH or RDP.
-
-### Linux VM
+## Step 4 — Install nginx on the Linux VM
 
 ```bash
 az vm run-command invoke \
   --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
+  --name vm-web \
   --command-id RunShellScript \
-  --scripts "hostname && echo 'Web VM is running'"
+  --scripts "sudo apt-get update -y && sudo apt-get install -y nginx && sudo systemctl enable nginx && echo '<h1>QCB Technologies</h1>' | sudo tee /var/www/html/index.html"
 ```
 
-### Windows VM
+```powershell
+Invoke-AzVMRunCommand `
+  -ResourceGroupName "qcb-rg-lab" `
+  -VMName "vm-web" `
+  -CommandId "RunShellScript" `
+  -ScriptString "sudo apt-get update -y && sudo apt-get install -y nginx && sudo systemctl enable nginx && echo '<h1>QCB Technologies</h1>' | sudo tee /var/www/html/index.html"
+```
+
+---
+
+## Step 5 — Verify via run-command
 
 ```bash
+# Confirm nginx is serving
 az vm run-command invoke \
   --resource-group qcb-rg-lab \
-  --name qcb-vm-app-01 \
+  --name vm-web \
+  --command-id RunShellScript \
+  --scripts "curl -s http://localhost | head -3"
+
+# Confirm Windows VM is running
+az vm run-command invoke \
+  --resource-group qcb-rg-lab \
+  --name vm-app \
   --command-id RunPowerShellScript \
-  --scripts "hostname; Write-Host 'App VM is running'"
-```
-
-### What This Does
-
-`az vm run-command` sends a script to the VM agent (a lightweight service running on every Azure VM). The agent executes it locally and returns the output. No inbound port needs to be open — the VM agent communicates outbound to Azure over port 443.
-
----
-
-## Step 7 — Install a Web Server on the Linux VM
-
-```bash
-az vm run-command invoke \
-  --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
-  --command-id RunShellScript \
-  --scripts "sudo apt-get update -y && sudo apt-get install -y nginx && sudo systemctl start nginx && sudo systemctl enable nginx && echo 'QCB Technologies Web Server' | sudo tee /var/www/html/index.html"
+  --scripts "hostname; (Get-ComputerInfo).WindowsProductName"
 ```
 
 ---
@@ -249,41 +225,32 @@ az vm run-command invoke \
 ## Verification
 
 ```bash
-# List VMs and their state
-az vm list --resource-group qcb-rg-lab --output table
+# List both VMs and their power state
+az vm list --resource-group qcb-rg-lab --show-details --output table
 
-# Check VM power state
-az vm get-instance-view --resource-group qcb-rg-lab --name qcb-vm-web-01 \
-  --query instanceView.statuses[1] --output table
-
-# Get load balancer public IP
-az network public-ip show --resource-group qcb-rg-lab --name qcb-pip-lb \
-  --query ipAddress --output tsv
+# Confirm NICs have private IPs only — no public IP column should be populated
+az network nic list --resource-group qcb-rg-lab \
+  --query "[].{NIC:name, PrivateIP:ipConfigurations[0].privateIPAddress, Subnet:ipConfigurations[0].subnet.id}" \
+  --output table
 ```
-
----
-
-## Cost Management — Stop VMs Between Sessions
-
-VMs incur compute charges while running. Stop (deallocate) them when not in use:
-
-```bash
-az vm deallocate --resource-group qcb-rg-lab --name qcb-vm-web-01
-az vm deallocate --resource-group qcb-rg-lab --name qcb-vm-app-01
-```
-
-```powershell
-Stop-AzVM -ResourceGroupName "qcb-rg-lab" -Name "qcb-vm-web-01" -Force
-Stop-AzVM -ResourceGroupName "qcb-rg-lab" -Name "qcb-vm-app-01" -Force
-```
-
-> **Deallocate vs Stop:** Stopping a VM from inside the OS keeps it in a "Stopped" state — you still pay for compute. `az vm deallocate` releases the compute resources so you pay only for the disk.
 
 ---
 
 ## Gotchas & Lessons Learned
 
-> *This section is updated as the phase is implemented.*
+> *Updated as the phase is implemented.*
+
+---
+
+## Cost at This Phase
+
+| Resource | Free tier |
+|---|---|
+| vm-web (Linux B1s) | ✅ 750 hrs/month |
+| vm-app (Windows B1s) | ✅ 750 hrs/month |
+| Standard HDD managed disks | ✅ Covered |
+| NICs | ✅ Free |
+| **Total public IP cost** | **$0 — none created** |
 
 ---
 

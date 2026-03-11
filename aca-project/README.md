@@ -1,4 +1,4 @@
-# QCB Technologies — Azure Infrastructure Lab
+# Azure Cloud Architecture — QCB Technologies
 
 > **Portfolio project** | AZ-104 hands-on implementation | Azure CLI + PowerShell + Automation
 
@@ -6,16 +6,17 @@
 
 ## About This Project
 
-QCB Technologies is a small, growing IT managed services company based in the Isle of Man. This project documents the design, deployment, and automation of QCB's core Azure infrastructure — built from scratch using a pay-as-you-go subscription with cost-conscious, tear-down-and-rebuild practices.
+QCB Technologies is a small, growing IT managed services company. This project documents the design, deployment, and automation of QCB's core Azure infrastructure — built from scratch using a pay-as-you-go subscription with cost-conscious, tear-down-and-rebuild practices.
 
 Every task is documented in three ways:
+
 1. **Azure CLI** — the command and what it does
 2. **PowerShell (Az module)** — the equivalent command
 3. **Why** — the decision, trade-off, or dependency behind it
 
-At the end of each phase, an automation script ties everything together so the full environment can be rebuilt in a single run.
+At the end of the project, a master automation script ties everything together so the full environment can be rebuilt in a single run.
 
-**Honest disclosure:** This is an active learning project built to close real gaps in Azure infrastructure knowledge. Documentation reflects progress as it happens.
+**Honest disclosure:** This is an active learning project built to close real gaps in Azure infrastructure knowledge. Documentation reflects progress as it happens, including gotchas, mistakes, and lessons learned.
 
 ---
 
@@ -26,11 +27,9 @@ At the end of each phase, an automation script ties everything together so the f
 | **Company** | QCB Technologies Ltd |
 | **Domain** | qcbhomelab.online |
 | **Size** | Small IT MSP, ~10 staff |
-| **Goal** | Migrate internal tooling and client-facing services to Azure |
-| **Primary Region** | UK South (London) |
+| **Goal** | Deploy and manage core Azure infrastructure across all major AZ-104 domains |
+| **Primary Region** | `eastus` *(replace with your preferred region)* |
 | **Subscription type** | Pay-as-you-go |
-
-QCB needs a secure, observable, and repeatable Azure environment covering web-facing services, internal app workloads, data storage, identity management, and monitoring — all built with least-privilege access and no hardcoded credentials.
 
 ---
 
@@ -40,44 +39,55 @@ QCB needs a secure, observable, and repeatable Azure environment covering web-fa
 Internet
     │
     ▼
-[ Load Balancer ] (Public IP)
+[ Load Balancer ] (Public IP — load balancer only)
     │
     ▼
-[ Web Subnet ] — Linux VM (web-vm-01)     ← NSG: allow 80/443 inbound
+[ Web Subnet ] — Linux VM (qcb-vm-web-01)       ← NSG: allow 80/443 inbound
     │
     ▼
-[ App Subnet ] — Windows VM (app-vm-01)   ← NSG: allow 8080 from web subnet only
+[ App Subnet ] — Windows VM (qcb-vm-app-01)     ← NSG: allow 8080 from web subnet only
     │
     ▼
-[ Data Subnet ] — Storage Account         ← Private Endpoint, no public access
+[ Data Subnet ] — Storage Account               ← No public access
     │
-[ Key Vault ]  — Secrets, accessed via Managed Identity (no passwords in code)
-[ Log Analytics ] — Centralised monitoring, VM insights, alerts
+[ Key Vault ]     — Secrets via Managed Identity (no hardcoded credentials)
+[ Log Analytics ] — Centralised monitoring, alerts, VM Insights
 ```
+
+> **No public IPs on VMs.** All VM access is handled via `az vm run-command` through the Azure control plane — a realistic enterprise pattern.
 
 ---
 
 ## Repository Structure
 
 ```
-qcb-azure-lab/
-├── README.md                        ← This file (project overview)
+aca-project/
+├── README.md                            ← This file
 ├── docs/
-│   ├── 00-prerequisites.md          ← Subscription setup, tooling, naming conventions
-│   ├── 01-resource-groups.md        ← Phase 1: Foundation
-│   ├── 02-networking.md             ← Phase 2: VNet, Subnets, NSGs
-│   ├── 03-compute.md                ← Phase 3: Virtual Machines, Load Balancer
-│   ├── 04-storage.md                ← Phase 4: Storage Account, Blob, File Share
-│   ├── 05-identity.md               ← Phase 5: RBAC, Managed Identities
-│   ├── 06-keyvault.md               ← Phase 6: Key Vault, Secrets, Access Policies
-│   ├── 07-monitoring.md             ← Phase 7: Log Analytics, Alerts, Diagnostics
-│   └── 08-automation.md             ← Phase 8: Full rebuild script
+│   ├── 00-prerequisites.md              ← Tooling, authentication, conventions
+│   ├── 01-resource-groups.md            ← Resource groups, tags, subscription setup
+│   ├── 02-networking.md                 ← VNet, subnets, NSGs, DNS
+│   ├── 03-compute.md                    ← VMs, load balancer, availability
+│   ├── 04-storage.md                    ← Storage account, blob, file share
+│   ├── 05-identity.md                   ← RBAC, managed identities, Entra ID
+│   ├── 06-keyvault.md                   ← Key Vault, secrets, access policies
+│   ├── 07-monitoring.md                 ← Log Analytics, alerts, diagnostics
+│   └── 08-automation.md                 ← Full deploy + teardown automation
 ├── scripts/
-│   ├── cli/                         ← Azure CLI scripts per phase
-│   ├── powershell/                  ← PowerShell scripts per phase
-│   └── deploy-all.sh                ← Full environment rebuild (end-to-end)
-└── teardown/
-    └── destroy-all.sh               ← Safely deletes all QCB lab resources
+│   ├── cli/                             ← Azure CLI scripts per phase
+│   └── powershell/                      ← PowerShell scripts per phase
+├── teardown/
+│   └── destroy-all.sh                   ← Master teardown — deletes everything
+└── claude/
+    ├── 00-prerequisites/CLAUDE.md
+    ├── 01-resource-groups/CLAUDE.md
+    ├── 02-networking/CLAUDE.md
+    ├── 03-compute/CLAUDE.md
+    ├── 04-storage/CLAUDE.md
+    ├── 05-identity/CLAUDE.md
+    ├── 06-keyvault/CLAUDE.md
+    ├── 07-monitoring/CLAUDE.md
+    └── 08-automation/CLAUDE.md
 ```
 
 ---
@@ -86,53 +96,49 @@ qcb-azure-lab/
 
 | Phase | Topic | Key Services | Status |
 |-------|-------|--------------|--------|
-| [00](docs/00-prerequisites.md) | Prerequisites & Setup | Azure CLI, PowerShell Az, naming conventions | 🔲 Planned |
-| [01](docs/01-resource-groups.md) | Resource Groups & Subscriptions | Resource Groups, Tags | 🔲 Planned |
-| [02](docs/02-networking.md) | Networking | VNet, Subnets, NSGs, Peering, DNS | 🔲 Planned |
-| [03](docs/03-compute.md) | Compute | Linux VM, Windows VM, Load Balancer, Availability | 🔲 Planned |
-| [04](docs/04-storage.md) | Storage | Storage Account, Blob, File Share, Lifecycle Policies | 🔲 Planned |
+| [00](docs/00-prerequisites.md) | Prerequisites & Setup | Azure CLI, PowerShell Az, conventions | 🔲 Planned |
+| [01](docs/01-resource-groups.md) | Resource Groups | Resource Groups, Tags, Subscriptions | 🔲 Planned |
+| [02](docs/02-networking.md) | Networking | VNet, Subnets, NSGs, DNS | 🔲 Planned |
+| [03](docs/03-compute.md) | Compute | Linux VM, Windows VM, Load Balancer | 🔲 Planned |
+| [04](docs/04-storage.md) | Storage | Storage Account, Blob, File Share, Lifecycle | 🔲 Planned |
 | [05](docs/05-identity.md) | Identity & Access | RBAC, Managed Identities, Entra ID | 🔲 Planned |
-| [06](docs/06-keyvault.md) | Key Vault | Secrets, Keys, Access via Managed Identity | 🔲 Planned |
-| [07](docs/07-monitoring.md) | Monitoring | Log Analytics, Azure Monitor, Alerts, VM Insights | 🔲 Planned |
-| [08](docs/08-automation.md) | Automation | Full deploy + teardown scripts | 🔲 Planned |
+| [06](docs/06-keyvault.md) | Key Vault | Secrets, Keys, Managed Identity Access | 🔲 Planned |
+| [07](docs/07-monitoring.md) | Monitoring | Log Analytics, Azure Monitor, Alerts | 🔲 Planned |
+| [08](docs/08-automation.md) | Automation | Full rebuild + teardown scripts | 🔲 Planned |
 
 ---
 
 ## Naming Convention
 
-All resources follow a consistent naming pattern:
-
 ```
 qcb-<resource-type>-<descriptor>-<number>
 ```
 
-| Resource | Example Name |
-|----------|-------------|
+| Resource | Name |
+|----------|------|
 | Resource Group | `qcb-rg-lab` |
 | Virtual Network | `qcb-vnet-main` |
-| Subnet | `qcb-snet-web`, `qcb-snet-app`, `qcb-snet-data` |
-| Network Security Group | `qcb-nsg-web`, `qcb-nsg-app` |
-| Virtual Machine | `qcb-vm-web-01`, `qcb-vm-app-01` |
+| Subnet (web) | `qcb-snet-web` |
+| Subnet (app) | `qcb-snet-app` |
+| Subnet (data) | `qcb-snet-data` |
+| NSG | `qcb-nsg-web`, `qcb-nsg-app` |
+| Linux VM | `qcb-vm-web-01` |
+| Windows VM | `qcb-vm-app-01` |
 | Load Balancer | `qcb-lb-web` |
 | Storage Account | `qcbstorage01` *(no hyphens — Azure limitation)* |
 | Key Vault | `qcb-kv-lab` |
-| Log Analytics Workspace | `qcb-law-main` |
+| Log Analytics | `qcb-law-main` |
 
 ---
 
 ## Cost Controls
 
-This lab is designed to be as cheap as possible:
-
-- **VM sizes**: `Standard_B1s` (cheapest burstable, ~£3/month if left running)
-- **Tear down after each session**: Use `teardown/destroy-all.sh` — rebuild takes ~10 minutes
-- **Region**: UK South — closest to Isle of Man, competitive pricing
-- **Storage**: LRS (locally redundant) — cheapest replication tier
-- **No reserved instances** — pay-as-you-go only, resources deleted between sessions
-- **Free tier where available**: Log Analytics (first 5GB/day free), Key Vault (10k operations free)
-
-> Estimated cost per active session (2–3 hours): **< £0.50**
-> Estimated cost if VMs accidentally left running overnight: **~£0.30**
+- **No public IPs on VMs** — VM access via `az vm run-command` only
+- **VM sizes:** `Standard_B1s` — cheapest burstable tier
+- **Storage:** LRS (locally redundant) — cheapest replication
+- **Tear down after every session** — see [teardown/destroy-all.sh](teardown/destroy-all.sh)
+- **Free tier services used where available** — Log Analytics (5GB/day free), Key Vault (10k ops free)
+- **Rebuild takes ~10 minutes** from the master script
 
 ---
 
@@ -140,66 +146,19 @@ This lab is designed to be as cheap as possible:
 
 Each phase doc follows this structure:
 
-```markdown
-## What We're Building
-Brief description of the goal and how it fits QCB's scenario.
-
-## Prerequisites
-What must exist before this phase.
-
-## Step X — <Task Name>
-
-### Why
-The business or technical reason for this step.
-
-### Azure CLI
-\`\`\`bash
-az <command>
-\`\`\`
-
-### PowerShell
-\`\`\`powershell
-<Az command>
-\`\`\`
-
-### What This Does
-Explanation of what happened under the hood.
-
-## Verification
-How to confirm it worked.
-
-## Teardown
-How to remove just this phase's resources.
 ```
-
----
-
-## Tools Required
-
-| Tool | Purpose | Install |
-|------|---------|---------|
-| Azure CLI | Primary CLI tool | [docs.microsoft.com/cli/azure/install-azure-cli](https://docs.microsoft.com/cli/azure/install-azure-cli) |
-| PowerShell 7+ | Cross-platform shell | [aka.ms/powershell](https://aka.ms/powershell) |
-| Az PowerShell module | Azure cmdlets | `Install-Module -Name Az` |
-| Git | Version control | [git-scm.com](https://git-scm.com) |
-
----
-
-## Getting Started
-
-```bash
-# 1. Clone the repo
-git clone https://github.com/<your-username>/qcb-azure-lab.git
-cd qcb-azure-lab
-
-# 2. Log in to Azure
-az login
-
-# 3. Confirm your subscription
-az account show
-
-# 4. Start with Phase 0
-cat docs/00-prerequisites.md
+## What We're Building
+## Prerequisites
+## The Technology — what it is and why we're using it
+## Step X — <Task>
+   ### Why
+   ### Azure CLI
+   ### PowerShell
+   ### What This Does
+## Verification
+## Gotchas & Lessons Learned
+## Teardown (this phase only)
+## Navigation
 ```
 
 ---
@@ -216,4 +175,19 @@ cat docs/00-prerequisites.md
 
 ---
 
-*Built by [Your Name] — Isle of Man | [qcbhomelab.online](https://qcbhomelab.online)*
+## Tools Required
+
+| Tool | Install |
+|------|---------|
+| Azure CLI | [docs.microsoft.com/cli/azure](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) |
+| PowerShell 7+ | [aka.ms/powershell](https://aka.ms/powershell) |
+| Az PowerShell module | `Install-Module -Name Az` |
+| Git | [git-scm.com](https://git-scm.com) |
+
+---
+
+➡️ **Start here:** [docs/00-prerequisites.md](docs/00-prerequisites.md)
+
+---
+
+*Part of the [Engineering Portfolio](../README.md) — QCB Technologies lab environment. No real client data or credentials included.*

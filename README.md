@@ -2,7 +2,7 @@
 title: README
 description: 
 published: true
-date: 2026-03-11T10:10:44.884Z
+date: 2026-03-11T10:57:54.264Z
 tags: 
 editor: markdown
 dateCreated: 2026-02-28T17:36:23.462Z
@@ -12,23 +12,21 @@ dateCreated: 2026-02-28T17:36:23.462Z
 
 **IT Infrastructure & Cloud Migration | Learning in Public**
 
-[LinkedIn](#) · [GitHub](https://github.com/sandtiger76/engineering-portfolio)
+[LinkedIn](https://www.linkedin.com/in/quintin-boshoff-1905033/)
 
 ---
 
 ## About This Portfolio
 
-I’m an IT infrastructure engineer with over 25 years of experience across desktop support, server platforms, enterprise storage, and large-scale infrastructure transformation. 
+I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience spanning end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. Over the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation initiatives — guiding transitions from traditional on-premises environments to cloud-based platforms across multiple regions and sites.
 
-Over the latter part of my career, my focus has been on planning and delivering complex data migration and modernization initiatives—guiding transitions from traditional on‑premises environments to cloud-based platforms operating across multiple regions.
+I've always been curious by nature and genuinely enjoy learning. As the technology landscape shifted toward cloud-native architectures, automation, and infrastructure as code, I decided to deliberately build on my existing skills — filling the gaps in modern tooling that my career hadn't naturally taken me to yet.
 
-I've always been curious by nature and genuinely enjoy learning. As the technology landscape shifted toward cloud-native architectures, automation, and infrastructure as code, I decided to deliberately build on my existing skills, utilizing modern tooling and practices that my career hadn’t naturally required yet.
-
-This portfolio documents that journey. Each project represents work I have designed and implemented end-to-end, reflecting real-world decision-making as well as the outcomes and lessons learned along the way. The repository also reflects my use of modern tooling—including AI-assisted workflows—to accelerate learning, experimentation, and problem-solving.
+This portfolio documents that journey. Each project represents work I have designed and implemented end-to-end, reflecting real-world decision-making as well as the outcomes and lessons learned along the way. It also reflects my use of modern tooling — including AI-assisted workflows — to accelerate learning, experimentation, and problem-solving.
 
 In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility as first-class deliverables.
 
-If you’re working on similar infrastructure modernization or cloud-focused initiatives, I hope the projects and write-ups here prove useful and informative.
+This portfolio is relevant to infrastructure engineering, cloud engineering, platform, and migration-focused roles. Whether you're a technical engineer, a hiring manager, or someone planning a similar project yourself — I hope you find something useful here.
 
 ---
 
@@ -36,7 +34,7 @@ If you’re working on similar infrastructure modernization or cloud-focused ini
 
 Each project has two layers of documentation:
 
-- **A plain-English summary** — what the project is, why it exists, and what it achieves, written for anyone
+- **A plain-English summary** — what the project is, why it exists, and what it achieves, written for any audience
 - **Detailed technical documentation** — implementation steps, decisions, and rationale for engineers and hiring managers who want to go deeper
 
 Lab environments and fictional scenarios are clearly labelled throughout. No real client data, credentials, or confidential information appears anywhere in this repository.
@@ -49,11 +47,11 @@ Lab environments and fictional scenarios are clearly labelled throughout. No rea
 
 ### 📁 [m365-project](./m365-project/README.md) — Microsoft 365 Migration
 
-> *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on‑premises, physical Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
+> *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on-premises Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
 
-This project documents the kind of migration I’ve delivered in the real world for SME clients. The scenario uses a fictional company, but every step reflects what you’d encounter in a genuine engagement — including the often-overlooked realities like SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap Microsoft 365 doesn’t solve for you.
+This project documents the kind of migration I've delivered in the real world for SME clients. The scenario uses a fictional company, but every step reflects what you'd encounter in a genuine engagement — including the often-overlooked realities like SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap that Microsoft 365 doesn't solve for you.
 
-**Why I built it:** To create a repeatable, documented blueprint that I could share
+**Why I built it:** To create a repeatable, documented blueprint — useful both as a portfolio piece and as a practical guide for anyone planning a similar migration.
 
 **What I hope you take from it:** A clear, honest guide to planning and delivering an M365 migration end-to-end, including the decisions that often get glossed over in vendor documentation.
 
@@ -65,11 +63,11 @@ This project documents the kind of migration I’ve delivered in the real world 
 
 > *A self-hosted infrastructure platform running on a Proxmox homelab — containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
 
-I’ve spent most of my career supporting and migrating infrastructure that other people built. I understood how it worked, but I hadn’t built a modern containerised platform from scratch myself, or owned the infrastructure-as-code end‑to‑end. This project was my first attempt to fix that.
+Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code — two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
 
-The stack runs Nextcloud as the core application — a self-hosted collaboration and file‑sharing platform — alongside PostgreSQL, Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
+The stack runs Nextcloud as the core application — a self-hosted cloud collaboration and file-sharing platform — alongside PostgreSQL (in place of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
 
-**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won’t claim it was written entirely from scratch. The value for me was two‑fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self‑hosted platform production‑grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That’s what infrastructure‑as‑code means in practice, and I wanted to experience it directly rather than just read about it.
+**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won't claim it was written entirely from scratch. The value was two-fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self-hosted platform production-grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That's what infrastructure-as-code means in practice, and I wanted to experience it directly rather than just read about it.
 
 **Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling — areas I was curious about but had no practical experience in.
 
@@ -81,23 +79,19 @@ The stack runs Nextcloud as the core application — a self-hosted collaboration
 
 ### ☁️ [aca-project](./aca-project/README.md) — Azure Cloud Architecture
 
-> *A hands-on Azure learning project — implementing a complete, connected infrastructure across the core domains of the AZ-104 curriculum, documented as I go.*
+> *A hands-on Azure learning project — implementing a connected infrastructure across the core Azure domains, documented as I go.*
 
-This project was built to deliberately close gaps in my end‑to‑end Azure infrastructure experience and complete the overall cloud picture. I learn best by implementing a real  environment, testing it, and then deepening that understanding through iteration. 
+This project was built to deliberately close gaps in my end-to-end Azure infrastructure experience. I learn best by implementing a real environment, testing it, and deepening that understanding through iteration.
 
-The project draws from each major area of the AZ‑104 curriculum — including networking, compute, storage, identity, monitoring, and automation — and turns those topics into practical, working implementations.
+The project draws from each major area of the AZ-104 curriculum — networking, compute, storage, identity, monitoring, and automation — and turns those topics into practical, working implementations. All work is carried out in a pay-as-you-go Azure subscription, using free-tier services where possible and short-lived resources where not, keeping costs minimal while still reflecting real-world usage patterns.
 
-All work is carried out in a pay‑as‑you‑go Azure subscription, using free-tier services where possible and short‑lived resources where not. Everything is designed to be created, tested, and then removed to keep costs minimal, while still reflecting real-world Azure usage patterns.
+The documentation focuses on not just what was built, but why — covering the decisions, trade-offs, and dependencies that are often hard to grasp from reference documentation alone.
 
-The documentation is written in plain, accessible language, with the goal of explaining not just what was built, but why — focusing on the decisions, trade-offs, and dependencies that are often hard to grasp when learning from reference documentation alone.
+**Honest disclosure:** This is an active learning project. Documentation reflects progress as it happens rather than a finished guide, and some areas are explored more deeply than others as my understanding evolves.
 
+**Why I built it:** To gain genuine hands-on Azure infrastructure experience across core domains, and to anchor that learning in real implementations rather than theory alone.
 
-**Honest disclosure:** This is an active learning project. The documentation reflects progress as it happens rather than a polished, finished guide. Some areas are explored more deeply than others as my understanding evolves.
-
-**Why I built it:** To gain genuine, hands-on Azure infrastructure experience across the full AZ‑104 scope, and to anchor that learning in real implementations rather than theory alone.
-
-**What I hope you take from it:** A practical, end‑to‑end reference for core Azure infrastructure concepts
-
+**What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts — written from the perspective of someone working through it in real time.
 
 **[→ View Project](./aca-project/README.md)**
 

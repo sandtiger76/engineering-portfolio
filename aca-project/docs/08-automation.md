@@ -4,8 +4,9 @@
 |---|---|
 | **Phase** | 08 |
 | **Topic** | Full Environment Automation |
-| **Services** | Azure CLI, PowerShell, Bash scripting |
-| **Est. Cost** | Same as running all phases — delete immediately after testing |
+| **AZ-104 Domain** | All domains |
+| **Services** | Azure CLI, Bash scripting |
+| **Est. Cost** | Same as running all phases — tear down immediately after testing |
 
 ---
 
@@ -17,9 +18,12 @@
 
 ## What We're Building
 
-A single script (`scripts/deploy-all.sh`) that rebuilds the entire QCB lab environment from scratch — every resource from every phase, in the correct order, with proper dependency handling. And a matching teardown script (`teardown/destroy-all.sh`) that removes everything cleanly.
+Two scripts that automate the entire lab lifecycle:
 
-This is the payoff of the entire project. If the script runs end-to-end without errors, it validates that every command documented in every phase is correct and that you understand the dependencies between resources.
+- `scripts/deploy-all.sh` — rebuilds the full environment across all 7 phases in a single run (~15–20 minutes)
+- `teardown/destroy-all.sh` — purges the Key Vault and deletes the resource group, removing everything cleanly
+
+This phase demonstrates the principle that infrastructure should be **cattle, not pets** — the environment can be destroyed and recreated at any time from code. It also validates that every command documented in every phase is correct, in the right order, and handles dependencies properly.
 
 ---
 
@@ -27,64 +31,87 @@ This is the payoff of the entire project. If the script runs end-to-end without 
 
 ### Why Automate?
 
-Every phase was built step-by-step deliberately — to understand what each resource does and why it exists. Automation comes after understanding, not before.
-
-The rebuild script isn't just a convenience. It proves:
+Each phase was built step-by-step to understand what each resource does and why it exists. Automation comes after understanding, not before. The deploy script proves:
 
 - Every command is correct and repeatable
-- Dependencies are understood (you can't create a VM before the VNet exists)
-- The environment is cattle, not pets — it can be destroyed and recreated at any time
-- Cost is controlled — spin up, test, tear down
+- Dependencies are understood — you cannot create a VM before the VNet exists, cannot assign a Key Vault role before the vault exists
+- The environment can be destroyed and recreated to stop costs between sessions
+- The entire AZ-104 lab can be validated in a single run
 
-### Script Design Principles
+### Design Principles
 
 The deploy script follows these rules:
 
-- **Idempotent where possible** — running it twice shouldn't fail or duplicate resources
-- **Variables at the top** — region, names, and sizes are set once and referenced throughout
-- **Exit on error** — `set -e` means the script stops if any command fails rather than continuing with a broken state
-- **Clear section headers** — so you can follow progress and identify where a failure occurred
-- **Teardown is separate** — the destroy script is never called by the deploy script
+| Principle | Implementation |
+|---|---|
+| Exit on any error | `set -e` at the top — script stops immediately if any command fails |
+| Variables at the top | All names, sizes, and settings are defined once and referenced throughout |
+| Idempotent where possible | `az group create`, `az vm identity assign` and others are safe to re-run |
+| Clear section headers | Phase markers in output so you can follow progress and locate failures |
+| No public IPs | No `pip-web` variable — public IP removed from design entirely |
+| Teardown is separate | The destroy script is never called by the deploy script |
 
-### PowerShell Alternative
+### Script Structure
 
-A PowerShell version (`scripts/deploy-all.ps1`) is also provided for environments where bash isn't available. Both scripts produce identical infrastructure.
+```
+deploy-all.sh
+├── Variables
+├── Phase 01 — az group create
+├── Phase 02 — az network vnet create, subnet create ×2, nsg create ×2,
+│              nsg rule create ×3, subnet update ×2
+├── Phase 03 — az network nic create ×2, az vm create ×2,
+│              az vm run-command invoke (nginx install)
+├── Phase 04 — az storage account create, az storage container create ×2
+├── Phase 05 — az vm identity assign, az role assignment create (storage)
+├── Phase 06 — az keyvault create, az role assignment create (KV officer),
+│              sleep 30, az keyvault secret set,
+│              az role assignment create (KV secrets user)
+└── Phase 07 — az monitor log-analytics workspace create,
+               az monitor action-group create,
+               az monitor metrics alert create
+```
+
+```
+destroy-all.sh
+├── Confirmation prompt
+├── Step 1 — az keyvault delete + az keyvault purge (with sleep 15)
+└── Step 2 — az group delete --yes (blocking, waits for completion)
+```
 
 ---
 
-## deploy-all.sh
+## The Deploy Script
 
-See the full script at [scripts/deploy-all.sh](../scripts/deploy-all.sh).
+Full script at: `scripts/deploy-all.sh`
 
-The script runs through phases in order:
+Key variables:
 
-1. Set variables
-2. Create resource group
-3. Create VNet, subnets, NSGs, NSG rules
-4. Create load balancer and public IP
-5. Create availability set
-6. Create Linux VM (web tier)
-7. Create Windows VM (app tier)
-8. Install nginx on web VM via run-command
-9. Create storage account, blob container, file share, lifecycle policy
-10. Enable managed identity on web VM
-11. Assign RBAC roles
-12. Create Key Vault, store secrets, grant VM access
-13. Create Log Analytics Workspace
-14. Install monitoring agent on VMs
-15. Create action group and CPU alert
-
----
-
-## destroy-all.sh
-
-See the full script at [teardown/destroy-all.sh](../teardown/destroy-all.sh).
-
-The teardown script:
-
-1. Purges the Key Vault (soft-delete means the name is reserved for 90 days otherwise)
-2. Deletes the resource group (removes everything else)
-3. Confirms deletion
+```bash
+LOCATION="eastus"
+RG="qcb-rg-lab"
+VNET="qcb-vnet-lab"
+SNET_WEB="snet-web"
+SNET_APP="snet-app"
+NSG_WEB="nsg-web"
+NSG_APP="nsg-app"
+NIC_WEB="nic-web"
+NIC_APP="nic-app"
+VM_WEB="vm-web"
+VM_APP="vm-app"
+VM_SIZE="Standard_B1s"
+VM_IMAGE_LINUX="Ubuntu2204"
+VM_IMAGE_WIN="Win2022Datacenter"
+VM_ADMIN="qcbadmin"
+VM_PASSWORD="QCBLab2024!Secure"
+STORAGE="stqcblab"
+CONTAINER_1="uploads"
+CONTAINER_2="backups"
+KV="qcb-kv-lab"
+LAW="qcb-law-main"
+ACTION_GROUP="qcb-ag-ops"
+ALERT_EMAIL="qcb-alerts@qcbhomelab.online"
+TAGS="Project=QCBLab Environment=Lab"
+```
 
 ---
 
@@ -93,10 +120,7 @@ The teardown script:
 ### Deploy
 
 ```bash
-# Make executable
 chmod +x scripts/deploy-all.sh
-
-# Run
 ./scripts/deploy-all.sh
 ```
 
@@ -107,55 +131,107 @@ chmod +x teardown/destroy-all.sh
 ./teardown/destroy-all.sh
 ```
 
-### PowerShell Deploy
+### Expected timings
 
-```powershell
-pwsh scripts/deploy-all.ps1
-```
+| Phase | Approx. time |
+|---|---|
+| Phase 01 — Resource Group | < 1 minute |
+| Phase 02 — Networking | ~2 minutes |
+| Phase 03 — Compute | ~10–12 minutes (Windows VM is the bottleneck) |
+| Phase 04 — Storage | ~1 minute |
+| Phase 05 — Identity | ~1 minute |
+| Phase 06 — Key Vault | ~2 minutes (includes `sleep 30`) |
+| Phase 07 — Monitoring | ~2 minutes |
+| **Total deploy** | **~15–20 minutes** |
+| Teardown | ~3–5 minutes |
 
 ---
 
 ## Verifying the Full Build
 
-After the deploy script completes, run these checks:
+After the deploy script completes, run the full verification suite:
 
 ```bash
-# All resources in the group
-az resource list --resource-group qcb-rg-lab --output table
+# Phase 01
+az group show --name qcb-rg-lab \
+  --query "{Name:name, Location:location, State:properties.provisioningState}" \
+  --output table
 
-# VM status
+# Phase 02
+az network vnet show --resource-group qcb-rg-lab --name qcb-vnet-lab \
+  --query "{Name:name, Space:addressSpace.addressPrefixes}" --output table
+az network vnet subnet list --resource-group qcb-rg-lab --vnet-name qcb-vnet-lab --output table
+az network nsg list --resource-group qcb-rg-lab --output table
+
+# Phase 03
 az vm list --resource-group qcb-rg-lab --show-details --output table
+az network nic list --resource-group qcb-rg-lab \
+  --query "[].{NIC:name, PrivateIP:ipConfigurations[0].privateIPAddress}" --output table
+az vm run-command invoke --resource-group qcb-rg-lab --name vm-web \
+  --command-id RunShellScript --scripts "curl -s http://localhost | head -3"
 
-# Web server responding (via run-command)
-az vm run-command invoke \
-  --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
-  --command-id RunShellScript \
-  --scripts "curl -s http://localhost | head -5"
+# Phase 04
+az storage account show --name stqcblab --resource-group qcb-rg-lab \
+  --query "{Name:name, SKU:sku.name, TLS:minimumTlsVersion}" --output table
+az storage container list --account-name stqcblab --auth-mode login --output table
 
-# Secret accessible from VM
-az vm run-command invoke \
-  --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
-  --command-id RunShellScript \
-  --scripts "curl -s -o /dev/null -w '%{http_code}' 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://vault.azure.net' -H 'Metadata:true'"
+# Phase 05
+az vm show --resource-group qcb-rg-lab --name vm-web --query "identity" --output json
+az role assignment list \
+  --assignee $(az vm show --resource-group qcb-rg-lab --name vm-web \
+    --query identity.principalId --output tsv) \
+  --all --output table
+
+# Phase 06
+az keyvault show --name qcb-kv-lab --resource-group qcb-rg-lab \
+  --query "{Name:name, RBAC:properties.enableRbacAuthorization}" --output table
+az keyvault secret list --vault-name qcb-kv-lab --output table
+
+# Phase 07
+az monitor log-analytics workspace show --resource-group qcb-rg-lab \
+  --workspace-name qcb-law-main \
+  --query "{Name:name, SKU:sku, Retention:retentionInDays}" --output table
+az monitor metrics alert list --resource-group qcb-rg-lab --output table
 ```
 
 ---
 
 ## Gotchas & Lessons Learned
 
-> *This section is updated as the phase is implemented.*
+> *Verified: 2026-03-11*
+
+**1. First run exited with code 3 at Phase 04 — transient Azure API error.** The script failed at `az storage container create` on the first run with no structural issue in the script. Re-running immediately succeeded through all 7 phases without modification. This is a known behaviour with Azure ARM — transient 5xx errors are possible on first use of a resource type in a new resource group. `set -e` causes the script to exit cleanly rather than continue in a broken state.
+
+**2. All commands are idempotent — re-running is always safe.** `az group create`, `az network vnet create`, `az vm identity assign`, `az keyvault create` and all other commands in the script are safe to re-run. Resources that already exist are returned as-is without error.
+
+**3. `VM_IDENTITY` is set in Phase 05 and reused in Phase 06.** The variable holding the VM's managed identity principal ID is captured in Phase 05 and used again in Phase 06 for the Key Vault role assignment. If running phases independently rather than as a single script, re-capture it:
+```bash
+VM_IDENTITY=$(az vm show --resource-group qcb-rg-lab --name vm-web \
+  --query identity.principalId --output tsv)
+```
+
+**4. The `sleep 30` in Phase 06 is load-bearing.** Without the pause between assigning `Key Vault Secrets Officer` and running `az keyvault secret set`, the secret creation fails with 403. The sleep is intentional and confirmed necessary.
+
+**5. Teardown uses a confirmation prompt.** `destroy-all.sh` requires you to type `yes` before proceeding. This is intentional — running teardown accidentally would delete everything. The deploy script does not call teardown.
+
+**6. Key Vault purge is required for clean rebuilds.** Without purging after deletion, `qcb-kv-lab` enters soft-delete state for 90 days and the name cannot be reused. The teardown script deletes the vault, waits 15 seconds for soft-delete to register, then purges it. Subsequent deploy runs can create the vault with the same name immediately.
+
+**7. No PowerShell equivalent for the full deploy script.** The automation is CLI-only (`deploy-all.sh`). Each individual phase is documented with PowerShell equivalents in the phase docs, but the master automation script uses bash and Azure CLI throughout.
 
 ---
 
-## Teardown
+## Cost at This Phase
 
-```bash
-./teardown/destroy-all.sh
-```
+Running the deploy script and tearing down in the same session costs effectively **$0** — all resources fall within free tier allowances and the session duration is well under the monthly free hour limits.
 
-This removes all QCB lab resources. The script is in [teardown/destroy-all.sh](../teardown/destroy-all.sh).
+| Session component | Cost |
+|---|---|
+| ~20 min Linux B1s | ✅ Free tier |
+| ~20 min Windows B1s | ✅ Free tier |
+| Storage operations | ✅ Free tier |
+| Key Vault operations | ✅ Free tier |
+| Log Analytics ingestion | ✅ Free tier (negligible data) |
+| Public IPs | ✅ $0 — none created |
 
 ---
 

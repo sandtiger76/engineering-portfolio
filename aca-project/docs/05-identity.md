@@ -4,7 +4,8 @@
 |---|---|
 | **Phase** | 05 |
 | **Topic** | Identity & Access Management |
-| **Services** | RBAC, Managed Identities, Entra ID |
+| **AZ-104 Domain** | Manage Azure Identities and Governance |
+| **Services** | Managed Identities, RBAC |
 | **Est. Cost** | None — RBAC and managed identities are free |
 
 ---
@@ -17,151 +18,136 @@
 
 ## What We're Building
 
-Role-based access control (RBAC) assignments on QCB's resource group, and a system-assigned managed identity on the web VM so it can authenticate to other Azure services without any credentials stored anywhere.
+A system-assigned managed identity on `vm-web`, and a role assignment that grants it `Storage Blob Data Reader` on `stqcblab`. This allows the web VM to read blobs from storage using its identity — no credentials stored anywhere.
+
+This phase maps to the **Manage Azure Identities and Governance** domain of AZ-104, specifically: configuring managed identities, assigning RBAC roles at resource scope, understanding the difference between system-assigned and user-assigned identities, and retrieving principal IDs for role assignment.
 
 ---
 
 ## The Technology
 
-### Entra ID (formerly Azure Active Directory)
-
-Entra ID is Azure's identity platform. Every user, service principal, and managed identity that interacts with Azure is authenticated through Entra ID. It's the foundation that RBAC sits on top of.
-
-You don't manage Entra ID directly in this project — it's the background system that makes identity work.
-
-### Role-Based Access Control (RBAC)
-
-RBAC is how Azure controls who can do what to which resources. It has three components:
-
-- **Security principal** — who: a user, group, service principal, or managed identity
-- **Role definition** — what: a set of permissions (e.g. "Reader" = read-only, "Contributor" = read/write, "Owner" = full control)
-- **Scope** — where: management group, subscription, resource group, or individual resource
-
-When you assign a role, you're saying: *this principal can do these actions at this scope.*
-
-**Built-in roles you'll use most:**
-
-| Role | Permissions |
-|------|------------|
-| Owner | Full control, including assigning roles to others |
-| Contributor | Create and manage resources, cannot assign roles |
-| Reader | View resources only |
-| Storage Blob Data Contributor | Read/write/delete blob data |
-| Key Vault Secrets User | Read secrets from Key Vault |
-
 ### Managed Identity
 
-A managed identity is an identity in Entra ID that is automatically managed by Azure — you don't create passwords or rotate keys. You assign it to a resource (like a VM), and that resource can then authenticate to other Azure services using that identity.
+A managed identity is an identity in Entra ID (Azure Active Directory) that Azure manages automatically — no passwords, no keys, no rotation required. You assign it to a resource (like a VM), and that resource can request access tokens to authenticate to other Azure services.
 
 There are two types:
 
-- **System-assigned:** tied to a single resource, deleted when the resource is deleted
-- **User-assigned:** independent resource, can be assigned to multiple VMs or services
+| Type | Behaviour |
+|---|---|
+| System-assigned | Tied to one resource. Created and deleted with the resource. Used in this project. |
+| User-assigned | Independent resource. Can be assigned to multiple VMs or services. |
 
-**Why this matters:** Instead of storing a password or connection string in your VM to access a storage account, the VM authenticates using its managed identity. No credentials, no secrets to rotate, no accidental exposure in code.
+This project uses **system-assigned** — it is enabled on `vm-web` and Azure creates a corresponding service principal in Entra ID automatically.
 
----
+### RBAC
 
-## Step 1 — View Current Role Assignments
+Role-Based Access Control (RBAC) is how Azure controls who can do what to which resources. An assignment has three parts:
 
-```bash
-az role assignment list \
-  --resource-group qcb-rg-lab \
-  --output table
-```
+- **Security principal** — who (a user, group, service principal, or managed identity)
+- **Role definition** — what (a set of permissions)
+- **Scope** — where (management group, subscription, resource group, or individual resource)
 
-```powershell
-Get-AzRoleAssignment -ResourceGroupName "qcb-rg-lab" | Format-Table DisplayName, RoleDefinitionName, Scope
-```
+In this phase, `vm-web`'s managed identity is assigned `Storage Blob Data Reader` scoped to the `stqcblab` storage account resource — the narrowest possible scope.
 
 ---
 
-## Step 2 — Assign a Reader Role to a User
+## Step 1 — Enable Managed Identity on vm-web
 
-This demonstrates how you'd give a colleague read-only access to the resource group.
+### Azure Portal
 
-```bash
-# Get your own user object ID first
-az ad signed-in-user show --query id --output tsv
+1. Open **vm-web**
+2. In the left menu, click **Security → Identity**
+3. Under the **System assigned** tab, set **Status** to **On**
+4. Click **Save**
+5. Click **Yes** on the confirmation dialog
+6. Note the **Object (principal) ID** — you will need it for role assignment
 
-# Assign Reader role (replace <object-id> with the output above)
-az role assignment create \
-  --assignee "<object-id>" \
-  --role "Reader" \
-  --scope "/subscriptions/<sub-id>/resourceGroups/qcb-rg-lab"
-```
-
-```powershell
-$userId = (Get-AzADUser -SignedIn).Id
-
-New-AzRoleAssignment `
-  -ObjectId $userId `
-  -RoleDefinitionName "Reader" `
-  -ResourceGroupName "qcb-rg-lab"
-```
-
-> This is demonstrating the pattern. In practice you'd assign this to a colleague's object ID, not your own.
-
----
-
-## Step 3 — Enable Managed Identity on the Web VM
+### Azure CLI
 
 ```bash
 az vm identity assign \
   --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01
+  --name vm-web
 ```
 
+### PowerShell
+
 ```powershell
-$vm = Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "qcb-vm-web-01"
+$vm = Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "vm-web"
 Update-AzVM -ResourceGroupName "qcb-rg-lab" -VM $vm -IdentityType SystemAssigned
 ```
 
-### What This Does
-
-Enables a system-assigned managed identity on the VM. Azure creates an identity in Entra ID and associates it with the VM. The VM can now request tokens from the Azure Instance Metadata Service (IMDS) endpoint — a local API available inside every VM at `http://169.254.169.254`.
-
 ---
 
-## Step 4 — Get the Managed Identity's Object ID
+## Step 2 — Retrieve the Principal ID
+
+### Azure Portal
+
+The Object (principal) ID is shown on the **Identity** blade after enabling the managed identity.
+
+### Azure CLI
 
 ```bash
 az vm show \
   --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
+  --name vm-web \
   --query identity.principalId \
   --output tsv
 ```
 
-```powershell
-(Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "qcb-vm-web-01").Identity.PrincipalId
-```
+From the lab run, this returned: `ce4e1613-36a7-44f5-91c8-1372f3892186`
 
-Save this — you'll use it in Phase 06 to grant Key Vault access to the VM.
+### PowerShell
+
+```powershell
+(Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "vm-web").Identity.PrincipalId
+```
 
 ---
 
-## Step 5 — Assign Storage Blob Reader to the Managed Identity
+## Step 3 — Assign Storage Blob Data Reader to the Identity
 
-This allows the web VM to read blobs from the storage account using its identity — no keys required.
+### Azure Portal
+
+1. Open **stqcblab**
+2. In the left menu, click **Access Control (IAM)**
+3. Click **+ Add → Add role assignment**
+4. Select role: **Storage Blob Data Reader** → click **Next**
+5. **Assign access to:** Managed identity
+6. Click **+ Select members**:
+   - **Managed identity:** Virtual machine
+   - Select **vm-web**
+7. Click **Select**, then **Review + assign**
+
+### Azure CLI
 
 ```bash
 # Get the storage account resource ID
-STORAGE_ID=$(az storage account show --name qcbstorage01 --resource-group qcb-rg-lab --query id --output tsv)
+STORAGE_ID=$(az storage account show \
+  --name stqcblab \
+  --resource-group qcb-rg-lab \
+  --query id \
+  --output tsv)
 
-# Get the VM's managed identity principal ID
-VM_IDENTITY=$(az vm show --resource-group qcb-rg-lab --name qcb-vm-web-01 --query identity.principalId --output tsv)
+# Get the VM managed identity principal ID
+VM_IDENTITY=$(az vm show \
+  --resource-group qcb-rg-lab \
+  --name vm-web \
+  --query identity.principalId \
+  --output tsv)
 
-# Assign role
+# Assign the role
 az role assignment create \
   --assignee "$VM_IDENTITY" \
   --role "Storage Blob Data Reader" \
   --scope "$STORAGE_ID"
 ```
 
+### PowerShell
+
 ```powershell
-$storageId = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "qcbstorage01").Id
-$vmIdentity = (Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "qcb-vm-web-01").Identity.PrincipalId
+$storageId  = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "stqcblab").Id
+$vmIdentity = (Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "vm-web").Identity.PrincipalId
 
 New-AzRoleAssignment `
   -ObjectId $vmIdentity `
@@ -171,44 +157,75 @@ New-AzRoleAssignment `
 
 ---
 
-## Step 6 — Verify the Assignment
+## Verification
+
+### Azure Portal
+
+1. Open **stqcblab → Access Control (IAM) → Role assignments**
+2. Filter by **Storage Blob Data Reader** — confirm `vm-web` appears
+
+### Azure CLI
 
 ```bash
+# Show identity on the VM
+az vm show \
+  --resource-group qcb-rg-lab \
+  --name vm-web \
+  --query "identity" \
+  --output json
+
+# List role assignments for the identity
+# Note: --all flag is required to return resource-scoped assignments
 az role assignment list \
-  --assignee "$VM_IDENTITY" \
+  --assignee $(az vm show --resource-group qcb-rg-lab --name vm-web \
+    --query identity.principalId --output tsv) \
+  --all \
   --output table
 ```
 
+### PowerShell
+
 ```powershell
-Get-AzRoleAssignment -ObjectId $vmIdentity | Format-Table RoleDefinitionName, Scope
-```
+$vmIdentity = (Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "vm-web").Identity.PrincipalId
 
----
-
-## Verification
-
-```bash
-# Confirm managed identity is enabled
-az vm show --resource-group qcb-rg-lab --name qcb-vm-web-01 --query identity --output json
-
-# List all role assignments on the resource group
-az role assignment list --resource-group qcb-rg-lab --output table
+Get-AzRoleAssignment -ObjectId $vmIdentity | `
+  Format-Table RoleDefinitionName, Scope
 ```
 
 ---
 
 ## Gotchas & Lessons Learned
 
-> *This section is updated as the phase is implemented.*
+> *Verified: 2026-03-11*
+
+**1. `az role assignment list` without `--all` returns empty results even when assignments exist.** The default scope filter only checks subscription-level assignments. Resource-scoped assignments (like this one, scoped to a storage account) are invisible without `--all`. Always use `--all` when verifying role assignments in this project.
+
+**2. The principal ID in role assignment output differs from the VM's `identity.principalId`.** The role assignment record stores an internal object ID that may differ from the `principalId` returned by `az vm show`. This is a known display artifact in Azure CLI. The assignments are functionally correct — verify by checking the scope and role definition name, not just the principal ID column.
+
+**3. Role propagation takes 1–2 minutes.** After creating a role assignment, there is a delay before it takes effect across Azure's distributed authorization layer. This is why Phase 06 includes a `sleep 30` before attempting to use the Key Vault role — the same principle applies here.
+
+**4. System-assigned identity is deleted when the VM is deleted.** If you delete `vm-web` and recreate it, a new principal ID is generated. Any role assignments made against the old principal ID become orphaned and must be recreated.
+
+**5. Transient ARM error on first run affected Phase 05.** The first script run exited with code 3 in Phase 04, but the `az vm identity assign` command from Phase 05 had already executed successfully before the failure. When the script was re-run, the idempotent identity assign command succeeded again without issue.
+
+---
+
+## Cost at This Phase
+
+**Zero** — managed identities and RBAC role assignments are free.
 
 ---
 
 ## Teardown — This Phase Only
 
-Role assignments are automatically removed when you delete the resource group. No separate cleanup needed.
+Role assignments are automatically removed when the resource group is deleted.
 
 ```bash
 az group delete --name qcb-rg-lab --yes --no-wait
+```
+
+```powershell
+Remove-AzResourceGroup -Name "qcb-rg-lab" -Force -AsJob
 ```
 
 For the full project teardown, see [teardown/destroy-all.sh](../teardown/destroy-all.sh).

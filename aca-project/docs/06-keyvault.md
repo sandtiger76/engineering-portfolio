@@ -4,8 +4,9 @@
 |---|---|
 | **Phase** | 06 |
 | **Topic** | Key Vault |
+| **AZ-104 Domain** | Monitor and Maintain Azure Resources |
 | **Services** | Azure Key Vault, Secrets, Managed Identity Access |
-| **Est. Cost** | Very low — first 10,000 operations/month free |
+| **Est. Cost** | Free tier — first 10,000 operations/month |
 
 ---
 
@@ -17,7 +18,9 @@
 
 ## What We're Building
 
-An Azure Key Vault (`qcb-kv-lab`) to store secrets — specifically the VM admin password that we hardcoded in Phase 03. We'll then grant the web VM's managed identity permission to read secrets from the vault, so applications running on that VM can retrieve credentials at runtime without any secrets stored in code or config files.
+An Azure Key Vault (`qcb-kv-lab`) using RBAC authorisation. We store the VM admin password as a secret, grant the current user rights to manage secrets, and grant `vm-web`'s managed identity the `Key Vault Secrets User` role so it can retrieve secrets at runtime — without any credentials stored on the VM.
+
+This phase maps to the **Monitor and Maintain Azure Resources** domain of AZ-104, specifically: configuring Key Vault, managing secrets, and configuring access to Key Vault using RBAC.
 
 ---
 
@@ -25,41 +28,54 @@ An Azure Key Vault (`qcb-kv-lab`) to store secrets — specifically the VM admin
 
 ### Azure Key Vault
 
-Key Vault is a managed service for storing and controlling access to secrets, encryption keys, and certificates. It solves one of the most common security problems: credentials and secrets ending up hardcoded in code, config files, scripts, or environment variables — where they get committed to git, emailed around, or left on servers.
+Key Vault is a managed service for storing secrets, encryption keys, and certificates. It solves the most common security problem in cloud infrastructure: credentials ending up hardcoded in code, config files, or scripts where they get committed to git, logged, or accidentally exposed.
 
-Key Vault centralises secrets behind Entra ID authentication and RBAC. Nothing accesses a secret without being explicitly authorised.
-
-**Three types of objects Key Vault manages:**
+**Three types of objects:**
 
 | Type | What it stores |
-|------|---------------|
+|---|---|
 | Secrets | Passwords, connection strings, API keys |
-| Keys | Cryptographic keys for encryption/signing |
+| Keys | Cryptographic keys for encryption and signing |
 | Certificates | TLS/SSL certificates with automatic renewal |
 
-For this project we focus on **Secrets**.
+This project uses **Secrets** only.
 
 ### Access Models
 
-Key Vault has two access models:
+Key Vault supports two access models:
 
-- **Vault access policy** — the older model, permissions set per-identity on the vault itself
-- **RBAC** — the newer, recommended model, uses standard Azure role assignments
+| Model | Description |
+|---|---|
+| Vault access policy | Older model, permissions set per-identity directly on the vault |
+| RBAC | Newer, recommended model — uses standard Azure role assignments |
 
-We use **RBAC** — it's consistent with the rest of the project and is Microsoft's recommended approach for new deployments.
+This project uses **RBAC** (`--enable-rbac-authorization true`). It is consistent with how all other access is managed and is Microsoft's recommended approach for new deployments.
 
 ### Why Not Just Use Environment Variables?
 
-Environment variables on a VM are visible to anyone with access to that VM — and they tend to get logged, exported, or accidentally exposed. Key Vault secrets are:
-
-- Never exposed in logs
-- Accessed only by authorised identities
-- Versioned — old versions are retained
-- Audited — every access is logged
+Environment variables on a VM are visible to anyone with access to that VM, tend to get logged, and are easily accidentally exposed. Key Vault secrets are never exposed in logs, are accessed only by authorised identities, are versioned, and every access is audited.
 
 ---
 
 ## Step 1 — Create the Key Vault
+
+### Azure Portal
+
+1. Search for **Key vaults** and select it
+2. Click **+ Create**
+3. Fill in the **Basics** tab:
+   - **Subscription:** QCB PAYG PersonalCloud
+   - **Resource group:** `qcb-rg-lab`
+   - **Key vault name:** `qcb-kv-lab`
+   - **Region:** East US
+   - **Pricing tier:** Standard
+4. Click **Next: Access configuration**
+   - **Permission model:** Azure role-based access control
+5. Click **Next: Tags**:
+   - Add `Project=QCBLab` and `Environment=Lab`
+6. Click **Review + create**, then **Create**
+
+### Azure CLI
 
 ```bash
 az keyvault create \
@@ -70,6 +86,8 @@ az keyvault create \
   --tags Project=QCBLab Environment=Lab
 ```
 
+### PowerShell
+
 ```powershell
 New-AzKeyVault `
   -ResourceGroupName "qcb-rg-lab" `
@@ -79,22 +97,33 @@ New-AzKeyVault `
   -Tag @{Project="QCBLab"; Environment="Lab"}
 ```
 
-> `--enable-rbac-authorization true` uses the RBAC model instead of vault access policies.
-
-> **Gotcha:** Key Vault names must be globally unique, 3–24 characters. If `qcb-kv-lab` is taken, add a number suffix.
-
 ---
 
-## Step 2 — Grant Yourself Secrets Access
+## Step 2 — Grant Your User Account Secrets Access
 
-Before you can add secrets, your user account needs the `Key Vault Secrets Officer` role:
+Before storing a secret, your user account needs the `Key Vault Secrets Officer` role on the vault.
+
+### Azure Portal
+
+1. Open **qcb-kv-lab → Access Control (IAM)**
+2. Click **+ Add → Add role assignment**
+3. Select **Key Vault Secrets Officer** → click **Next**
+4. **Assign access to:** User, group, or service principal
+5. Click **+ Select members** → search for your account → click **Select**
+6. Click **Review + assign**
+
+### Azure CLI
 
 ```bash
-# Get your user object ID
-USER_ID=$(az ad signed-in-user show --query id --output tsv)
-
 # Get Key Vault resource ID
-KV_ID=$(az keyvault show --name qcb-kv-lab --resource-group qcb-rg-lab --query id --output tsv)
+KV_ID=$(az keyvault show \
+  --name qcb-kv-lab \
+  --resource-group qcb-rg-lab \
+  --query id \
+  --output tsv)
+
+# Get current signed-in user object ID
+USER_ID=$(az ad signed-in-user show --query id --output tsv)
 
 # Assign role
 az role assignment create \
@@ -103,9 +132,11 @@ az role assignment create \
   --scope "$KV_ID"
 ```
 
+### PowerShell
+
 ```powershell
+$kvId   = (Get-AzKeyVault -VaultName "qcb-kv-lab" -ResourceGroupName "qcb-rg-lab").ResourceId
 $userId = (Get-AzADUser -SignedIn).Id
-$kvId = (Get-AzKeyVault -VaultName "qcb-kv-lab" -ResourceGroupName "qcb-rg-lab").ResourceId
 
 New-AzRoleAssignment `
   -ObjectId $userId `
@@ -113,45 +144,89 @@ New-AzRoleAssignment `
   -Scope $kvId
 ```
 
-> **Gotcha:** Role propagation takes 1–2 minutes. If you immediately try to add a secret and get a `403 Forbidden`, wait and retry.
+---
+
+## Step 3 — Wait for Role Propagation
+
+```bash
+# Required — role assignments take time to propagate through Azure's auth layer
+# Without this wait, az keyvault secret set returns a 403 even though the role was just assigned
+echo "Waiting 30s for role propagation..."
+sleep 30
+```
+
+> This `sleep 30` is in the deploy script deliberately. See Gotchas for why it is necessary.
 
 ---
 
-## Step 3 — Store the VM Admin Password as a Secret
+## Step 4 — Store the VM Admin Password as a Secret
+
+### Azure Portal
+
+1. Open **qcb-kv-lab → Objects → Secrets**
+2. Click **+ Generate/Import**
+3. Fill in:
+   - **Upload options:** Manual
+   - **Name:** `vm-admin-password`
+   - **Secret value:** `QCBLab2024!Secure`
+4. Click **Create**
+
+### Azure CLI
 
 ```bash
 az keyvault secret set \
   --vault-name qcb-kv-lab \
   --name "vm-admin-password" \
-  --value "<YourVMPassword>"
+  --value "QCBLab2024!Secure"
 ```
 
+### PowerShell
+
 ```powershell
-$secret = ConvertTo-SecureString "<YourVMPassword>" -AsPlainText -Force
+$secret = ConvertTo-SecureString "QCBLab2024!Secure" -AsPlainText -Force
 Set-AzKeyVaultSecret -VaultName "qcb-kv-lab" -Name "vm-admin-password" -SecretValue $secret
 ```
 
 ---
 
-## Step 4 — Grant the Web VM Managed Identity Access to Secrets
+## Step 5 — Grant vm-web Managed Identity Access to Secrets
+
+### Azure Portal
+
+1. Open **qcb-kv-lab → Access Control (IAM)**
+2. Click **+ Add → Add role assignment**
+3. Select **Key Vault Secrets User** → click **Next**
+4. **Assign access to:** Managed identity
+5. Click **+ Select members** → Managed identity: Virtual machine → select `vm-web`
+6. Click **Select**, then **Review + assign**
+
+### Azure CLI
 
 ```bash
-# Get VM managed identity principal ID
-VM_IDENTITY=$(az vm show --resource-group qcb-rg-lab --name qcb-vm-web-01 --query identity.principalId --output tsv)
+# VM_IDENTITY was set in Phase 05 — re-retrieve if running standalone
+VM_IDENTITY=$(az vm show \
+  --resource-group qcb-rg-lab \
+  --name vm-web \
+  --query identity.principalId \
+  --output tsv)
 
-# Get Key Vault resource ID
-KV_ID=$(az keyvault show --name qcb-kv-lab --resource-group qcb-rg-lab --query id --output tsv)
+KV_ID=$(az keyvault show \
+  --name qcb-kv-lab \
+  --resource-group qcb-rg-lab \
+  --query id \
+  --output tsv)
 
-# Assign Key Vault Secrets User role
 az role assignment create \
   --assignee "$VM_IDENTITY" \
   --role "Key Vault Secrets User" \
   --scope "$KV_ID"
 ```
 
+### PowerShell
+
 ```powershell
-$vmIdentity = (Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "qcb-vm-web-01").Identity.PrincipalId
-$kvId = (Get-AzKeyVault -VaultName "qcb-kv-lab" -ResourceGroupName "qcb-rg-lab").ResourceId
+$vmIdentity = (Get-AzVM -ResourceGroupName "qcb-rg-lab" -Name "vm-web").Identity.PrincipalId
+$kvId       = (Get-AzKeyVault -VaultName "qcb-kv-lab" -ResourceGroupName "qcb-rg-lab").ResourceId
 
 New-AzRoleAssignment `
   -ObjectId $vmIdentity `
@@ -161,70 +236,78 @@ New-AzRoleAssignment `
 
 ---
 
-## Step 5 — Test Secret Retrieval from the VM
-
-Using `run-command`, we simulate what an application running on the VM would do — retrieve the secret using the VM's managed identity:
-
-```bash
-az vm run-command invoke \
-  --resource-group qcb-rg-lab \
-  --name qcb-vm-web-01 \
-  --command-id RunShellScript \
-  --scripts "
-    TOKEN=\$(curl -s 'http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https://vault.azure.net' -H 'Metadata:true' | python3 -c 'import sys,json; print(json.load(sys.stdin)[\"access_token\"])')
-    SECRET=\$(curl -s 'https://qcb-kv-lab.vault.azure.net/secrets/vm-admin-password?api-version=7.0' -H \"Authorization: Bearer \$TOKEN\" | python3 -c 'import sys,json; print(json.load(sys.stdin)[\"value\"])')
-    echo \"Secret retrieved successfully: \${#SECRET} characters\"
-  "
-```
-
-### What This Does
-
-The script runs inside the VM and:
-1. Calls the IMDS endpoint (local to every Azure VM) to get an access token for Key Vault
-2. Uses that token to call the Key Vault REST API
-3. Prints the secret length (not the value) to confirm retrieval worked
-
-No credentials stored anywhere. The VM authenticates using its managed identity automatically.
-
----
-
 ## Verification
 
+### Azure Portal
+
+1. Open **qcb-kv-lab → Objects → Secrets** — confirm `vm-admin-password` exists
+2. Open **qcb-kv-lab → Access Control (IAM) → Role assignments** — confirm both role assignments
+
+### Azure CLI
+
 ```bash
-# List secrets (names only, not values)
-az keyvault secret list --vault-name qcb-kv-lab --output table
+az keyvault show \
+  --name qcb-kv-lab \
+  --resource-group qcb-rg-lab \
+  --query "{Name:name, RBAC:properties.enableRbacAuthorization}" \
+  --output table
 
-# Show secret metadata (not value)
-az keyvault secret show --vault-name qcb-kv-lab --name vm-admin-password --query "{Name:name, Created:attributes.created, Enabled:attributes.enabled}" --output table
+az keyvault secret list \
+  --vault-name qcb-kv-lab \
+  --output table
+```
 
-# List role assignments on the vault
-az role assignment list --scope $(az keyvault show --name qcb-kv-lab --resource-group qcb-rg-lab --query id --output tsv) --output table
+### PowerShell
+
+```powershell
+Get-AzKeyVault -VaultName "qcb-kv-lab" -ResourceGroupName "qcb-rg-lab" | `
+  Select-Object VaultName, EnableRbacAuthorization
+
+Get-AzKeyVaultSecret -VaultName "qcb-kv-lab" | Format-Table Name, Enabled, Created
 ```
 
 ---
 
 ## Gotchas & Lessons Learned
 
-> *This section is updated as the phase is implemented.*
+> *Verified: 2026-03-11*
+
+**1. The 30-second `sleep` for role propagation is necessary and confirmed.** Without it, `az keyvault secret set` returns a `403 Forbidden` even though the `Key Vault Secrets Officer` role was just assigned. Azure's distributed authorisation layer takes time — typically 15–60 seconds — to propagate new role assignments. The deploy script waits 30 seconds, which was sufficient in testing.
+
+**2. Key Vault soft-delete means the vault name is reserved for 90 days after deletion.** If you delete `qcb-kv-lab` without purging it, the name cannot be reused for 90 days. The teardown script (`destroy-all.sh`) handles this by explicitly deleting and then purging the vault before deleting the resource group.
+
+**3. Key Vault names must be globally unique, 3–24 characters.** Alphanumeric and hyphens only. If `qcb-kv-lab` is taken in another subscription, append a suffix.
+
+**4. RBAC mode vs vault access policies — they are mutually exclusive.** `--enable-rbac-authorization true` sets the vault to RBAC mode. If you attempt to use `az keyvault set-policy` on an RBAC-mode vault, the command succeeds but has no effect — access is controlled entirely through role assignments.
+
+**5. `az ad signed-in-user show` retrieves your user object ID for role assignment.** This is the correct way to get your own object ID in a script context. Hard-coding object IDs in scripts is fragile — always retrieve them dynamically.
+
+---
+
+## Cost at This Phase
+
+| Resource | Free Tier |
+|---|---|
+| qcb-kv-lab (Standard) | ✅ First 10,000 operations/month |
+| Secret storage | ✅ Included in operation allowance |
+| Role assignments | ✅ Free |
 
 ---
 
 ## Teardown — This Phase Only
 
-Key Vault has soft-delete enabled by default — deleted vaults are retained for 90 days and the name cannot be reused during that period. To permanently delete (purge):
+Key Vault requires an explicit purge to release the name immediately:
 
 ```bash
-az group delete --name qcb-rg-lab --yes --no-wait
-
-# If you need to reuse the vault name, purge it after deletion:
+az keyvault delete --name qcb-kv-lab --resource-group qcb-rg-lab
 az keyvault purge --name qcb-kv-lab --location eastus
+az group delete --name qcb-rg-lab --yes --no-wait
 ```
 
 ```powershell
-Remove-AzResourceGroup -Name "qcb-rg-lab" -Force -AsJob
-
-# Purge if needed:
+Remove-AzKeyVault -VaultName "qcb-kv-lab" -ResourceGroupName "qcb-rg-lab" -Force
 Remove-AzKeyVault -VaultName "qcb-kv-lab" -Location "eastus" -InRemovedState -Force
+Remove-AzResourceGroup -Name "qcb-rg-lab" -Force -AsJob
 ```
 
 For the full project teardown, see [teardown/destroy-all.sh](../teardown/destroy-all.sh).

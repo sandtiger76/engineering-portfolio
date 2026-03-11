@@ -4,8 +4,9 @@
 |---|---|
 | **Phase** | 04 |
 | **Topic** | Azure Storage |
-| **Services** | Storage Account, Blob Storage, File Share, Lifecycle Policies |
-| **Est. Cost** | Very low — LRS storage, minimal data |
+| **AZ-104 Domain** | Implement and Manage Storage |
+| **Services** | Storage Account, Blob Containers |
+| **Est. Cost** | Free tier — first 5 GB/month |
 
 ---
 
@@ -17,7 +18,9 @@
 
 ## What We're Building
 
-An Azure Storage Account (`qcbstorage01`) with a blob container for unstructured data and a file share for shared storage. We'll apply a lifecycle policy that automatically moves old blobs to a cheaper tier, and lock down the account so it has no public internet access.
+A storage account (`stqcblab`) with two blob containers — `uploads` and `backups`. The account is configured with TLS 1.2 enforcement, no public blob access, and identity-based authentication rather than storage keys.
+
+This phase maps to the **Implement and Manage Storage** domain of AZ-104, specifically: creating and configuring storage accounts, configuring blob storage, understanding redundancy options, and securing storage with access controls and TLS enforcement.
 
 ---
 
@@ -25,194 +28,182 @@ An Azure Storage Account (`qcbstorage01`) with a blob container for unstructured
 
 ### Storage Account
 
-An Azure Storage Account is the top-level container for all Azure Storage services. It's the namespace — the account name becomes part of every URL for data stored inside it (e.g. `https://qcbstorage01.blob.core.windows.net`).
+A storage account is the top-level namespace for all Azure Storage services. The account name becomes part of every URL for data stored inside it (e.g. `https://stqcblab.blob.core.windows.net`). Settings for redundancy, performance, and access are configured at the account level.
 
-Everything flows from the storage account: blob storage, file shares, queues, and tables all live inside one. You set redundancy, performance tier, and access settings at the account level.
+### Redundancy
 
-### Redundancy Options
-
-| Option | What it means | Cost |
-|--------|--------------|------|
-| LRS | 3 copies in one datacentre | Cheapest |
+| Option | Description | Cost |
+|---|---|---|
+| LRS | 3 copies within one datacentre | Cheapest |
 | ZRS | 3 copies across availability zones | Mid |
 | GRS | LRS + async copy to a second region | Higher |
 | GZRS | ZRS + async copy to a second region | Highest |
 
-We use **LRS** (Locally Redundant Storage) — 3 copies within a single datacentre. Sufficient for a lab, lowest cost.
+This project uses **Standard_LRS** — three local copies, lowest cost, sufficient for a lab.
 
 ### Blob Storage
 
-Blob (Binary Large Object) storage is for unstructured data — files, images, backups, logs. Data is stored in **containers** (like folders) and accessed via HTTP/HTTPS.
+Blob storage is for unstructured data — files, images, backups, logs. Data is organised in **containers** and accessed over HTTPS. Containers in this project:
 
-Blobs have three **access tiers:**
+| Container | Purpose |
+|---|---|
+| `uploads` | Incoming files from applications |
+| `backups` | Backup data |
 
-| Tier | Use case | Cost to store | Cost to access |
-|------|----------|--------------|----------------|
-| Hot | Frequently accessed | Higher | Lower |
-| Cool | Infrequently accessed | Lower | Higher |
-| Archive | Rarely accessed | Lowest | Highest + rehydration delay |
+### `--auth-mode login`
 
-### File Share
-
-Azure Files provides a fully managed SMB file share in the cloud. VMs can mount it like a network drive. It's the Azure equivalent of a traditional file server.
-
-### Lifecycle Policies
-
-A lifecycle policy is a rule set that automatically transitions blobs between tiers or deletes them based on age. For example: move to Cool after 30 days, move to Archive after 90 days, delete after 365 days.
+The deploy script uses `--auth-mode login` when creating containers. This authenticates using your Entra ID identity rather than a storage account key — the secure, recommended approach. It requires the caller to have an appropriate RBAC role on the storage account (e.g. `Storage Blob Data Contributor`).
 
 ---
 
 ## Step 1 — Create the Storage Account
 
-```bash
-az storage account create \
-  --resource-group qcb-rg-lab \
-  --name qcbstorage01 \
-  --sku Standard_LRS \
-  --kind StorageV2 \
-  --access-tier Hot \
-  --allow-blob-public-access false \
-  --tags Project=QCBLab Environment=Lab
-```
+### Azure Portal
 
-```powershell
-New-AzStorageAccount `
-  -ResourceGroupName "qcb-rg-lab" `
-  -Name "qcbstorage01" `
-  -Location "eastus" `
-  -SkuName "Standard_LRS" `
-  -Kind "StorageV2" `
-  -AccessTier "Hot" `
-  -AllowBlobPublicAccess $false `
-  -Tag @{Project="QCBLab"; Environment="Lab"}
-```
-
-> **Gotcha:** Storage account names must be globally unique across all of Azure, 3–24 characters, lowercase letters and numbers only — no hyphens. If `qcbstorage01` is taken, try `qcbstorage02` etc.
-
----
-
-## Step 2 — Create a Blob Container
-
-```bash
-az storage container create \
-  --account-name qcbstorage01 \
-  --name qcb-data \
-  --auth-mode login
-```
-
-```powershell
-$ctx = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "qcbstorage01").Context
-New-AzStorageContainer -Name "qcb-data" -Context $ctx
-```
-
-> `--auth-mode login` uses your Entra ID credentials rather than a storage key — the preferred approach.
-
----
-
-## Step 3 — Upload a Test Blob
-
-```bash
-echo "QCB Technologies test file" > /tmp/qcb-test.txt
-
-az storage blob upload \
-  --account-name qcbstorage01 \
-  --container-name qcb-data \
-  --name qcb-test.txt \
-  --file /tmp/qcb-test.txt \
-  --auth-mode login
-```
-
-```powershell
-$ctx = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "qcbstorage01").Context
-Set-AzStorageBlobContent -Container "qcb-data" -File "/tmp/qcb-test.txt" -Blob "qcb-test.txt" -Context $ctx
-```
-
----
-
-## Step 4 — Create a File Share
-
-```bash
-az storage share create \
-  --account-name qcbstorage01 \
-  --name qcb-fileshare \
-  --quota 1 \
-  --auth-mode login
-```
-
-```powershell
-$ctx = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "qcbstorage01").Context
-New-AzStorageShare -Name "qcb-fileshare" -Context $ctx
-```
-
-> `--quota 1` sets a 1GB quota. Increase as needed.
-
----
-
-## Step 5 — Apply a Lifecycle Policy
+1. Search for **Storage accounts** and select it
+2. Click **+ Create**
+3. Fill in the **Basics** tab:
+   - **Subscription:** QCB PAYG PersonalCloud
+   - **Resource group:** `qcb-rg-lab`
+   - **Storage account name:** `stqcblab`
+   - **Region:** East US
+   - **Performance:** Standard
+   - **Redundancy:** Locally-redundant storage (LRS)
+4. Click **Next: Advanced**
+   - **Minimum TLS version:** Version 1.2
+   - **Allow Blob public access:** Disabled
+5. Click **Next: Tags**
+   - Add `Project=QCBLab` and `Environment=Lab`
+6. Click **Review + create**, then **Create**
 
 ### Azure CLI
 
 ```bash
-az storage account management-policy create \
-  --account-name qcbstorage01 \
+az storage account create \
   --resource-group qcb-rg-lab \
-  --policy '{
-    "rules": [
-      {
-        "name": "MoveToCool",
-        "enabled": true,
-        "type": "Lifecycle",
-        "definition": {
-          "filters": {"blobTypes": ["blockBlob"]},
-          "actions": {
-            "baseBlob": {
-              "tierToCool": {"daysAfterModificationGreaterThan": 30},
-              "tierToArchive": {"daysAfterModificationGreaterThan": 90},
-              "delete": {"daysAfterModificationGreaterThan": 365}
-            }
-          }
-        }
-      }
-    ]
-  }'
+  --name stqcblab \
+  --sku Standard_LRS \
+  --kind StorageV2 \
+  --access-tier Hot \
+  --allow-blob-public-access false \
+  --min-tls-version TLS1_2 \
+  --tags Project=QCBLab Environment=Lab
 ```
 
 ### PowerShell
 
 ```powershell
-$action = Add-AzStorageAccountManagementPolicyAction -BaseBlobAction TierToCool -daysAfterModificationGreaterThan 30
-$action = Add-AzStorageAccountManagementPolicyAction -InputObject $action -BaseBlobAction TierToArchive -daysAfterModificationGreaterThan 90
-$action = Add-AzStorageAccountManagementPolicyAction -InputObject $action -BaseBlobAction Delete -daysAfterModificationGreaterThan 365
+New-AzStorageAccount `
+  -ResourceGroupName "qcb-rg-lab" `
+  -Name "stqcblab" `
+  -Location "eastus" `
+  -SkuName "Standard_LRS" `
+  -Kind "StorageV2" `
+  -AccessTier "Hot" `
+  -AllowBlobPublicAccess $false `
+  -MinimumTlsVersion "TLS1_2" `
+  -Tag @{Project="QCBLab"; Environment="Lab"}
+```
 
-$filter = New-AzStorageAccountManagementPolicyFilter -BlobType blockBlob
-$rule = New-AzStorageAccountManagementPolicyRule -Name "MoveToCool" -Action $action -Filter $filter
+---
 
-Set-AzStorageAccountManagementPolicy -ResourceGroupName "qcb-rg-lab" -StorageAccountName "qcbstorage01" -Rule $rule
+## Step 2 — Create the Blob Containers
+
+### Azure Portal
+
+1. Open **stqcblab**
+2. In the left menu, click **Containers**
+3. Click **+ Container**:
+   - **Name:** `uploads`
+   - **Public access level:** Private (no anonymous access)
+   - Click **Create**
+4. Repeat for `backups`
+
+### Azure CLI
+
+```bash
+az storage container create \
+  --account-name stqcblab \
+  --name uploads \
+  --auth-mode login
+
+az storage container create \
+  --account-name stqcblab \
+  --name backups \
+  --auth-mode login
+```
+
+### PowerShell
+
+```powershell
+$ctx = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "stqcblab").Context
+
+New-AzStorageContainer -Name "uploads" -Context $ctx -Permission Off
+New-AzStorageContainer -Name "backups" -Context $ctx -Permission Off
 ```
 
 ---
 
 ## Verification
 
+### Azure Portal
+
+1. Open **stqcblab → Overview** — confirm SKU: Standard LRS, TLS: 1.2
+2. Click **Containers** — confirm both `uploads` and `backups` exist
+3. Click **Configuration** — confirm **Blob public access: Disabled**
+
+### Azure CLI
+
 ```bash
-# Confirm account exists
-az storage account show --name qcbstorage01 --resource-group qcb-rg-lab --output table
+az storage account show \
+  --name stqcblab \
+  --resource-group qcb-rg-lab \
+  --query "{Name:name, SKU:sku.name, TLS:minimumTlsVersion}" \
+  --output table
 
-# List containers
-az storage container list --account-name qcbstorage01 --auth-mode login --output table
+az storage container list \
+  --account-name stqcblab \
+  --auth-mode login \
+  --output table
+```
 
-# List blobs
-az storage blob list --account-name qcbstorage01 --container-name qcb-data --auth-mode login --output table
+### PowerShell
 
-# List file shares
-az storage share list --account-name qcbstorage01 --auth-mode login --output table
+```powershell
+Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "stqcblab" | `
+  Select-Object StorageAccountName, `
+    @{N="SKU";E={$_.Sku.Name}}, `
+    @{N="TLS";E={$_.MinimumTlsVersion}}
+
+$ctx = (Get-AzStorageAccount -ResourceGroupName "qcb-rg-lab" -Name "stqcblab").Context
+Get-AzStorageContainer -Context $ctx
 ```
 
 ---
 
 ## Gotchas & Lessons Learned
 
-> *This section is updated as the phase is implemented.*
+> *Verified: 2026-03-11*
+
+**1. Transient Azure API error on first run — exit code 3 at container creation.** The deploy script failed at the `az storage container create` step on the first run with exit code 3. This is a transient Azure ARM API error — there was no structural issue with the script or command. Re-running the script immediately succeeded cleanly. All `az` commands in the script are idempotent, so re-running is always safe.
+
+**2. `--min-tls-version` deprecation warning.** Azure CLI emits a general deprecation notice about the `--min-tls-version` flag, warning that `TLS1_0` and `TLS1_1` values are retired as of 2026-02-03. The script uses `TLS1_2` which is the current required value — the warning is informational only and does not affect the operation.
+
+**3. Storage account names must be globally unique, 3–24 characters, lowercase letters and numbers only.** No hyphens allowed — Azure enforces this. If `stqcblab` is already taken in another subscription, append a number suffix.
+
+**4. `--auth-mode login` requires an RBAC role on the storage account.** If you run the container create commands manually as a different user or service principal, ensure they have at least `Storage Blob Data Contributor` on the storage account. The deploy script runs as the signed-in user who created the account and inherits implicit access.
+
+**5. `--access-tier Hot` is the default for StorageV2 but specifying it explicitly is good practice.** It makes the intent clear in the script and prevents unexpected defaults if Microsoft changes behaviour in a future CLI version.
+
+---
+
+## Cost at This Phase
+
+| Resource | Free Tier |
+|---|---|
+| stqcblab (Standard LRS) | ✅ First 5 GB/month hot blob storage |
+| Container create operations | ✅ Covered under free tier operations |
+| Data transfer (intra-region) | ✅ Free |
 
 ---
 
@@ -220,6 +211,10 @@ az storage share list --account-name qcbstorage01 --auth-mode login --output tab
 
 ```bash
 az group delete --name qcb-rg-lab --yes --no-wait
+```
+
+```powershell
+Remove-AzResourceGroup -Name "qcb-rg-lab" -Force -AsJob
 ```
 
 For the full project teardown, see [teardown/destroy-all.sh](../teardown/destroy-all.sh).

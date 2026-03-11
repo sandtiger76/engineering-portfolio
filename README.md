@@ -2,7 +2,7 @@
 title: README
 description: 
 published: true
-date: 2026-03-11T09:25:36.092Z
+date: 2026-03-11T09:35:06.534Z
 tags: 
 editor: markdown
 dateCreated: 2026-02-28T17:36:23.462Z
@@ -49,7 +49,7 @@ Lab environments and fictional scenarios are clearly labelled throughout. No rea
 
 ### 📁 [m365-project](./m365-project/README.md) — Microsoft 365 Migration
 
-> *A complete end-to-end Microsoft 365 Business Premium migration for a fictional 15-person SME — from on-premises Windows Server and IMAP email, through to a full cloud platform with security hardening and infrastructure decommissioning.*
+> *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on‑premises, physical Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
 
 This project documents the kind of migration I’ve delivered in the real world for SME clients. The scenario uses a fictional company, but every step reflects what you’d encounter in a genuine engagement — including the often-overlooked realities like SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap Microsoft 365 doesn’t solve for you.
 

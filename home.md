@@ -1,134 +1,108 @@
-# Engineering Portfolio
+# Quintin Boshoff — Engineering Portfolio
 
-**Infrastructure · Automation · Cloud**
+**IT Infrastructure Engineer & Cloud Migration Consultant**
 
-A collection of real-world technical projects spanning on-premise infrastructure, cloud migration, and intelligent automation — built, documented, and maintained as a living record of hands-on engineering work.
+[LinkedIn](https://www.linkedin.com/in/quintin-boshoff-1905033/)
 
 ---
 
-## About
+## About This Portfolio
 
-Over a decade of IT experience across enterprise environments: workstation and server administration (Windows & Linux), Active Directory, large-scale storage infrastructure, data management, and cloud migrations. This portfolio bridges that foundation with modern engineering practices — automation pipelines, cloud architecture, and infrastructure-as-code.
+I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience spanning end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. Over the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation initiatives — guiding transitions from traditional on-premises environments to cloud-based platforms across multiple regions and sites.
 
-Each project here is fully documented, reproducible, and reflects the kind of work that gets things running (and keeps them that way).
+I've always been curious by nature and genuinely enjoy learning. As the technology landscape shifted toward cloud-native architectures, automation, and infrastructure as code, I decided to deliberately build on my existing skills — filling the gaps in modern tooling that my career hadn't naturally taken me to yet.
+
+This portfolio documents that journey. Each project represents work I have designed and implemented end-to-end, reflecting real-world decision-making as well as the outcomes and lessons learned along the way. It also reflects my use of modern tooling — including AI-assisted workflows — to accelerate learning, experimentation, and problem-solving.
+
+In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility as first-class deliverables.
+
+This portfolio is relevant to infrastructure engineering, cloud engineering, platform, and migration-focused roles. Whether you're a technical engineer, a hiring manager, or someone planning a similar project yourself — I hope you find something useful here.
+
+---
+
+## How This Portfolio Is Structured
+
+Each project has two layers of documentation:
+
+- **A plain-English summary** — what the project is, why it exists, and what it achieves, written for any audience
+- **Detailed technical documentation** — implementation steps, decisions, and rationale for engineers and hiring managers who want to go deeper
+
+Lab environments and fictional scenarios are clearly labelled throughout. No real client data, credentials, or confidential information appears anywhere in this repository.
 
 ---
 
 ## Projects
 
-### 🔍 Job Intelligence Pipeline
-`automation` `n8n` `web scraping` `database` `self-hosted`
+---
 
-An end-to-end automated job discovery and research system, hosted entirely on local infrastructure.
+### 📁 [m365-project](./m365-project/README.md) — Microsoft 365 Migration
 
-**What it does:**
-- Scrapes predefined job listing sources on a schedule
-- Stores structured job data in a local database
-- Filters and ranks opportunities based on configurable criteria
-- Enriches listings with company research data
-- Generates tailored cover letter drafts and CV update suggestions per role
+> *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on-premises Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
 
-**Stack:** n8n (workflow automation) · PostgreSQL · Docker · Self-hosted Linux server
+This project documents the kind of migration I've delivered in the real world for SME clients. The scenario uses a fictional company, but every step reflects what you'd encounter in a genuine engagement — including the often-overlooked realities like SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap that Microsoft 365 doesn't solve for you.
 
-**Why it matters:** Demonstrates real-world automation thinking — not just connecting APIs, but building a practical pipeline with data persistence, scheduling, and actionable output. The entire infrastructure (servers, database, orchestration) is provisioned and managed locally.
+**Why I built it:** To create a repeatable, documented blueprint — useful both as a portfolio piece and as a practical guide for anyone planning a similar migration.
 
-> 📂 [View project documentation →](./projects/job-intelligence-pipeline/)
+**What I hope you take from it:** A clear, honest guide to planning and delivering an M365 migration end-to-end, including the decisions that often get glossed over in vendor documentation.
+
+**[→ View Project](./m365-project/README.md)**
 
 ---
 
-### ☁️ SME On-Premise to Azure Migration
-`azure` `microsoft 365` `cloud migration` `infrastructure`
+### 🖥️ [asi-project](./asi-project/README.md) — Automated Self-Hosted Infrastructure
 
-A documented end-to-end migration for a small business moving from local servers and third-party hosted email to a fully integrated Microsoft Azure and Microsoft 365 environment.
+> *A self-hosted infrastructure platform running on a Proxmox homelab — containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
 
-**Scope:**
-- Assessment of existing on-premise infrastructure
-- Migration planning and cutover strategy
-- Azure Active Directory setup and hybrid identity configuration
-- Exchange Online / Microsoft 365 Business deployment
-- Data migration (files, email, shared resources)
-- Post-migration support and documentation
+Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code — two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
 
-**Stack:** Azure · Microsoft 365 · Entra ID · Exchange Online · Azure Files
+The stack runs Nextcloud as the core application — a self-hosted cloud collaboration and file-sharing platform — alongside PostgreSQL (in place of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
 
-**Why it matters:** Mirrors the real migration projects that SMEs undertake every day — balancing business continuity with modernisation. Fully documented for reproducibility.
+**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won't claim it was written entirely from scratch. The value was two-fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self-hosted platform production-grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That's what infrastructure-as-code means in practice, and I wanted to experience it directly rather than just read about it.
 
-> 📂 [View project documentation →](./projects/azure-sme-migration/)
+**Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling — areas I was curious about but had no practical experience in.
+
+**What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
+
+**[→ View Project](./asi-project/README.md)**
 
 ---
 
-### 🧪 Azure Lab Projects *(In Progress)*
-`az-104` `azure` `iac` `cloud labs`
+### ☁️ [aca-project](./aca-project/README.md) — Azure Cloud Architecture
 
-Hands-on Azure labs and mini-projects built in parallel with AZ-104 exam preparation. Each lab is documented as a standalone guide, covering real scenarios rather than just exam theory.
+> *A hands-on Azure learning project — implementing a connected infrastructure across the core Azure domains, documented as I go.*
 
-Planned topics include:
-- Virtual network design and peering
-- Azure Backup and Recovery Services Vault
-- Role-Based Access Control (RBAC) implementation
-- Azure Monitor and alerting pipelines
-- Policy and governance frameworks
+This project was built to deliberately close gaps in my end-to-end Azure infrastructure experience. I learn best by implementing a real environment, testing it, and deepening that understanding through iteration.
 
-> 📂 [View labs →](./projects/azure-labs/)
+The project draws from each major area of the AZ-104 curriculum — networking, compute, storage, identity, monitoring, and automation — and turns those topics into practical, working implementations. All work is carried out in a pay-as-you-go Azure subscription, using free-tier services where possible and short-lived resources where not, keeping costs minimal while still reflecting real-world usage patterns.
 
----
+The documentation focuses on not just what was built, but why — covering the decisions, trade-offs, and dependencies that are often hard to grasp from reference documentation alone.
 
-### 🛠️ Infrastructure Guides
-`proxmox` `docker` `linux` `homelab` `self-hosted`
+**Honest disclosure:** This is an active learning project. Documentation reflects progress as it happens rather than a finished guide, and some areas are explored more deeply than others as my understanding evolves.
 
-Practical how-to documentation for infrastructure tools used across these projects — written to be useful for anyone building similar environments.
+**Why I built it:** To gain genuine hands-on Azure infrastructure experience across core domains, and to anchor that learning in real implementations rather than theory alone.
 
-Topics covered:
-- Proxmox VE setup and VM/LXC management
-- Docker and Docker Compose for self-hosted services
-- Linux server hardening basics
-- Network configuration and VLAN segmentation
+**What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts — written from the perspective of someone working through it in real time.
 
-> 📂 [View guides →](./infrastructure/)
+**[→ View Project](./aca-project/README.md)**
 
 ---
 
-## Repository Structure
+## Background
 
-```
-engineering-portfolio/
-├── projects/
-│   ├── job-intelligence-pipeline/
-│   ├── azure-sme-migration/
-│   └── azure-labs/
-├── infrastructure/
-│   ├── proxmox/
-│   ├── docker/
-│   └── linux/
-└── README.md
-```
-
----
-
-## Technical Background
-
-| Domain | Experience |
+| Area | Experience |
 |---|---|
-| Operating Systems | Windows Server (2012–2022), Ubuntu, Debian, RHEL |
-| Identity & Access | Active Directory, Group Policy, Entra ID |
-| Virtualisation | Proxmox VE, Hyper-V, VMware |
-| Containers | Docker, Docker Compose |
-| Automation | n8n, PowerShell, Bash |
-| Storage | Enterprise NAS/SAN, Azure Files, backup solutions |
-| Cloud | Azure (AZ-104 in progress), Microsoft 365 |
-| Networking | VLANs, DNS, DHCP, firewalls, VPN |
+| **Cloud Migration** | Global data centre decommissions · NetApp NAS/SAN to cloud · Azure NetApp Files · Cloud Volumes ONTAP · AWS migration tooling · StorageX · SPMT · Sharegate |
+| **Microsoft 365** | Entra ID · Exchange Online · SharePoint Online · OneDrive · Teams · Intune · Conditional Access |
+| **Enterprise Storage** | NetApp NAS/SAN — architecture, administration, and global operational support |
+| **Infrastructure** | Windows Server · Linux · Active Directory · DNS · DHCP · Proxmox · VMware |
+| **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively learning)* |
+| **Automation & IaC** | Ansible · PowerShell · Bash *(actively learning)* |
+| **Monitoring** | Prometheus · Grafana · cAdvisor *(actively learning)* |
+| **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT *(actively learning)* |
+| **Cloud Platforms** | Microsoft Azure · AWS *(actively building hands-on experience)* |
+| **Version Control** | Git · GitHub *(actively learning)* |
 
 ---
 
-## Status
-
-| Project | Status |
-|---|---|
-| Job Intelligence Pipeline | 🔨 In progress |
-| SME Azure Migration | 📋 Planning |
-| Azure Lab Projects | 🔨 In progress |
-| Infrastructure Guides | ✍️ Ongoing |
-
----
-
-*All projects are documented with architecture decisions, setup steps, lessons learned, and where applicable — what I'd do differently next time.*
+*All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly documented. No client data, credentials, or confidential information is included anywhere in this repository.*
+```

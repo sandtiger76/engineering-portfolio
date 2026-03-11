@@ -2,7 +2,7 @@
 title: README
 description: 
 published: true
-date: 2026-03-11T09:35:06.534Z
+date: 2026-03-11T10:04:08.863Z
 tags: 
 editor: markdown
 dateCreated: 2026-02-28T17:36:23.462Z
@@ -83,15 +83,21 @@ The stack runs Nextcloud as the core application — a self-hosted collaboration
 
 > *A hands-on Azure learning project — implementing a complete, connected infrastructure across the core domains of the AZ-104 curriculum, documented as I go.*
 
-My cloud migration work at BP was real and substantial, but I was on the data and migration side — I didn't build the cloud infrastructure, that was done by other teams. I could plan a migration to Azure NetApp Files or Cloud Volumes ONTAP, but I couldn't spin up the Azure environment myself.
+This project was built to deliberately close gaps in my end‑to‑end Azure infrastructure experience and complete the overall cloud picture. I learn best by implementing a real  environment, testing it, and then deepening that understanding through iteration. 
 
-This project is me fixing that gap directly. Rather than just studying for AZ-104, I'm implementing the concepts hands-on — virtual networks, VMs, storage accounts, Entra ID, Azure Monitor, and automated deployment — and documenting each piece as I go.
+The project draws from each major area of the AZ‑104 curriculum — including networking, compute, storage, identity, monitoring, and automation — and turns those topics into practical, working implementations.
 
-**Honest disclosure:** This is active learning. The documentation reflects where I am in the process, not a finished polished guide. Some sections will be more complete than others. I'm using an Azure account with free-tier services where possible, paying for short-lived resources where needed, and deleting everything that incurs cost when I'm done with it.
+All work is carried out in a pay‑as‑you‑go Azure subscription, using free-tier services where possible and short‑lived resources where not. Everything is designed to be created, tested, and then removed to keep costs minimal, while still reflecting real-world Azure usage patterns.
 
-**Why I built it:** To build genuine Azure hands-on experience, not just theoretical knowledge — and to document it in a way that might help someone else learning the same material.
+The documentation is written in plain, accessible language, with the goal of explaining not just what was built, but why — focusing on the decisions, trade-offs, and dependencies that are often hard to grasp when learning from reference documentation alone.
 
-**What I hope you take from it:** An honest learning journal with working implementations across the core Azure infrastructure domains.
+
+**Honest disclosure:** This is an active learning project. The documentation reflects progress as it happens rather than a polished, finished guide. Some areas are explored more deeply than others as my understanding evolves.
+
+**Why I built it:** To gain genuine, hands-on Azure infrastructure experience across the full AZ‑104 scope, and to anchor that learning in real implementations rather than theory alone.
+
+**What I hope you take from it:** A practical, end‑to‑end reference for core Azure infrastructure concepts
+
 
 **[→ View Project](./aca-project/README.md)**
 
@@ -105,12 +111,12 @@ This project is me fixing that gap directly. Rather than just studying for AZ-10
 | **Microsoft 365** | Entra ID · Exchange Online · SharePoint Online · OneDrive · Teams · Intune · Conditional Access |
 | **Enterprise Storage** | NetApp NAS/SAN architect and administrator — 10+ years across BP global estate |
 | **Infrastructure** | Windows Server · Active Directory · DNS · DHCP · VMware · Proxmox |
-| **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively learning)* |
-| **Automation & IaC** | Ansible · PowerShell · Bash *(actively learning)* |
+| **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively building hands-on experience)* |
+| **Automation & IaC** | Ansible · PowerShell · Bash *(actively building hands-on experience)* |
 | **Monitoring** | Prometheus · Grafana · cAdvisor *(actively learning)* |
-| **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT |
+| **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT (actively building hands-on experience) |
 | **Cloud Platforms** | Microsoft Azure · AWS *(actively building hands-on experience)* |
-| **Version Control** | Git · GitHub *(actively learning)* |
+| **Version Control** | Git · GitHub *(actively building hands-on experience)* |
 
 ---
 

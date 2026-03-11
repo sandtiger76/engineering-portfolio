@@ -162,7 +162,26 @@ Get-AzContext | Select-Object Name, Subscription, Tenant
 
 ## Gotchas & Lessons Learned
 
-> *This section is updated as the phase is implemented.*
+> *Updated: 2026-03-11*
+
+**1. `az group create` is idempotent.** Running it on an already-existing group with the same location returns `Succeeded` rather than an error. Tags on re-run are merged, not replaced. Safe to use in automation scripts without a check-then-create pattern.
+
+**2. Tag handling differs significantly between CLI and PowerShell.** This is one of the most important behavioural differences between the two tools:
+
+| Behaviour | Azure CLI | PowerShell |
+|---|---|---|
+| Add a single tag | `az group update --set tags.Key=Value` — additive, existing tags preserved | `Set-AzResourceGroup -Tag @{Key="Value"}` — **replaces all tags** |
+| Safe additive update | Default behaviour | Must read → merge → write back manually |
+
+In PowerShell, always read the existing tags first, modify the hashtable, then write it back — otherwise you will silently wipe all other tags.
+
+**3. Use `--set tags.Key=Value` not `--tags` for additive CLI updates.** The `--tags` flag on `az group update` replaces all tags. The `--set tags.Key=Value` syntax adds or updates a single tag without touching others.
+
+**4. `az configure --defaults` succeeds silently.** There is no confirmation output. Verify it took effect with `az configure --list-defaults` or by checking `~/.azure/config`.
+
+**5. Tags are returned alphabetically sorted by Azure.** Regardless of the order you set them, Azure returns tag keys sorted alphabetically in JSON output. This is cosmetic only — it has no functional impact.
+
+**6. NetworkWatcherRG will always appear in `az group list`.** It is Azure-managed, tied to Network Watcher being enabled for the region. Leave it alone — it does not affect the lab.
 
 ---
 

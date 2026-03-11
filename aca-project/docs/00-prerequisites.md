@@ -1,181 +1,192 @@
 # Phase 00 — Prerequisites & Setup
 
-> Before building anything in Azure, we need the right tools installed, a verified subscription, and a clear set of conventions to keep everything consistent.
+| | |
+|---|---|
+| **Phase** | 00 |
+| **Topic** | Prerequisites & Setup |
+| **Services** | Azure CLI, PowerShell Az module |
+| **Est. Cost** | None — nothing deployed |
 
 ---
 
-## What We're Setting Up
+## Navigation
 
-- Azure CLI installed and authenticated
-- PowerShell 7+ with the Az module
-- Subscription confirmed and default region set
-- Naming conventions agreed (see README)
-- A baseline understanding of how CLI and PowerShell relate
+[← Back to README](../README.md) | [Next: Phase 01 — Resource Groups →](01-resource-groups.md)
 
 ---
 
-## Step 1 — Install Azure CLI
+## What We're Building
 
-### Why
-The Azure CLI is a cross-platform command-line tool for managing Azure resources. It's the most direct way to interact with Azure outside the portal, and every command maps 1:1 with the underlying REST API.
+Nothing in Azure yet. This phase gets your local tooling ready, authenticates you to Azure, and establishes the conventions we'll follow throughout the project. Getting this right means every phase after this runs cleanly.
 
-### Install (Windows)
-```powershell
-winget install Microsoft.AzureCLI
-```
+---
 
-### Install (macOS/Linux)
-```bash
-brew install azure-cli
-# or
-curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
-```
+## The Technology
 
-### Verify
+### Azure CLI
+
+The Azure CLI (`az`) is a cross-platform command-line tool that lets you manage Azure resources from a terminal. Every `az` command maps directly to an Azure REST API call — so when you run `az group create`, you're doing exactly what the portal does when you click "Create resource group", just faster and repeatably.
+
+It outputs JSON by default, but supports `--output table` for readable terminal output and `--output tsv` for scripting.
+
+**Why we use it:** It's the most direct and scriptable way to interact with Azure. It's also what most Azure documentation uses, so it's worth being fluent in it.
+
+### PowerShell Az Module
+
+The `Az` PowerShell module provides cmdlets (e.g. `New-AzResourceGroup`) that wrap the same Azure REST API. PowerShell works with objects rather than text, which makes it more powerful for scripting complex logic — filtering, looping, error handling.
+
+**Why we use it:** Many enterprise environments are Windows-first and PowerShell-heavy. Knowing both CLI and PowerShell means you can work in any environment.
+
+### How They Relate
+
+Both tools do the same thing — they call the Azure API. The choice is usually personal preference or environment. This project documents both so you build fluency in each.
+
+| | Azure CLI | PowerShell Az |
+|---|---|---|
+| Syntax | `az resource verb --flag` | `Verb-AzResource -Param` |
+| Output | JSON / table / tsv | Objects |
+| Scripting | Bash / shell | `.ps1` scripts |
+| Cross-platform | Yes | Yes (PowerShell 7+) |
+
+---
+
+## Step 1 — Verify Tools Are Installed
+
+### Azure CLI
+
 ```bash
 az version
 ```
 
----
+Expected output includes `"azure-cli": "2.x.x"`. If not installed:
 
-## Step 2 — Install PowerShell 7+
-
-### Why
-PowerShell 5.1 (built into Windows) works but is limited. PowerShell 7+ is cross-platform, faster, and required for some Az module features.
-
-### Install
 ```bash
-# Windows (winget)
-winget install Microsoft.PowerShell
-
-# macOS
-brew install powershell/tap/powershell
+# Debian/Ubuntu/Mint
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
-
-### Verify
-```powershell
-$PSVersionTable.PSVersion
-```
-
----
-
-## Step 3 — Install the Az PowerShell Module
-
-### Why
-The `Az` module provides PowerShell cmdlets that wrap the Azure REST API — the PowerShell equivalent of the Azure CLI.
 
 ### PowerShell
+
+```bash
+pwsh --version
+```
+
+Expected: `PowerShell 7.x.x`. If not installed:
+
+```bash
+# Debian/Ubuntu/Mint
+sudo apt-get install -y powershell
+```
+
+### Az PowerShell Module
+
+```powershell
+Get-Module -Name Az.Accounts -ListAvailable
+```
+
+If not installed:
+
 ```powershell
 Install-Module -Name Az -Repository PSGallery -Force
 ```
 
 > If prompted about an untrusted repository, type `Y` to continue.
 
-### Verify
-```powershell
-Get-Module -Name Az -ListAvailable | Select-Object Name, Version
-```
-
 ---
 
-## Step 4 — Authenticate to Azure
-
-### Why
-Both tools need to know who you are before they can do anything. Authentication opens a browser window and stores a token locally.
+## Step 2 — Authenticate
 
 ### Azure CLI
+
 ```bash
 az login
 ```
 
+This opens a browser. Sign in with your Azure account. Once complete, your terminal shows your available subscriptions.
+
 ### PowerShell
+
 ```powershell
 Connect-AzAccount
 ```
 
+Same browser-based flow. Stores credentials in-memory for the session.
+
 ### What This Does
-Both commands open a browser-based login flow. Once authenticated, they store a local token valid for your session. The CLI stores credentials in `~/.azure/`, PowerShell stores them in-memory per session.
+
+Both commands request an OAuth2 token from Entra ID (formerly Azure Active Directory). The CLI stores the token at `~/.azure/`, PowerShell holds it in memory. Tokens expire — if a session goes idle for a long time you may need to re-authenticate.
 
 ---
 
-## Step 5 — Confirm Your Subscription
-
-### Why
-If you have multiple subscriptions, you need to make sure commands run against the right one.
+## Step 3 — Confirm Your Subscription
 
 ### Azure CLI
+
 ```bash
 # List all subscriptions
 az account list --output table
 
-# Set the active subscription
-az account set --subscription "<your-subscription-id>"
-
-# Confirm
-az account show
+# Confirm active subscription
+az account show --output table
 ```
 
 ### PowerShell
+
 ```powershell
 # List all subscriptions
 Get-AzSubscription
 
-# Set the active subscription
-Set-AzContext -SubscriptionId "<your-subscription-id>"
-
-# Confirm
+# Confirm active context
 Get-AzContext
+```
+
+If you have multiple subscriptions, set the correct one:
+
+```bash
+# CLI
+az account set --subscription "<your-subscription-name-or-id>"
+```
+
+```powershell
+# PowerShell
+Set-AzContext -SubscriptionName "<your-subscription-name>"
 ```
 
 ---
 
-## Step 6 — Set Default Region (CLI only)
+## Step 4 — Set Default Region (CLI)
 
-### Why
-Setting a default location means you don't have to type `--location uksouth` on every command. PowerShell doesn't have an equivalent — you'll always pass `-Location` explicitly.
+Setting a default location saves you typing `--location eastus` on every command.
 
-### Azure CLI
 ```bash
-az configure --defaults location=uksouth
+az configure --defaults location=eastus
 ```
 
+> Replace `eastus` with your preferred region. Run `az account list-locations --output table` to see all options.
+
 ### Verify
+
 ```bash
 az configure --list-defaults
 ```
 
----
-
-## Step 7 — Understand the Relationship Between CLI and PowerShell
-
-Both tools do the same thing — they call the Azure REST API. The main differences:
-
-| | Azure CLI | PowerShell (Az) |
-|---|---|---|
-| **Syntax** | `az resource verb --flag value` | `Verb-AzResource -Parameter Value` |
-| **Output** | JSON by default (also table, tsv) | Objects (pipe-friendly) |
-| **Scripting** | Bash / shell scripts | PowerShell scripts (.ps1) |
-| **Learning curve** | Slightly easier to start | More verbose but more powerful for scripting |
-| **Cross-platform** | Yes | Yes (PowerShell 7+) |
-
-> **QCB approach:** We document both side-by-side so you build an intuition for how they map to each other. In practice, use whichever feels natural — they're equivalent.
+> PowerShell has no equivalent — you'll pass `-Location` explicitly on each command.
 
 ---
 
-## Step 8 — Install Git and Create the Repo
+## Step 5 — Check for Existing Resources
 
-### Why
-Every change should be version-controlled. You'll also push your documentation and scripts here as the project progresses.
+Before building anything, confirm what's already in your subscription:
 
-### CLI
 ```bash
-# Check if git is installed
-git --version
-
-# Clone (after creating the repo on GitHub)
-git clone https://github.com/<your-username>/qcb-azure-lab.git
-cd qcb-azure-lab
+az group list --output table
 ```
+
+```powershell
+Get-AzResourceGroup | Format-Table ResourceGroupName, Location, ProvisioningState
+```
+
+A clean subscription will show only `NetworkWatcherRG` (auto-created by Azure) or nothing at all. If you see other resource groups from previous work, make a note — they won't interfere but it's good to know they're there.
 
 ---
 
@@ -183,36 +194,46 @@ cd qcb-azure-lab
 
 Before moving to Phase 01, confirm all of the following:
 
-```bash
-# Azure CLI version (should be 2.x or higher)
-az version
+- [ ] `az version` returns 2.x or higher
+- [ ] `pwsh --version` returns 7.x or higher
+- [ ] `az login` completed successfully
+- [ ] `az account show` shows the correct subscription
+- [ ] `az configure --list-defaults` shows `location = eastus` (or your chosen region)
 
-# Logged in and correct subscription active
-az account show --query "{Name:name, ID:id, State:state}" --output table
+---
 
-# Default region set
-az configure --list-defaults
-```
+## Gotchas & Lessons Learned
 
-```powershell
-# PowerShell version (should be 7+)
-$PSVersionTable.PSVersion
+> *Updated: 2026-03-11*
 
-# Az module installed
-Get-Module -Name Az.Accounts -ListAvailable
+**1. Az module installs per-user by default.** On Linux, `Install-PSResource Az` installs to `~/.local/share/powershell/Modules`. This is fine for personal use. For a shared or system-wide install, run `Install-PSResource Az -Scope AllUsers` as root.
 
-# Authenticated
-Get-AzContext
-```
+**2. PowerShell alternative install method.** `Install-PSResource Az` is the modern replacement for `Install-Module -Name Az -Repository PSGallery -Force`. Both work — `Install-PSResource` is the preferred approach going forward.
+
+**3. `Get-AzContext` shows "Azure subscription 1" not the subscription name.** This is a display quirk in the context Name field. The subscription ID and account details are correct — don't be thrown off by the label.
+
+**4. Az 15.0.0 upgrade warning.** If PowerShell warns that Az 14.x is outdated and Az 15.0.0 is available, do not upgrade mid-project. Az 15.0.0 contains breaking changes from 14.x. Review the migration guide before upgrading and wait until between projects.
+
+**5. Cached credentials mean login steps may not be interactive.** If you've previously authenticated, `az account show` and `Get-AzContext` will return valid sessions immediately — no browser flow is triggered. If you're on a fresh machine or tokens have expired, run `az login` and `Connect-AzAccount` to re-authenticate.
+
+**6. Token expiry.** Azure CLI tokens expire after approximately 1 hour of inactivity. If commands start returning authentication errors mid-session, run `az login` again.
+
+**7. NetworkWatcherRG is expected.** `az group list` will show a `NetworkWatcherRG` resource group that you didn't create. Azure Network Watcher creates this automatically. Do not delete it.
+
+---
+
+## Teardown
+
+Nothing was deployed in this phase. No teardown required.
 
 ---
 
 ## Cost at This Phase
 
-**£0.00** — Nothing has been deployed to Azure yet.
+**Zero** — no Azure resources created.
 
 ---
 
-## Next Phase
+## Navigation
 
-➡️ [Phase 01 — Resource Groups & Subscription Management](01-resource-groups.md)
+[← Back to README](../README.md) | [Next: Phase 01 — Resource Groups →](01-resource-groups.md)

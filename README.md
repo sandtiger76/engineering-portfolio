@@ -2,7 +2,7 @@
 title: README
 description: 
 published: true
-date: 2026-03-11T10:04:08.863Z
+date: 2026-03-11T10:10:44.884Z
 tags: 
 editor: markdown
 dateCreated: 2026-02-28T17:36:23.462Z
@@ -107,13 +107,13 @@ The documentation is written in plain, accessible language, with the goal of exp
 
 | Area | Experience |
 |---|---|
-| **Cloud Migration** | Data Migration SME at BP — global data centre decommissions, NetApp NAS/SAN to cloud, Azure NetApp Files, Cloud Volumes ONTAP, AWS migration tooling, StorageX, SPMT, Sharegate |
+| **Cloud Migration** | Global data centre decommissions, NetApp NAS/SAN to cloud, Azure NetApp Files, Cloud Volumes ONTAP, AWS migration tooling, StorageX, SPMT, Sharegate |
 | **Microsoft 365** | Entra ID · Exchange Online · SharePoint Online · OneDrive · Teams · Intune · Conditional Access |
-| **Enterprise Storage** | NetApp NAS/SAN architect and administrator — 10+ years across BP global estate |
-| **Infrastructure** | Windows Server · Active Directory · DNS · DHCP · VMware · Proxmox |
+| **Enterprise Storage** | NetApp NAS/SAN architect and administrator |
+| **Infrastructure** | Windows Server · Linux Server · Active Directory · DNS · DHCP · Proxmox |
 | **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively building hands-on experience)* |
 | **Automation & IaC** | Ansible · PowerShell · Bash *(actively building hands-on experience)* |
-| **Monitoring** | Prometheus · Grafana · cAdvisor *(actively learning)* |
+| **Monitoring** | Prometheus · Grafana · cAdvisor *(ctively building hands-on experience)* |
 | **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT (actively building hands-on experience) |
 | **Cloud Platforms** | Microsoft Azure · AWS *(actively building hands-on experience)* |
 | **Version Control** | Git · GitHub *(actively building hands-on experience)* |

@@ -16,8 +16,6 @@ This portfolio documents that journey. Each project represents work I have desig
 
 In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility as first-class deliverables.
 
-All materials are published openly and may be reused freely. Feedback, corrections, and suggestions are very welcome.
-
 ---
 
 ## How This Portfolio Is Structured
@@ -104,5 +102,4 @@ This project builds a complete Azure environment that touches every major AZ-104
 
 ---
 
-*All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly documented. No client data, credentials, or confidential information is included anywhere in this repository.*
-```
+*All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly documented. No client data, credentials, or confidential information is included anywhere in this repository. All materials are published openly and may be reused freely. Feedback, corrections, and suggestions are very welcome.*

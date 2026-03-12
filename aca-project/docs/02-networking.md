@@ -1,26 +1,18 @@
 # Phase 02 — Networking
 
-| | |
-|---|---|
-| **Phase** | 02 |
-| **Topic** | Virtual Networking |
-| **AZ-104 Domain** | Implement and Manage Virtual Networking |
-| **Services** | VNet, Subnets, NSGs |
-| **Est. Cost** | None — VNets and NSGs are free |
+**AZ-104 Domain:** Implement and Manage Virtual Networking &nbsp;|&nbsp; **Services:** VNet, Subnets, NSGs &nbsp;|&nbsp; **Est. Cost:** Free
 
 ---
 
 ## Navigation
 
-[← Phase 01: Resource Groups](01-resource-groups.md) | [Back to README](../README.md) | [Next: Phase 03 — Compute →](03-compute.md)
+[← Phase 01](01-resource-groups.md) &nbsp;|&nbsp; [README](../README.md) &nbsp;|&nbsp; [Phase 03 →](03-compute.md)
 
 ---
 
 ## What We're Building
 
-A Virtual Network (`qcb-vnet-lab`) with two subnets — `snet-web` and `snet-app` — each protected by its own Network Security Group. This creates the network isolation that separates the web tier from the application tier, and demonstrates the core AZ-104 networking concepts: address space design, subnet segmentation, and stateful firewall rules.
-
-This phase maps to the **Implement and Manage Virtual Networking** domain of AZ-104, specifically: creating and configuring VNets, configuring subnets, and creating and configuring NSGs.
+A Virtual Network (`qcb-vnet-lab`) with two subnets — `snet-web` and `snet-app` — each protected by its own Network Security Group. This creates the network isolation that separates the web tier from the application tier, and covers the core AZ-104 networking concepts: address space design, subnet segmentation, and stateful firewall rules.
 
 ---
 
@@ -30,7 +22,7 @@ This phase maps to the **Implement and Manage Virtual Networking** domain of AZ-
 
 A VNet is Azure's isolated private network. Resources inside a VNet can communicate with each other by default. Resources outside cannot reach in unless explicitly allowed. The VNet has an address space — a range of private IP addresses that all resources inside it draw from.
 
-This project uses `10.0.0.0/16` — the standard RFC 1918 private range, giving 65,536 possible addresses.
+This project uses `10.0.0.0/16` — a standard RFC 1918 private range, giving 65,536 possible addresses.
 
 ### Subnets
 
@@ -43,13 +35,13 @@ A subnet is a subdivision of the VNet's address space used to segment workloads:
 
 Azure reserves the first four addresses and the last address in every subnet (`.0`, `.1`, `.2`, `.3`, `.255`), leaving 251 usable addresses per `/24`.
 
-> **Design note:** A third `snet-data` subnet (`10.0.3.0/24`) is reserved for storage private endpoints in a future production design but is not deployed in this lab.
+> **Design note:** A third `snet-data` subnet (`10.0.3.0/24`) would be added for storage private endpoints in a production design, but is not deployed in this lab.
 
 ### Network Security Groups (NSGs)
 
 An NSG is a stateful firewall attached to a subnet or NIC. Rules have a priority number — **lower = higher priority**. Azure evaluates rules from lowest to highest until a match is found. If no rule matches, the implicit `DenyAllInbound` rule at priority 65500 blocks the traffic.
 
-**Stateful** means return traffic for allowed connections is automatically permitted — no matching outbound rule is needed.
+**Stateful** means return traffic for allowed connections is automatically permitted — you don't need a matching outbound rule for responses to flow back.
 
 ### NSG Rules in This Project
 
@@ -67,13 +59,10 @@ The app tier (`snet-app`) only accepts traffic from the web subnet — not from 
 
 ### Azure Portal
 
-1. In the search bar, type **Virtual networks** and select it
+1. Search for **Virtual networks** and select it
 2. Click **+ Create**
 3. Fill in the **Basics** tab:
-   - **Subscription:** QCB PAYG PersonalCloud
-   - **Resource group:** `qcb-rg-lab`
-   - **Name:** `qcb-vnet-lab`
-   - **Region:** East US
+   - **Resource group:** `qcb-rg-lab` | **Name:** `qcb-vnet-lab` | **Region:** East US
 4. Click **Next: IP Addresses**
 5. Set **IPv4 address space** to `10.0.0.0/16`
 6. Delete any pre-populated default subnet
@@ -106,16 +95,9 @@ New-AzVirtualNetwork `
 
 ### Azure Portal
 
-1. Open **qcb-vnet-lab**
-2. In the left menu, click **Subnets**
-3. Click **+ Subnet**:
-   - **Name:** `snet-web`
-   - **Subnet address range:** `10.0.1.0/24`
-   - Click **Save**
-4. Click **+ Subnet** again:
-   - **Name:** `snet-app`
-   - **Subnet address range:** `10.0.2.0/24`
-   - Click **Save**
+1. Open **qcb-vnet-lab → Subnets → + Subnet**
+2. Create `snet-web` with address range `10.0.1.0/24`
+3. Repeat for `snet-app` with address range `10.0.2.0/24`
 
 ### Azure CLI
 
@@ -139,16 +121,14 @@ az network vnet subnet create \
 $vnet = Get-AzVirtualNetwork -ResourceGroupName "qcb-rg-lab" -Name "qcb-vnet-lab"
 
 Add-AzVirtualNetworkSubnetConfig `
-  -Name "snet-web" `
-  -VirtualNetwork $vnet `
+  -Name "snet-web" -VirtualNetwork $vnet `
   -AddressPrefix "10.0.1.0/24" | Set-AzVirtualNetwork
 
 # Re-fetch — $vnet is stale after Set-AzVirtualNetwork
 $vnet = Get-AzVirtualNetwork -ResourceGroupName "qcb-rg-lab" -Name "qcb-vnet-lab"
 
 Add-AzVirtualNetworkSubnetConfig `
-  -Name "snet-app" `
-  -VirtualNetwork $vnet `
+  -Name "snet-app" -VirtualNetwork $vnet `
   -AddressPrefix "10.0.2.0/24" | Set-AzVirtualNetwork
 ```
 
@@ -158,12 +138,8 @@ Add-AzVirtualNetworkSubnetConfig `
 
 ### Azure Portal
 
-1. In the search bar, type **Network security groups** and select it
-2. Click **+ Create**:
-   - **Resource group:** `qcb-rg-lab`
-   - **Name:** `nsg-web`
-   - **Region:** East US
-   - Click **Review + create**, then **Create**
+1. Search for **Network security groups → + Create**
+2. Create `nsg-web` in `qcb-rg-lab`, East US
 3. Repeat for `nsg-app`
 
 ### Azure CLI
@@ -184,16 +160,12 @@ az network nsg create \
 
 ```powershell
 New-AzNetworkSecurityGroup `
-  -ResourceGroupName "qcb-rg-lab" `
-  -Location "eastus" `
-  -Name "nsg-web" `
-  -Tag @{Project="QCBLab"; Environment="Lab"}
+  -ResourceGroupName "qcb-rg-lab" -Location "eastus" `
+  -Name "nsg-web" -Tag @{Project="QCBLab"; Environment="Lab"}
 
 New-AzNetworkSecurityGroup `
-  -ResourceGroupName "qcb-rg-lab" `
-  -Location "eastus" `
-  -Name "nsg-app" `
-  -Tag @{Project="QCBLab"; Environment="Lab"}
+  -ResourceGroupName "qcb-rg-lab" -Location "eastus" `
+  -Name "nsg-app" -Tag @{Project="QCBLab"; Environment="Lab"}
 ```
 
 ---
@@ -202,58 +174,34 @@ New-AzNetworkSecurityGroup `
 
 ### Azure Portal
 
-**nsg-web — HTTP and HTTPS inbound:**
+**nsg-web:**
 1. Open **nsg-web → Inbound security rules → + Add**
-2. Rule 1:
-   - **Source:** Any | **Destination port:** 80 | **Protocol:** TCP
-   - **Action:** Allow | **Priority:** 100 | **Name:** `Allow-HTTP`
-   - Click **Add**
-3. Rule 2:
-   - **Source:** Any | **Destination port:** 443 | **Protocol:** TCP
-   - **Action:** Allow | **Priority:** 110 | **Name:** `Allow-HTTPS`
-   - Click **Add**
+2. Allow TCP:80 from Any — priority 100 — name `Allow-HTTP`
+3. Allow TCP:443 from Any — priority 110 — name `Allow-HTTPS`
 
-**nsg-app — port 8080 from web subnet only:**
+**nsg-app:**
 1. Open **nsg-app → Inbound security rules → + Add**
-2. Rule:
-   - **Source:** IP Addresses | **Source IP:** `10.0.1.0/24`
-   - **Destination port:** 8080 | **Protocol:** TCP
-   - **Action:** Allow | **Priority:** 100 | **Name:** `Allow-From-Web`
-   - Click **Add**
+2. Allow TCP:8080 from source IP `10.0.1.0/24` — priority 100 — name `Allow-From-Web`
 
 ### Azure CLI
 
 ```bash
-# nsg-web rules
 az network nsg rule create \
-  --resource-group qcb-rg-lab \
-  --nsg-name nsg-web \
-  --name Allow-HTTP \
-  --priority 100 \
-  --protocol Tcp \
-  --direction Inbound \
-  --access Allow \
+  --resource-group qcb-rg-lab --nsg-name nsg-web \
+  --name Allow-HTTP --priority 100 \
+  --protocol Tcp --direction Inbound --access Allow \
   --destination-port-range 80
 
 az network nsg rule create \
-  --resource-group qcb-rg-lab \
-  --nsg-name nsg-web \
-  --name Allow-HTTPS \
-  --priority 110 \
-  --protocol Tcp \
-  --direction Inbound \
-  --access Allow \
+  --resource-group qcb-rg-lab --nsg-name nsg-web \
+  --name Allow-HTTPS --priority 110 \
+  --protocol Tcp --direction Inbound --access Allow \
   --destination-port-range 443
 
-# nsg-app rule
 az network nsg rule create \
-  --resource-group qcb-rg-lab \
-  --nsg-name nsg-app \
-  --name Allow-From-Web \
-  --priority 100 \
-  --protocol Tcp \
-  --direction Inbound \
-  --access Allow \
+  --resource-group qcb-rg-lab --nsg-name nsg-app \
+  --name Allow-From-Web --priority 100 \
+  --protocol Tcp --direction Inbound --access Allow \
   --source-address-prefix 10.0.1.0/24 \
   --destination-port-range 8080
 ```
@@ -261,7 +209,6 @@ az network nsg rule create \
 ### PowerShell
 
 ```powershell
-# nsg-web rules
 $nsgWeb = Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" -Name "nsg-web"
 
 Add-AzNetworkSecurityRuleConfig -NetworkSecurityGroup $nsgWeb `
@@ -278,7 +225,6 @@ Add-AzNetworkSecurityRuleConfig -NetworkSecurityGroup $nsgWeb `
   -SourceAddressPrefix "*" -SourcePortRange "*" `
   -DestinationAddressPrefix "*" -DestinationPortRange 443 | Set-AzNetworkSecurityGroup
 
-# nsg-app rule
 $nsgApp = Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" -Name "nsg-app"
 
 Add-AzNetworkSecurityRuleConfig -NetworkSecurityGroup $nsgApp `
@@ -294,47 +240,37 @@ Add-AzNetworkSecurityRuleConfig -NetworkSecurityGroup $nsgApp `
 
 ### Azure Portal
 
-1. Open **nsg-web → Subnets → + Associate**
-   - **Virtual network:** `qcb-vnet-lab` | **Subnet:** `snet-web`
-   - Click **OK**
-2. Open **nsg-app → Subnets → + Associate**
-   - **Virtual network:** `qcb-vnet-lab` | **Subnet:** `snet-app`
-   - Click **OK**
+1. Open **nsg-web → Subnets → + Associate** → select `qcb-vnet-lab` / `snet-web`
+2. Open **nsg-app → Subnets → + Associate** → select `qcb-vnet-lab` / `snet-app`
 
 ### Azure CLI
 
 ```bash
 az network vnet subnet update \
-  --resource-group qcb-rg-lab \
-  --vnet-name qcb-vnet-lab \
-  --name snet-web \
-  --network-security-group nsg-web
+  --resource-group qcb-rg-lab --vnet-name qcb-vnet-lab \
+  --name snet-web --network-security-group nsg-web
 
 az network vnet subnet update \
-  --resource-group qcb-rg-lab \
-  --vnet-name qcb-vnet-lab \
-  --name snet-app \
-  --network-security-group nsg-app
+  --resource-group qcb-rg-lab --vnet-name qcb-vnet-lab \
+  --name snet-app --network-security-group nsg-app
 ```
 
 ### PowerShell
 
 ```powershell
-$vnet = Get-AzVirtualNetwork -ResourceGroupName "qcb-rg-lab" -Name "qcb-vnet-lab"
+$vnet   = Get-AzVirtualNetwork -ResourceGroupName "qcb-rg-lab" -Name "qcb-vnet-lab"
 $nsgWeb = Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" -Name "nsg-web"
 $nsgApp = Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" -Name "nsg-app"
 
 Set-AzVirtualNetworkSubnetConfig `
-  -VirtualNetwork $vnet `
-  -Name "snet-web" `
+  -VirtualNetwork $vnet -Name "snet-web" `
   -AddressPrefix "10.0.1.0/24" `
   -NetworkSecurityGroup $nsgWeb | Set-AzVirtualNetwork
 
 $vnet = Get-AzVirtualNetwork -ResourceGroupName "qcb-rg-lab" -Name "qcb-vnet-lab"
 
 Set-AzVirtualNetworkSubnetConfig `
-  -VirtualNetwork $vnet `
-  -Name "snet-app" `
+  -VirtualNetwork $vnet -Name "snet-app" `
   -AddressPrefix "10.0.2.0/24" `
   -NetworkSecurityGroup $nsgApp | Set-AzVirtualNetwork
 ```
@@ -343,29 +279,17 @@ Set-AzVirtualNetworkSubnetConfig `
 
 ## Verification
 
-### Azure Portal
-
-1. Open **qcb-vnet-lab → Subnets** — confirm both subnets show their associated NSG
-2. Open **nsg-web → Inbound security rules** — confirm Allow-HTTP (100) and Allow-HTTPS (110)
-3. Open **nsg-app → Inbound security rules** — confirm Allow-From-Web (100)
-
 ### Azure CLI
 
 ```bash
 az network vnet show \
-  --resource-group qcb-rg-lab \
-  --name qcb-vnet-lab \
-  --query "{Name:name, Space:addressSpace.addressPrefixes}" \
-  --output table
+  --resource-group qcb-rg-lab --name qcb-vnet-lab \
+  --query "{Name:name, Space:addressSpace.addressPrefixes}" --output table
 
 az network vnet subnet list \
-  --resource-group qcb-rg-lab \
-  --vnet-name qcb-vnet-lab \
-  --output table
+  --resource-group qcb-rg-lab --vnet-name qcb-vnet-lab --output table
 
-az network nsg list \
-  --resource-group qcb-rg-lab \
-  --output table
+az network nsg list --resource-group qcb-rg-lab --output table
 ```
 
 ### PowerShell
@@ -399,26 +323,6 @@ Get-AzNetworkSecurityGroup -ResourceGroupName "qcb-rg-lab" | Format-Table Name, 
 
 ---
 
-## Cost at This Phase
-
-**Zero** — VNets, subnets, and NSGs have no cost.
-
----
-
-## Teardown — This Phase Only
-
-```bash
-az group delete --name qcb-rg-lab --yes --no-wait
-```
-
-```powershell
-Remove-AzResourceGroup -Name "qcb-rg-lab" -Force -AsJob
-```
-
-For the full project teardown, see [teardown/destroy-all.sh](../teardown/destroy-all.sh).
-
----
-
 ## Navigation
 
-[← Phase 01: Resource Groups](01-resource-groups.md) | [Back to README](../README.md) | [Next: Phase 03 — Compute →](03-compute.md)
+[← Phase 01](01-resource-groups.md) &nbsp;|&nbsp; [README](../README.md) &nbsp;|&nbsp; [Phase 03 →](03-compute.md)

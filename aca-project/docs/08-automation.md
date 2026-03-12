@@ -1,18 +1,12 @@
 # Phase 08 — Automation
 
-| | |
-|---|---|
-| **Phase** | 08 |
-| **Topic** | Full Environment Automation |
-| **AZ-104 Domain** | All domains |
-| **Services** | Azure CLI, Bash scripting |
-| **Est. Cost** | Same as running all phases — tear down immediately after testing |
+**AZ-104 Domain:** All domains &nbsp;|&nbsp; **Services:** Azure CLI, Bash scripting &nbsp;|&nbsp; **Est. Cost:** Same as running all phases — tear down immediately after testing
 
 ---
 
 ## Navigation
 
-[← Phase 07: Monitoring](07-monitoring.md) | [Back to README](../README.md)
+[← Phase 07](07-monitoring.md) &nbsp;|&nbsp; [README](../README.md)
 
 ---
 
@@ -40,15 +34,13 @@ Each phase was built step-by-step to understand what each resource does and why 
 
 ### Design Principles
 
-The deploy script follows these rules:
-
 | Principle | Implementation |
 |---|---|
 | Exit on any error | `set -e` at the top — script stops immediately if any command fails |
 | Variables at the top | All names, sizes, and settings are defined once and referenced throughout |
 | Idempotent where possible | `az group create`, `az vm identity assign` and others are safe to re-run |
 | Clear section headers | Phase markers in output so you can follow progress and locate failures |
-| No public IPs | No `pip-web` variable — public IP removed from design entirely |
+| No public IPs | Intentional — public IP removed from the design entirely |
 | Teardown is separate | The destroy script is never called by the deploy script |
 
 ### Script Structure
@@ -69,9 +61,7 @@ deploy-all.sh
 └── Phase 07 — az monitor log-analytics workspace create,
                az monitor action-group create,
                az monitor metrics alert create
-```
 
-```
 destroy-all.sh
 ├── Confirmation prompt
 ├── Step 1 — az keyvault delete + az keyvault purge (with sleep 15)
@@ -131,7 +121,7 @@ chmod +x teardown/destroy-all.sh
 ./teardown/destroy-all.sh
 ```
 
-### Expected timings
+### Expected Timings
 
 | Phase | Approx. time |
 |---|---|
@@ -149,7 +139,7 @@ chmod +x teardown/destroy-all.sh
 
 ## Verifying the Full Build
 
-After the deploy script completes, run the full verification suite:
+After the deploy script completes:
 
 ```bash
 # Phase 01
@@ -161,26 +151,18 @@ az group show --name qcb-rg-lab \
 az network vnet show --resource-group qcb-rg-lab --name qcb-vnet-lab \
   --query "{Name:name, Space:addressSpace.addressPrefixes}" --output table
 az network vnet subnet list --resource-group qcb-rg-lab --vnet-name qcb-vnet-lab --output table
-az network nsg list --resource-group qcb-rg-lab --output table
 
 # Phase 03
 az vm list --resource-group qcb-rg-lab --show-details --output table
-az network nic list --resource-group qcb-rg-lab \
-  --query "[].{NIC:name, PrivateIP:ipConfigurations[0].privateIPAddress}" --output table
 az vm run-command invoke --resource-group qcb-rg-lab --name vm-web \
   --command-id RunShellScript --scripts "curl -s http://localhost | head -3"
 
 # Phase 04
 az storage account show --name stqcblab --resource-group qcb-rg-lab \
   --query "{Name:name, SKU:sku.name, TLS:minimumTlsVersion}" --output table
-az storage container list --account-name stqcblab --auth-mode login --output table
 
 # Phase 05
 az vm show --resource-group qcb-rg-lab --name vm-web --query "identity" --output json
-az role assignment list \
-  --assignee $(az vm show --resource-group qcb-rg-lab --name vm-web \
-    --query identity.principalId --output tsv) \
-  --all --output table
 
 # Phase 06
 az keyvault show --name qcb-kv-lab --resource-group qcb-rg-lab \
@@ -200,11 +182,12 @@ az monitor metrics alert list --resource-group qcb-rg-lab --output table
 
 > *Verified: 2026-03-11*
 
-**1. First run exited with code 3 at Phase 04 — transient Azure API error.** The script failed at `az storage container create` on the first run with no structural issue in the script. Re-running immediately succeeded through all 7 phases without modification. This is a known behaviour with Azure ARM — transient 5xx errors are possible on first use of a resource type in a new resource group. `set -e` causes the script to exit cleanly rather than continue in a broken state.
+**1. First run exited with code 3 at Phase 04 — transient Azure API error.** The script failed at `az storage container create` on the first run with no structural issue. Re-running immediately succeeded through all 7 phases. This is a known behaviour with Azure ARM — transient 5xx errors are possible on first use of a resource type in a new resource group. `set -e` causes the script to exit cleanly rather than continue in a broken state.
 
 **2. All commands are idempotent — re-running is always safe.** `az group create`, `az network vnet create`, `az vm identity assign`, `az keyvault create` and all other commands in the script are safe to re-run. Resources that already exist are returned as-is without error.
 
-**3. `VM_IDENTITY` is set in Phase 05 and reused in Phase 06.** The variable holding the VM's managed identity principal ID is captured in Phase 05 and used again in Phase 06 for the Key Vault role assignment. If running phases independently rather than as a single script, re-capture it:
+**3. `VM_IDENTITY` is set in Phase 05 and reused in Phase 06.** The variable holding the VM's managed identity principal ID is captured in Phase 05 and used again in Phase 06 for the Key Vault role assignment. If running phases independently, re-capture it:
+
 ```bash
 VM_IDENTITY=$(az vm show --resource-group qcb-rg-lab --name vm-web \
   --query identity.principalId --output tsv)
@@ -212,29 +195,20 @@ VM_IDENTITY=$(az vm show --resource-group qcb-rg-lab --name vm-web \
 
 **4. The `sleep 30` in Phase 06 is load-bearing.** Without the pause between assigning `Key Vault Secrets Officer` and running `az keyvault secret set`, the secret creation fails with 403. The sleep is intentional and confirmed necessary.
 
-**5. Teardown uses a confirmation prompt.** `destroy-all.sh` requires you to type `yes` before proceeding. This is intentional — running teardown accidentally would delete everything. The deploy script does not call teardown.
+**5. Teardown uses a confirmation prompt.** `destroy-all.sh` requires you to type `yes` before proceeding. This is intentional — running teardown accidentally would delete everything.
 
-**6. Key Vault purge is required for clean rebuilds.** Without purging after deletion, `qcb-kv-lab` enters soft-delete state for 90 days and the name cannot be reused. The teardown script deletes the vault, waits 15 seconds for soft-delete to register, then purges it. Subsequent deploy runs can create the vault with the same name immediately.
+**6. Key Vault purge is required for clean rebuilds.** Without purging after deletion, `qcb-kv-lab` enters soft-delete state for 90 days and the name cannot be reused. The teardown script deletes the vault, waits 15 seconds, then purges it. Subsequent deploy runs can create the vault with the same name immediately.
 
-**7. No PowerShell equivalent for the full deploy script.** The automation is CLI-only (`deploy-all.sh`). Each individual phase is documented with PowerShell equivalents in the phase docs, but the master automation script uses bash and Azure CLI throughout.
+**7. No PowerShell equivalent for the full deploy script.** The automation is CLI-only (`deploy-all.sh`). Each individual phase documents PowerShell equivalents, but the master automation script uses bash and Azure CLI throughout.
 
 ---
 
-## Cost at This Phase
+## Cost
 
 Running the deploy script and tearing down in the same session costs effectively **$0** — all resources fall within free tier allowances and the session duration is well under the monthly free hour limits.
-
-| Session component | Cost |
-|---|---|
-| ~20 min Linux B1s | ✅ Free tier |
-| ~20 min Windows B1s | ✅ Free tier |
-| Storage operations | ✅ Free tier |
-| Key Vault operations | ✅ Free tier |
-| Log Analytics ingestion | ✅ Free tier (negligible data) |
-| Public IPs | ✅ $0 — none created |
 
 ---
 
 ## Navigation
 
-[← Phase 07: Monitoring](07-monitoring.md) | [Back to README](../README.md)
+[← Phase 07](07-monitoring.md) &nbsp;|&nbsp; [README](../README.md)

@@ -1,26 +1,18 @@
 # Phase 01 — Resource Groups & Subscription Management
 
-| | |
-|---|---|
-| **Phase** | 01 |
-| **Topic** | Resource Groups & Subscription Management |
-| **AZ-104 Domain** | Manage Azure Identities and Governance |
-| **Services** | Resource Groups, Tags, Subscriptions |
-| **Est. Cost** | None — resource groups are free |
+**AZ-104 Domain:** Manage Azure Identities and Governance &nbsp;|&nbsp; **Services:** Resource Groups, Tags, Subscriptions &nbsp;|&nbsp; **Est. Cost:** Free
 
 ---
 
 ## Navigation
 
-[← Phase 00: Prerequisites](00-prerequisites.md) | [Back to README](../README.md) | [Next: Phase 02 — Networking →](02-networking.md)
+[← Phase 00](00-prerequisites.md) &nbsp;|&nbsp; [README](../README.md) &nbsp;|&nbsp; [Phase 02 →](02-networking.md)
 
 ---
 
 ## What We're Building
 
-A single resource group (`qcb-rg-lab`) that contains every resource in this project. We apply tags so resources are clearly identified, and use the resource group as both a cost boundary and a teardown target — deleting it removes everything inside instantly.
-
-This phase maps to the **Manage Azure Identities and Governance** domain of AZ-104, specifically: managing subscriptions, managing resource groups, and applying resource tags.
+A single resource group (`qcb-rg-lab`) that contains every resource in this project. Tags are applied so resources are clearly identified, and the resource group acts as both a cost boundary and a teardown target — deleting it removes everything inside in a single operation.
 
 ---
 
@@ -28,11 +20,11 @@ This phase maps to the **Manage Azure Identities and Governance** domain of AZ-1
 
 ### What is a Resource Group?
 
-A resource group is a logical container for Azure resources. Every resource you create — a VM, a storage account, a virtual network — must live inside one. It behaves like a folder, but with additional capabilities:
+A resource group is a logical container for Azure resources. Every resource you create — a VM, a storage account, a virtual network — must live inside one. Think of it as a folder, but with capabilities that matter for real infrastructure work:
 
-- **Lifecycle management:** Delete the resource group and everything inside is deleted. This is how teardown works — one command removes the entire lab.
+- **Lifecycle management:** Delete the resource group and everything inside is deleted. This is how teardown works in this project — one command removes the entire lab.
 - **Access control:** RBAC permissions applied at the resource group level cascade to all resources inside.
-- **Billing boundary:** Azure cost reports can be filtered by resource group, making it easy to see exactly what a project costs.
+- **Cost tracking:** Azure cost reports can be filtered by resource group, making it easy to see exactly what a project costs. This is why tags matter — they let you identify and report on resources across multiple resource groups or subscriptions.
 - **Region assignment:** A resource group has a region, but resources inside do not have to be in the same region. The resource group region determines where the metadata is stored.
 
 ### Tags
@@ -49,7 +41,7 @@ Tags are key-value pairs attached to resources for organisation, cost tracking, 
 2. In the top search bar, type **Resource groups** and select it
 3. Click **+ Create**
 4. Fill in the **Basics** tab:
-   - **Subscription:** QCB PAYG PersonalCloud
+   - **Subscription:** your subscription
    - **Resource group:** `qcb-rg-lab`
    - **Region:** East US
 5. Click **Next: Tags**
@@ -84,10 +76,7 @@ New-AzResourceGroup `
 
 1. Navigate to **Resource groups**
 2. Click **qcb-rg-lab**
-3. Confirm the Overview pane shows:
-   - Location: East US
-   - Provisioning state: Succeeded
-   - Tags: Project=QCBLab, Environment=Lab
+3. Confirm the Overview pane shows Location: East US, Provisioning state: Succeeded, and both tags
 
 ### Azure CLI
 
@@ -150,11 +139,6 @@ Set-AzResourceGroup -Name "qcb-rg-lab" -Tag $rg.Tags
 
 ## Step 4 — Check Subscription Context
 
-### Azure Portal
-
-1. Click your account name in the top-right corner
-2. The active subscription is shown in the dropdown
-
 ### Azure CLI
 
 ```bash
@@ -169,19 +153,11 @@ Get-AzContext | Select-Object Name, Subscription, Tenant
 
 ---
 
-## Verification Checklist
-
-- [ ] `az group show --name qcb-rg-lab` returns `Succeeded`
-- [ ] Tags visible: `Project=QCBLab`, `Environment=Lab`
-- [ ] Subscription shows `QCB PAYG PersonalCloud`
-
----
-
 ## Gotchas & Lessons Learned
 
 > *Verified: 2026-03-11*
 
-**1. `az group create` is idempotent.** Running it against an existing group with the same location returns `Succeeded` without error. Tags on re-run are merged, not replaced. Safe in automation scripts without a check-then-create pattern. Confirmed on second run after exit code 3 in Phase 04.
+**1. `az group create` is idempotent.** Running it against an existing group with the same location returns `Succeeded` without error. Tags on re-run are merged, not replaced. Safe in automation scripts without a check-then-create pattern.
 
 **2. Tag handling differs significantly between CLI and PowerShell.**
 
@@ -190,36 +166,16 @@ Get-AzContext | Select-Object Name, Subscription, Tenant
 | Add a single tag | `--set tags.Key=Value` — additive, existing tags preserved | `Set-AzResourceGroup -Tag @{Key="Value"}` — **replaces all tags** |
 | Safe additive update | Default behaviour | Must read → merge → write back manually |
 
-In PowerShell, always read the existing tags first, modify the hashtable, then write it back — otherwise you silently wipe all other tags.
+In PowerShell, always read existing tags first, modify the hashtable, then write it back — otherwise you silently wipe all other tags.
 
 **3. Use `--set tags.Key=Value` not `--tags` for additive CLI updates.** The `--tags` flag on `az group update` replaces all tags. The `--set tags.Key=Value` syntax adds or updates a single tag without touching others.
 
-**4. `NetworkWatcherRG` always appears in `az group list`.** Azure creates this automatically when Network Watcher is enabled for a region. Leave it alone — it does not affect the lab and should not be deleted.
+**4. `NetworkWatcherRG` always appears in `az group list`.** Azure creates this automatically when Network Watcher is enabled for a region. Leave it alone.
 
-**5. Tags are returned alphabetically sorted.** Regardless of the order you set them, Azure returns tag keys sorted alphabetically in JSON output. Cosmetic only — no functional impact.
-
----
-
-## Cost at This Phase
-
-**Zero** — resource groups have no cost.
-
----
-
-## Teardown — This Phase Only
-
-```bash
-az group delete --name qcb-rg-lab --yes --no-wait
-```
-
-```powershell
-Remove-AzResourceGroup -Name "qcb-rg-lab" -Force -AsJob
-```
-
-For the full project teardown, see [teardown/destroy-all.sh](../teardown/destroy-all.sh).
+**5. Tags are returned alphabetically sorted.** Regardless of the order you set them, Azure returns tag keys sorted alphabetically. Cosmetic only — no functional impact.
 
 ---
 
 ## Navigation
 
-[← Phase 00: Prerequisites](00-prerequisites.md) | [Back to README](../README.md) | [Next: Phase 02 — Networking →](02-networking.md)
+[← Phase 00](00-prerequisites.md) &nbsp;|&nbsp; [README](../README.md) &nbsp;|&nbsp; [Phase 02 →](02-networking.md)

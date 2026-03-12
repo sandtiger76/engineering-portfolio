@@ -1,23 +1,18 @@
 # Phase 00 — Prerequisites & Setup
 
-| | |
-|---|---|
-| **Phase** | 00 |
-| **Topic** | Prerequisites & Setup |
-| **Services** | Azure CLI, PowerShell Az module |
-| **Est. Cost** | None — nothing deployed |
+**AZ-104 Domain:** All | **Services:** Azure CLI, PowerShell Az module
 
 ---
 
 ## Navigation
 
-[← Back to README](../README.md) | [Next: Phase 01 — Resource Groups →](01-resource-groups.md)
+[README](../README.md) &nbsp;|&nbsp; [Phase 01 →](01-resource-groups.md)
 
 ---
 
 ## What We're Building
 
-Nothing in Azure yet. This phase gets your local tooling ready, authenticates you to Azure, and establishes the conventions we'll follow throughout the project. Getting this right means every phase after this runs cleanly.
+Nothing in Azure yet. This phase gets your local tooling ready, authenticates you to Azure, and establishes the conventions followed throughout the project. Getting this right means every phase after this runs cleanly.
 
 ---
 
@@ -25,21 +20,15 @@ Nothing in Azure yet. This phase gets your local tooling ready, authenticates yo
 
 ### Azure CLI
 
-The Azure CLI (`az`) is a cross-platform command-line tool that lets you manage Azure resources from a terminal. Every `az` command maps directly to an Azure REST API call — so when you run `az group create`, you're doing exactly what the portal does when you click "Create resource group", just faster and repeatably.
+The Azure CLI (`az`) is a cross-platform command-line tool for managing Azure resources from a terminal. Every `az` command maps directly to an Azure REST API call — so `az group create` does exactly what clicking "Create resource group" in the portal does, just faster and repeatably.
 
 It outputs JSON by default, but supports `--output table` for readable terminal output and `--output tsv` for scripting.
 
-**Why we use it:** It's the most direct and scriptable way to interact with Azure. It's also what most Azure documentation uses, so it's worth being fluent in it.
-
 ### PowerShell Az Module
 
-The `Az` PowerShell module provides cmdlets (e.g. `New-AzResourceGroup`) that wrap the same Azure REST API. PowerShell works with objects rather than text, which makes it more powerful for scripting complex logic — filtering, looping, error handling.
+The `Az` PowerShell module provides cmdlets (e.g. `New-AzResourceGroup`) that wrap the same Azure REST API. PowerShell works with objects rather than text, making it more powerful for complex scripting — filtering, looping, error handling.
 
-**Why we use it:** Many enterprise environments are Windows-first and PowerShell-heavy. Knowing both CLI and PowerShell means you can work in any environment.
-
-### How They Relate
-
-Both tools do the same thing — they call the Azure API. The choice is usually personal preference or environment. This project documents both so you build fluency in each.
+Many enterprise environments are Windows-first and PowerShell-heavy. Knowing both CLI and PowerShell means you can work in any environment.
 
 | | Azure CLI | PowerShell Az |
 |---|---|---|
@@ -47,6 +36,8 @@ Both tools do the same thing — they call the Azure API. The choice is usually 
 | Output | JSON / table / tsv | Objects |
 | Scripting | Bash / shell | `.ps1` scripts |
 | Cross-platform | Yes | Yes (PowerShell 7+) |
+
+Both tools call the same Azure API. The choice is usually personal preference or environment constraint. This project documents both throughout.
 
 ---
 
@@ -112,10 +103,6 @@ Connect-AzAccount
 
 Same browser-based flow. Stores credentials in-memory for the session.
 
-### What This Does
-
-Both commands request an OAuth2 token from Entra ID (formerly Azure Active Directory). The CLI stores the token at `~/.azure/`, PowerShell holds it in memory. Tokens expire — if a session goes idle for a long time you may need to re-authenticate.
-
 ---
 
 ## Step 3 — Confirm Your Subscription
@@ -133,10 +120,7 @@ az account show --output table
 ### PowerShell
 
 ```powershell
-# List all subscriptions
 Get-AzSubscription
-
-# Confirm active context
 Get-AzContext
 ```
 
@@ -156,27 +140,24 @@ Set-AzContext -SubscriptionName "<your-subscription-name>"
 
 ## Step 4 — Set Default Region (CLI)
 
-Setting a default location saves you typing `--location eastus` on every command.
+Setting a default location saves typing `--location eastus` on every command.
 
 ```bash
 az configure --defaults location=eastus
 ```
 
-> Replace `eastus` with your preferred region. Run `az account list-locations --output table` to see all options.
-
-### Verify
+Replace `eastus` with your preferred region. Run `az account list-locations --output table` to see all options.
 
 ```bash
+# Verify
 az configure --list-defaults
 ```
 
-> PowerShell has no equivalent — you'll pass `-Location` explicitly on each command.
+> PowerShell has no equivalent — pass `-Location` explicitly on each command.
 
 ---
 
 ## Step 5 — Check for Existing Resources
-
-Before building anything, confirm what's already in your subscription:
 
 ```bash
 az group list --output table
@@ -186,19 +167,17 @@ az group list --output table
 Get-AzResourceGroup | Format-Table ResourceGroupName, Location, ProvisioningState
 ```
 
-A clean subscription will show only `NetworkWatcherRG` (auto-created by Azure) or nothing at all. If you see other resource groups from previous work, make a note — they won't interfere but it's good to know they're there.
+A clean subscription shows only `NetworkWatcherRG` (auto-created by Azure) or nothing at all.
 
 ---
 
 ## Verification Checklist
 
-Before moving to Phase 01, confirm all of the following:
-
 - [ ] `az version` returns 2.x or higher
 - [ ] `pwsh --version` returns 7.x or higher
 - [ ] `az login` completed successfully
 - [ ] `az account show` shows the correct subscription
-- [ ] `az configure --list-defaults` shows `location = eastus` (or your chosen region)
+- [ ] `az configure --list-defaults` shows `location = eastus`
 
 ---
 
@@ -206,34 +185,22 @@ Before moving to Phase 01, confirm all of the following:
 
 > *Updated: 2026-03-11*
 
-**1. Az module installs per-user by default.** On Linux, `Install-PSResource Az` installs to `~/.local/share/powershell/Modules`. This is fine for personal use. For a shared or system-wide install, run `Install-PSResource Az -Scope AllUsers` as root.
+**1. Az module installs per-user by default.** On Linux, `Install-PSResource Az` installs to `~/.local/share/powershell/Modules`. For a shared or system-wide install, run `Install-PSResource Az -Scope AllUsers` as root.
 
-**2. PowerShell alternative install method.** `Install-PSResource Az` is the modern replacement for `Install-Module -Name Az -Repository PSGallery -Force`. Both work — `Install-PSResource` is the preferred approach going forward.
+**2. `Install-PSResource Az` is the modern replacement** for `Install-Module -Name Az -Repository PSGallery -Force`. Both work — `Install-PSResource` is the preferred approach going forward.
 
-**3. `Get-AzContext` shows "Azure subscription 1" not the subscription name.** This is a display quirk in the context Name field. The subscription ID and account details are correct — don't be thrown off by the label.
+**3. `Get-AzContext` shows "Azure subscription 1" not the subscription name.** This is a display quirk. The subscription ID and account details are correct.
 
-**4. Az 15.0.0 upgrade warning.** If PowerShell warns that Az 14.x is outdated and Az 15.0.0 is available, do not upgrade mid-project. Az 15.0.0 contains breaking changes from 14.x. Review the migration guide before upgrading and wait until between projects.
+**4. Az 15.0.0 contains breaking changes from 14.x.** If PowerShell warns that an upgrade is available, do not upgrade mid-project. Review the migration guide before upgrading.
 
-**5. Cached credentials mean login steps may not be interactive.** If you've previously authenticated, `az account show` and `Get-AzContext` will return valid sessions immediately — no browser flow is triggered. If you're on a fresh machine or tokens have expired, run `az login` and `Connect-AzAccount` to re-authenticate.
+**5. Cached credentials mean login steps may not be interactive.** If you've previously authenticated, `az account show` and `Get-AzContext` return valid sessions immediately. If tokens have expired, run `az login` and `Connect-AzAccount` to re-authenticate.
 
 **6. Token expiry.** Azure CLI tokens expire after approximately 1 hour of inactivity. If commands start returning authentication errors mid-session, run `az login` again.
 
-**7. NetworkWatcherRG is expected.** `az group list` will show a `NetworkWatcherRG` resource group that you didn't create. Azure Network Watcher creates this automatically. Do not delete it.
-
----
-
-## Teardown
-
-Nothing was deployed in this phase. No teardown required.
-
----
-
-## Cost at This Phase
-
-**Zero** — no Azure resources created.
+**7. NetworkWatcherRG is expected.** Azure Network Watcher creates this automatically. Do not delete it.
 
 ---
 
 ## Navigation
 
-[← Back to README](../README.md) | [Next: Phase 01 — Resource Groups →](01-resource-groups.md)
+[README](../README.md) &nbsp;|&nbsp; [Phase 01 →](01-resource-groups.md)

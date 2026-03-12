@@ -84,6 +84,19 @@ A two-tier private network hosts a Linux web server and Windows application VM �
 
 ---
 
+### 🤖 [AI Projects](./ai-projects/README.md)
+
+> *A hands-on exploration of AI as a practical tool for infrastructure engineering — testing what it can genuinely do, where it falls short, and where it introduces real risk.*
+
+This section documents my direct experience using AI tooling in a real homelab environment — not as a novelty, but as a working part of an infrastructure practice. Projects range from giving an AI agent live access to infrastructure systems, to automating personal workflows, to exploring AI-assisted planning for complex migrations.
+
+**Why I built it:** The claims made about AI in infrastructure range from cautious to extraordinary. Rather than take either position at face value, I decided to find out for myself — building real things, in a real environment, and deliberately documenting the good, the bad, and the ugly.
+
+**What I hope you take from it:** An honest account of AI-assisted infrastructure work — including the parts that are genuinely impressive, the parts that will catch you out, and the security considerations that don't always make it into the marketing material.
+
+**[→ View Projects](./ai-projects/README.md)**
+
+---
 
 ## Background
 

@@ -52,6 +52,58 @@ JARVIS is useful for on-demand queries. It is not a substitute for a proper moni
 
 ---
 
+## Personal Experience & Lessons Learned
+
+*This section is deliberately subjective — it reflects direct, hands-on experience rather than general observations.*
+
+### Hallucinations Are Real
+
+The term "hallucination" describes confident but false, inaccurate, or nonsensical output from an AI model. It is not a rare edge case. It happens regularly, and the danger is not that Claude says something obviously wrong — it is that it says something wrong with exactly the same confidence and tone as when it is right.
+
+In infrastructure work, this matters. A hallucinated command, a fabricated configuration value, or a misremembered hostname can cause real problems if acted on without verification. Treat every output as a draft, not a fact.
+
+### AI Gets Worse the Longer You Chat
+
+This was one of the more surprising discoveries. In a long session — brainstorming an Azure project while implementing it simultaneously — Claude was asked to produce a comprehensive automation script based on everything discussed. By the time the script was written, Claude had effectively lost track of the earlier conversation. The script used new resource names that had never been agreed on, contradicting decisions made earlier in the same session.
+
+The lesson: for complex, multi-step projects, do not rely on a single long conversation. Break work into shorter focused sessions. Agree on names, structure, and decisions early, and document them outside the chat — in a file Claude can read — rather than assuming it will remember.
+
+### Token Limits Have Cost Implications
+
+It is easy to get carried away. Each tool call, each SSH connection, each file read consumes tokens. A long session with many MCP interactions can accumulate cost quickly, especially if you are iterating or exploring rather than executing a clear plan.
+
+Keep an eye on session length and token usage. Claude Code has a `/cost` command that shows consumption for the current session. Use it.
+
+### Automation Is Where It Gets Genuinely Impressive
+
+The most compelling real-world example from this project: building a complete self-hosted infrastructure platform — Proxmox LXC, Debian OS, PostgreSQL, Redis, Nginx, Prometheus, Grafana, and Portainer — provisioned from a single Ansible command.
+
+The Ansible code was written with AI assistance. JARVIS was then asked, in plain English, to run it against the homelab. It did. When two issues arose during deployment, JARVIS diagnosed them, applied fixes, and made notes for the documentation — without being asked to. The entire platform came up cleanly.
+
+That is a genuine preview of what AI-assisted infrastructure automation can look like. It is also a good illustration of why careful human oversight matters: the same capability that deployed a working platform could, with a misunderstood instruction or a hallucinated value, have done significant damage instead.
+
+### The Danger of Just Pasting Commands
+
+This is a hard-won lesson. Early in homelab experimentation — before JARVIS, before proper caution — commands suggested by AI were pasted and run without fully understanding what they did. The result was a broken environment that took significant time to recover.
+
+The homelab survived. A production environment might not have.
+
+AI suggestions should be read, understood, and verified before execution. "It looks right" is not sufficient. The combination of AI confidence and engineer haste is a genuinely dangerous one.
+
+### The Homelab Is Fully Open to JARVIS — By Design, With Eyes Open
+
+For this project, JARVIS has been given broad access: SSH into any device, run commands, read and write files, commit to GitHub. This is a deliberate choice to explore the full capability of the tooling.
+
+It is also a significant security exposure, and one that would be completely unacceptable in a production environment. In a homelab behind a home router with no sensitive data, the risk is manageable. The moment that changes — external exposure, sensitive credentials, real business data — the access model needs to change with it.
+
+### AI Is Still in Its Infancy
+
+The possibilities are genuinely impressive. The risks are equally real. What makes AI tooling valuable in an infrastructure context — its ability to take action, make changes, and operate autonomously — is exactly what makes it dangerous when things go wrong.
+
+The engineers who will use this well are the ones who stay engaged, verify outputs, understand what is being done and why, and never mistake confidence for correctness. AI is a powerful tool. Like all powerful tools, it requires respect.
+
+---
+
 ## Security Considerations
 
 This is the most important section for anyone considering a similar setup.

@@ -136,6 +136,34 @@ Used the GitHub MCP to retrieve recent commits, then summarised the changes in p
 
 ---
 
+### Infrastructure as Code
+
+This example demonstrates one of the more impressive capabilities: using AI to generate a complete infrastructure deployment from scratch.
+
+**The scenario:**
+
+You want to provision a full self-hosted platform — a Proxmox LXC container running Debian, with PostgreSQL, Redis, Nginx, Prometheus, Grafana, and Portainer — all deployed from a single Ansible command.
+
+**What you do:**
+
+Ask Claude to generate the Ansible deployment playbooks and a `CLAUDE.md` context file tailored to the project. Save everything to a new directory, then hand it straight back to Claude Code:
+```bash
+cd ~/Documents/project1
+claude
+```
+
+Then simply tell it to run.
+
+**Why this stands out:**
+
+What would typically require hours of research, writing playbooks, and debugging configuration — across seven separate services — is reduced to a single conversation. Claude generates the deployment code, documents the environment in `CLAUDE.md` so future sessions have full context, and the whole stack comes up from one command.
+
+The Ansible code was written with AI assistance. JARVIS was then asked, in plain English, to run it against the homelab. It did. When two issues arose during deployment, JARVIS diagnosed them, applied fixes, and made notes for the documentation — without being asked to. The entire platform came up cleanly.
+
+This is one of the clearest examples of AI acting as a force multiplier rather than just a query interface. The output is real, runnable infrastructure code — not a summary or a starting point, but something you can actually deploy.
+
+---
+
 ## Effective Prompting Patterns
 
 After regular use, a few patterns consistently produce better results:

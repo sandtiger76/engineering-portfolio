@@ -18,17 +18,14 @@ Everything is documented three ways — Azure Portal, Azure CLI, and PowerShell 
 
 The infrastructure is built for **QCB Technologies** — a fictional small IT managed services company. The scenario is made up, but the Azure resources, commands, and architectural decisions are all real and directly applicable to production environments.
 
-Using a scenario makes the project more coherent than a list of disconnected exercises. It gives every decision a reason: *why no public IPs on the VMs? Because in an MSP environment, VMs sit behind a load balancer and should never be directly internet-exposed.*
-
 ---
 
 ## A Note on How This Was Built
 
-The architectural decisions, the scenario design, and the understanding behind each phase are mine. The individual Azure CLI and PowerShell commands come mostly from Microsoft Learn and official documentation — I worked through them hands-on and documented what I found, including the gotchas.
+The architectural decisions, scenario design, and overall phased approach are mine; I worked through the Azure CLI and PowerShell commands hands-on, mostly from Microsoft Learn and official docs, and captured the practical gotchas I hit along the way.
 
-The automation scripts (`deploy-all.sh`, `destroy-all.sh`) were written with AI assistance. I understood what needed to happen in each phase, but orchestrating eight phases into a single idempotent script with correct dependency ordering is not something well covered by Microsoft's own documentation. AI helped bridge that gap. I reviewed, tested, and fixed the output — the scripts are verified working as of March 2026.
+The orchestration scripts (`deploy-all.sh`, `destroy-all.sh`) were written with AI assistance: I specified the phases and constraints, used AI to help with wiring them into an end‑to‑end flow, and then reviewed and tested the scripts myself. 
 
-I think being honest about how you use tools is more useful to anyone reading this than pretending everything was written from scratch.
 
 ---
 
@@ -65,6 +62,13 @@ The AZ-104 exam covers five domains. Here is what this project touches in each:
 ---
 
 ## Architecture
+
+- The environment is built around a simple two-tier network. 
+- A web VM running nginx sits in the web subnet, exposed only to HTTP and HTTPS traffic via its NSG. 
+- A Windows application VM sits in a separate app subnet, reachable only from the web tier — not from the internet. 
+- Neither VM has a public IP address; all access goes through the Azure control plane. 
+- The web VM has a managed identity that gives it permission to read from blob storage and retrieve secrets from Key Vault — no credentials stored on the machine, no passwords in scripts. 
+- A Log Analytics workspace and CPU metric alert round out the environment, watching the web VM and notifying on high load.
 
 ```mermaid
 flowchart TD
@@ -158,15 +162,15 @@ Every resource in this project falls within Azure's free tier:
 
 | Resource | Free Allowance |
 |----------|----------------|
-| vm-web — Linux B1s | ✅ 750 hrs/month |
-| vm-app — Windows B1s | ✅ 750 hrs/month |
-| OS disks — Standard HDD | ✅ 2 × 64 GB managed disks |
-| stqcblab — Blob Hot LRS | ✅ First 5 GB/month |
-| qcb-kv-lab — Key Vault | ✅ First 10,000 operations/month |
-| qcb-law-main — Log Analytics | ✅ First 5 GB/day ingestion |
-| Metric alert rules | ✅ First 10 rules free |
-| VNet, NSGs, NICs | ✅ Always free |
-| Public IPs | ✅ $0 — none created |
+| vm-web — Linux B1s | 750 hrs/month |
+| vm-app — Windows B1s | 750 hrs/month |
+| OS disks — Standard HDD | 2 × 64 GB managed disks |
+| stqcblab — Blob Hot LRS | First 5 GB/month |
+| qcb-kv-lab — Key Vault | First 10,000 operations/month |
+| qcb-law-main — Log Analytics | First 5 GB/day ingestion |
+| Metric alert rules | First 10 rules free |
+| VNet, NSGs, NICs | Always free |
+| Public IPs | $0 — none created |
 
 ---
 
@@ -197,4 +201,4 @@ aca-project/
 
 ---
 
-*Part of my engineering portfolio. No real client data or credentials included.*
+*No real client data or credentials included.*

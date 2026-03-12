@@ -14,44 +14,6 @@ The longer answer is what this page documents. JARVIS is genuinely useful. It al
 
 ---
 
-## What Works Well
-
-### Natural Language Operations
-The most immediately valuable capability is turning plain English into infrastructure operations. Asking "are any containers down?" and getting a consolidated answer across multiple hosts — without opening terminals, SSHing into systems manually, or running commands yourself — is a genuine productivity gain.
-
-For ad-hoc queries and diagnostics, JARVIS performs well. It handles the mechanics of connecting to the right host, running the right command, and presenting the output clearly.
-
-### Documentation Generation
-This was the biggest surprise. Given real infrastructure — a running Docker Compose stack, live container output, an existing documentation repo — Claude produces accurate, well-structured markdown documentation that requires minimal editing. The combination of SSH access to pull live config and GitHub access to commit the results makes documentation feel like a first-class outcome rather than an afterthought.
-
-### Lowering the Barrier to Routine Tasks
-Tasks that are slightly tedious — checking logs, verifying service status, pulling image updates, reviewing recent commits — become conversational. The friction of context-switching between terminals, browser tabs, and documentation is reduced significantly.
-
-### Learning Acceleration
-For someone building homelab skills, having an AI that can explain what a command does, suggest the right approach to a problem, and generate working configuration is genuinely useful. JARVIS accelerates experimentation.
-
----
-
-## What Doesn't Work Well
-
-### No Persistent Memory
-Every Claude Code session starts completely fresh. CLAUDE.md provides environmental context, but it cannot capture what happened in previous sessions — decisions made, problems encountered, changes implemented. If something was done last Tuesday, JARVIS has no knowledge of it unless it was documented.
-
-This is a fundamental architectural limitation, not a configuration problem. The mitigation is disciplined documentation — which JARVIS can help write, but which still requires the engineer to initiate.
-
-### Confidence Without Accuracy
-Claude will sometimes state things confidently that are subtly wrong. In infrastructure operations, subtle inaccuracies matter. Log output misinterpreted, a service dependency incorrectly described, a command that is almost right but not quite — these can cause problems if acted on without verification.
-
-This is not unique to Claude, but it is important to understand. JARVIS is not an authoritative source. It is a capable assistant that still requires human judgement to validate its outputs.
-
-### Context Window Degradation
-In long sessions involving many tool calls — SSH connections, file reads, API queries — Claude can begin to lose track of earlier context. Responses become less coherent, or earlier decisions are forgotten. For complex multi-step tasks, breaking work into shorter sessions produces better results.
-
-### Not a Monitoring Platform
-JARVIS is useful for on-demand queries. It is not a substitute for a proper monitoring stack. It does not alert, it does not trend, it does not page you at 3am when a container crashes. Prometheus and Grafana remain essential. JARVIS complements them; it does not replace them.
-
----
-
 ## Personal Experience & Lessons Learned
 
 *This section is deliberately subjective — it reflects direct, hands-on experience rather than general observations.*
@@ -101,6 +63,44 @@ It is also a significant security exposure, and one that would be completely una
 The possibilities are genuinely impressive. The risks are equally real. What makes AI tooling valuable in an infrastructure context — its ability to take action, make changes, and operate autonomously — is exactly what makes it dangerous when things go wrong.
 
 The engineers who will use this well are the ones who stay engaged, verify outputs, understand what is being done and why, and never mistake confidence for correctness. AI is a powerful tool. Like all powerful tools, it requires respect.
+
+---
+
+## What Works Well
+
+### Natural Language Operations
+The most immediately valuable capability is turning plain English into infrastructure operations. Asking "are any containers down?" and getting a consolidated answer across multiple hosts — without opening terminals, SSHing into systems manually, or running commands yourself — is a genuine productivity gain.
+
+For ad-hoc queries and diagnostics, JARVIS performs well. It handles the mechanics of connecting to the right host, running the right command, and presenting the output clearly.
+
+### Documentation Generation
+This was the biggest surprise. Given real infrastructure — a running Docker Compose stack, live container output, an existing documentation repo — Claude produces accurate, well-structured markdown documentation that requires minimal editing. The combination of SSH access to pull live config and GitHub access to commit the results makes documentation feel like a first-class outcome rather than an afterthought.
+
+### Lowering the Barrier to Routine Tasks
+Tasks that are slightly tedious — checking logs, verifying service status, pulling image updates, reviewing recent commits — become conversational. The friction of context-switching between terminals, browser tabs, and documentation is reduced significantly.
+
+### Learning Acceleration
+For someone building homelab skills, having an AI that can explain what a command does, suggest the right approach to a problem, and generate working configuration is genuinely useful. JARVIS accelerates experimentation.
+
+---
+
+## What Doesn't Work Well
+
+### No Persistent Memory
+Every Claude Code session starts completely fresh. CLAUDE.md provides environmental context, but it cannot capture what happened in previous sessions — decisions made, problems encountered, changes implemented. If something was done last Tuesday, JARVIS has no knowledge of it unless it was documented.
+
+This is a fundamental architectural limitation, not a configuration problem. The mitigation is disciplined documentation — which JARVIS can help write, but which still requires the engineer to initiate.
+
+### Confidence Without Accuracy
+Claude will sometimes state things confidently that are subtly wrong. In infrastructure operations, subtle inaccuracies matter. Log output misinterpreted, a service dependency incorrectly described, a command that is almost right but not quite — these can cause problems if acted on without verification.
+
+This is not unique to Claude, but it is important to understand. JARVIS is not an authoritative source. It is a capable assistant that still requires human judgement to validate its outputs.
+
+### Context Window Degradation
+In long sessions involving many tool calls — SSH connections, file reads, API queries — Claude can begin to lose track of earlier context. Responses become less coherent, or earlier decisions are forgotten. For complex multi-step tasks, breaking work into shorter sessions produces better results.
+
+### Not a Monitoring Platform
+JARVIS is useful for on-demand queries. It is not a substitute for a proper monitoring stack. It does not alert, it does not trend, it does not page you at 3am when a container crashes. Prometheus and Grafana remain essential. JARVIS complements them; it does not replace them.
 
 ---
 

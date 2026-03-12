@@ -70,13 +70,13 @@ The stack runs Nextcloud as the core application — a self-hosted cloud collabo
 
 > *Hands-on Azure infrastructure across AZ-104 domains: networking, compute, storage, identity, monitoring, and automation — with architecture diagrams and phased deploy/destroy scripts.*
 
-This project builds a complete Azure environment that touches every major AZ-104 exam domain — documented with the decisions made, the trade-offs considered, and the lessons learned along the way. A two-tier private network hosts a Linux web server and Windows application VM — neither exposed to the internet — wired together with managed identity, Key Vault secrets, blob storage, and live monitoring, all deployable from a single script and designed to tear down cleanly so you only pay for what you use.
+A two-tier private network hosts a Linux web server and Windows application VM — neither exposed to the internet — wired together with managed identity, Key Vault secrets, blob storage, and live monitoring, all deployable from a single script and designed to tear down cleanly so you only pay for what you use. This project builds a complete Azure environment that touches every major AZ-104 exam domain — documented with the decisions made, the trade-offs considered, and the lessons learned along the way. 
 
 **Why I built it:** I believe the best way to understand Azure infrastructure is to build it, break it, and document everything along the way.
 
 **What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts — written from the perspective of someone working through it in real time.
 
-**Honest disclosure:** The architectural design, learning plan, and scenario are mine. Some automation scripts and deployment orchestration (e.g., multi-phase `deploy`/`destroy` scripts) were developed with AI assistance.
+**Honest disclosure:** The architectural design, learning plan, and scenario are mine. The automation scripts and deployment orchestration (e.g., multi-phase `deploy`/`destroy` scripts) were developed with AI assistance.
 
 
 **[→ View Project](./aca-project/README.md)**

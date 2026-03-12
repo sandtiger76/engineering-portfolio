@@ -1,147 +1,172 @@
-# Azure Cloud Architecture — QCB Technologies
+# Azure Cloud Infrastructure — AZ-104 Hands-On Study Project
 
-> **Portfolio project** | AZ-104 hands-on implementation | Azure CLI + PowerShell + Azure Portal
-
----
-
-## About This Project
-
-QCB Technologies is a small, growing IT managed services company. This project documents the design, deployment, and automation of QCB's core Azure infrastructure — built from scratch using a pay-as-you-go subscription with cost-conscious, tear-down-and-rebuild practices.
-
-The project is structured as a series of phases that together cover every domain of the **AZ-104: Microsoft Azure Administrator** exam. Each phase builds on the last, producing a real, working environment rather than isolated exercises. By the end, a single automation script (`scripts/deploy-all.sh`) rebuilds the entire environment from scratch in 15–20 minutes — and a teardown script (`teardown/destroy-all.sh`) removes everything cleanly to stop all costs.
-
-Every task is documented in three ways:
-
-1. **Azure Portal** — step-by-step navigation through the GUI
-2. **Azure CLI** — the command and what it does
-3. **PowerShell (Az module)** — the equivalent command
-
-**Honest disclosure:** This is an active learning project built to close real gaps in Azure infrastructure knowledge. Documentation reflects progress as it happens, including gotchas, mistakes, and lessons learned.
+> *Building real Azure infrastructure to close real knowledge gaps — documented so others can follow along.*
 
 ---
 
-## What the Scripts Build
+## What This Is
 
-The deploy script (`scripts/deploy-all.sh`) runs end-to-end through seven phases and creates the following infrastructure in a single automated run:
+This project documents my hands-on journey through every domain of the **AZ-104: Microsoft Azure Administrator** exam. Rather than working through isolated exercises, I designed a connected infrastructure scenario and built it from scratch — so each phase builds on the last and produces something that actually works.
 
-| Phase | What Gets Built |
-|---|---|
-| 01 | Resource group `qcb-rg-lab` with tags |
-| 02 | VNet `qcb-vnet-lab`, subnets `snet-web` and `snet-app`, NSGs `nsg-web` and `nsg-app` with inbound rules |
-| 03 | NICs `nic-web` and `nic-app` (no public IPs), Linux VM `vm-web` (Ubuntu 22.04, B1s) with nginx, Windows VM `vm-app` (Windows Server 2022, B1s) |
-| 04 | Storage account `stqcblab` (Standard LRS, TLS 1.2), blob containers `uploads` and `backups` |
-| 05 | System-assigned managed identity on `vm-web`, Storage Blob Data Reader role on `stqcblab` |
-| 06 | Key Vault `qcb-kv-lab` (RBAC mode), secret `vm-admin-password`, Key Vault Secrets User role for `vm-web` identity |
-| 07 | Log Analytics workspace `qcb-law-main` (PerGB2018, 30-day retention), action group `qcb-ag-ops` (email), CPU metric alert `qcb-alert-cpu-web` (>80% for 5 min) |
+By the end, a single script (`scripts/deploy-all.sh`) rebuilds the entire environment in 15–20 minutes. A teardown script removes everything cleanly to stop costs. The whole thing runs on a free Azure account.
 
-The teardown script (`teardown/destroy-all.sh`) purges the Key Vault (bypassing 90-day soft-delete) and deletes the resource group, removing every resource in a single operation.
+Everything is documented three ways — Azure Portal, Azure CLI, and PowerShell — so you can follow along regardless of how you prefer to work.
 
 ---
 
-## How This Covers the AZ-104 Exam
+## The Scenario
 
-The AZ-104 exam is divided into five domains. This project covers all five:
+The infrastructure is built for **QCB Technologies** — a fictional small IT managed services company. The scenario is made up, but the Azure resources, commands, and architectural decisions are all real and directly applicable to production environments.
 
-### Domain 1 — Manage Azure Identities and Governance (20–25%)
-**Covered in:** Phase 01, Phase 05
-
-- Creating and managing resource groups with tags (Phase 01)
-- Understanding subscription scope and resource group as a billing and access boundary (Phase 01)
-- Role-Based Access Control (RBAC) — assigning built-in roles at resource scope (Phase 05)
-- System-assigned managed identities — enabling, retrieving the principal ID, and assigning roles (Phase 05)
-- `az ad signed-in-user show` to retrieve the current user's object ID for role assignments (Phase 06)
-
-### Domain 2 — Implement and Manage Storage (15–20%)
-**Covered in:** Phase 04, Phase 05
-
-- Creating storage accounts with specific SKU, kind, access tier, and TLS version (Phase 04)
-- Disabling public blob access at the account level (Phase 04)
-- Creating blob containers using Entra ID authentication (`--auth-mode login`) rather than storage keys (Phase 04)
-- Assigning the `Storage Blob Data Reader` RBAC role to a managed identity (Phase 05)
-- Understanding the difference between storage key access and identity-based access (Phase 05)
-
-### Domain 3 — Deploy and Manage Azure Compute Resources (20–25%)
-**Covered in:** Phase 03
-
-- Creating virtual machines with explicit NIC references to control network configuration (Phase 03)
-- Understanding VM sizes and the burstable B-series tier (Phase 03)
-- Using `az vm run-command invoke` to execute scripts inside VMs without public IPs or open ports (Phase 03)
-- Installing and configuring software on VMs via the Azure control plane (Phase 03)
-- Understanding the VM agent and how Azure communicates with VMs internally (Phase 03)
-- No-public-IP architecture — why VMs should not be directly internet-exposed (Phase 03)
-
-### Domain 4 — Implement and Manage Virtual Networking (15–20%)
-**Covered in:** Phase 02
-
-- Creating Virtual Networks with custom address spaces (Phase 02)
-- Subnet design — dividing address space across tiers (Phase 02)
-- Network Security Groups — creating, configuring inbound rules, and associating with subnets (Phase 02)
-- NSG rule priorities and the implicit DenyAllInbound rule at priority 65500 (Phase 02)
-- Restricting traffic between subnets — app tier only reachable from web tier (Phase 02)
-- Understanding stateful firewall behaviour — return traffic is automatically allowed (Phase 02)
-
-### Domain 5 — Monitor and Maintain Azure Resources (10–15%)
-**Covered in:** Phase 06, Phase 07
-
-- Azure Key Vault — creating vaults, storing secrets, RBAC access model vs vault access policies (Phase 06)
-- Granting managed identities access to Key Vault secrets without credentials (Phase 06)
-- Log Analytics Workspaces — creating, configuring retention, understanding the PerGB2018 SKU (Phase 07)
-- Azure Monitor action groups — configuring email notifications (Phase 07)
-- Metric alert rules — defining conditions, evaluation windows, and linking to action groups (Phase 07)
-- Understanding the `microsoft.insights` resource provider and auto-registration (Phase 07)
+Using a scenario makes the project more coherent than a list of disconnected exercises. It gives every decision a reason: *why no public IPs on the VMs? Because in an MSP environment, VMs sit behind a load balancer and should never be directly internet-exposed.*
 
 ---
 
-## Scenario
+## A Note on How This Was Built
 
-| | |
-|---|---|
-| **Company** | QCB Technologies Ltd |
-| **Domain** | qcbhomelab.online |
-| **Size** | Small IT MSP, ~10 staff |
-| **Goal** | Deploy and manage core Azure infrastructure across all AZ-104 domains |
-| **Primary Region** | `eastus` |
-| **Subscription** | QCB PAYG PersonalCloud (Pay-as-you-go) |
+The architectural decisions, the scenario design, and the understanding behind each phase are mine. The individual Azure CLI and PowerShell commands come mostly from Microsoft Learn and official documentation — I worked through them hands-on and documented what I found, including the gotchas.
+
+The automation scripts (`deploy-all.sh`, `destroy-all.sh`) were written with AI assistance. I understood what needed to happen in each phase, but orchestrating eight phases into a single idempotent script with correct dependency ordering is not something well covered by Microsoft's own documentation. AI helped bridge that gap. I reviewed, tested, and fixed the output — the scripts are verified working as of March 2026.
+
+I think being honest about how you use tools is more useful to anyone reading this than pretending everything was written from scratch.
 
 ---
 
-## Architecture Overview
+## What Gets Built
 
-```
-[ qcb-vnet-lab — 10.0.0.0/16 ]
-│
-├── [ snet-web — 10.0.1.0/24 ]  ←  nsg-web (allow HTTP:80, HTTPS:443 inbound)
-│     vm-web — Ubuntu 22.04, B1s, private IP 10.0.1.4
-│     nginx serving QCB Technologies page
-│     System-assigned managed identity
-│       → Storage Blob Data Reader on stqcblab
-│       → Key Vault Secrets User on qcb-kv-lab
-│
-└── [ snet-app — 10.0.2.0/24 ]  ←  nsg-app (allow TCP:8080 from snet-web only)
-      vm-app — Windows Server 2022, B1s, private IP 10.0.2.4
+A connected Azure environment spanning all five AZ-104 exam domains:
 
-[ stqcblab ]      — StorageV2, LRS, Hot, TLS1.2 | containers: uploads, backups
-[ qcb-kv-lab ]    — Key Vault, RBAC mode | secret: vm-admin-password
-[ qcb-law-main ]  — Log Analytics, PerGB2018, 30-day retention
-[ qcb-ag-ops ]    — Action group | email: qcb-alerts@qcbhomelab.online
-[ qcb-alert-cpu-web ] — CPU > 80% for 5 min on vm-web → qcb-ag-ops
+| Phase | What Gets Built | AZ-104 Domain |
+|-------|----------------|---------------|
+| [00 — Prerequisites](docs/00-prerequisites.md) | Tooling, authentication, conventions | — |
+| [01 — Resource Groups](docs/01-resource-groups.md) | `qcb-rg-lab` with tags | Identities & Governance |
+| [02 — Networking](docs/02-networking.md) | VNet, two subnets, NSGs with inbound rules | Virtual Networking |
+| [03 — Compute](docs/03-compute.md) | Linux VM (nginx) + Windows VM, no public IPs | Compute Resources |
+| [04 — Storage](docs/04-storage.md) | Storage account, blob containers, TLS 1.2 | Storage |
+| [05 — Identity](docs/05-identity.md) | Managed identity, RBAC role assignment | Identities & Governance |
+| [06 — Key Vault](docs/06-keyvault.md) | Key Vault (RBAC mode), secrets, identity-based access | Monitor & Maintain |
+| [07 — Monitoring](docs/07-monitoring.md) | Log Analytics, action group, CPU metric alert | Monitor & Maintain |
+| [08 — Automation](docs/08-automation.md) | Deploy + teardown scripts, idempotency | All domains |
+
+---
+
+## AZ-104 Domain Coverage
+
+The AZ-104 exam covers five domains. Here is what this project touches in each:
+
+| Domain | Weight | Covered By |
+|--------|--------|------------|
+| Manage Azure Identities and Governance | 20–25% | Resource groups, tags, RBAC, managed identities |
+| Implement and Manage Storage | 15–20% | Storage accounts, blob containers, identity-based access |
+| Deploy and Manage Azure Compute Resources | 20–25% | VMs, NICs, no-public-IP pattern, run-command |
+| Implement and Manage Virtual Networking | 15–20% | VNets, subnets, NSGs, stateful firewall rules |
+| Monitor and Maintain Azure Resources | 10–15% | Key Vault, Log Analytics, Azure Monitor, metric alerts |
+
+---
+
+## Architecture
+
+```mermaid
+flowchart TD
+    subgraph RG["📦 qcb-rg-lab — East US"]
+        subgraph VNET["qcb-vnet-lab  10.0.0.0/16"]
+            subgraph WEB["snet-web  10.0.1.0/24"]
+                VMWEB["🐧 vm-web\nUbuntu 22.04 · B1s\n10.0.1.4\nnginx"]
+            end
+            subgraph APP["snet-app  10.0.2.0/24"]
+                VMAPP["🪟 vm-app\nWindows Server 2022 · B1s\n10.0.2.4"]
+            end
+        end
+
+        NSG_WEB["🔒 nsg-web\nAllow HTTP:80, HTTPS:443"]
+        NSG_APP["🔒 nsg-app\nAllow TCP:8080 from snet-web only"]
+
+        STORAGE["💾 stqcblab\nBlob Storage · LRS · TLS 1.2\ncontainers: uploads, backups"]
+        KV["🔑 qcb-kv-lab\nKey Vault · RBAC mode\nsecret: vm-admin-password"]
+        LAW["📊 qcb-law-main\nLog Analytics · PerGB2018\n30-day retention"]
+        ALERT["🔔 qcb-alert-cpu-web\nCPU > 80% for 5 min\n→ email: qcb-ag-ops"]
+    end
+
+    NSG_WEB -.->|protects| WEB
+    NSG_APP -.->|protects| APP
+    VMWEB -->|managed identity\nBlob Data Reader| STORAGE
+    VMWEB -->|managed identity\nSecrets User| KV
+    VMWEB -->|metrics| ALERT
+    ALERT -->|triggers| LAW
+
+    style RG fill:#f0f4ff,stroke:#4a6fa5
+    style VNET fill:#e8f5e9,stroke:#388e3c
+    style WEB fill:#fff8e1,stroke:#f9a825
+    style APP fill:#fce4ec,stroke:#c62828
 ```
 
-> **No public IPs on any VM.** All VM access is via `az vm run-command` through the Azure control plane. VMs communicate over private IPs only within the VNet.
+> No public IPs on any VM. All VM access is via `az vm run-command` through the Azure control plane. VMs communicate over private IPs only.
 
 ---
 
-## Design Decisions
+## Key Design Decisions
 
-| Decision | Reason |
-|---|---|
-| No public IPs on VMs | Enterprise pattern — VMs not directly internet-exposed. Access via Azure control plane only. Eliminates cost and attack surface. |
-| No load balancer | Out of scope for this lab. Would sit in front of `vm-web` in a production deployment. NSG rules for 80/443 are already in place. |
-| No data subnet | Simplified to two subnets. A `snet-data` subnet (`10.0.3.0/24`) would be added for storage private endpoints in a production design. |
-| Standard_B1s for both VMs | Cheapest burstable tier. Covered by Azure free account (750 hrs/month each for Linux and Windows). |
-| Standard_LRS storage | Cheapest replication tier. Three copies in one datacentre — sufficient for a lab. |
+| Decision | Reasoning |
+|----------|-----------|
+| No public IPs on VMs | Enterprise pattern — VMs not directly internet-exposed. Eliminates both attack surface and hourly IP cost. Access via Azure control plane only. |
 | RBAC on Key Vault | Microsoft's recommended model for new deployments. Consistent with how all other access is managed in this project. |
-| Containers via `--auth-mode login` | Uses Entra ID identity rather than storage account keys — the secure, recommended approach. |
+| Storage containers via `--auth-mode login` | Uses Entra ID identity rather than storage account keys — the secure, recommended approach. |
+| Standard_B1s for both VMs | Cheapest burstable tier, covered by Azure free account (750 hrs/month each for Linux and Windows). |
+| Standard_LRS storage | Three local copies — sufficient for a lab. Keeps costs at zero. |
+| No load balancer | Out of scope for this lab. In a production design, a load balancer would hold the public IP and sit in front of `vm-web`. The NSG rules for 80/443 are already in place. |
+
+---
+
+## Running It Yourself
+
+Everything in this project is free to run. All resources fall within Azure's free tier allowances, and the teardown script removes everything cleanly when you're done.
+
+### Prerequisites
+
+| Tool | Install |
+|------|---------|
+| Azure CLI | [docs.microsoft.com/cli/azure](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) |
+| PowerShell 7+ | [aka.ms/powershell](https://aka.ms/powershell) |
+| Az PowerShell module | `Install-Module -Name Az` |
+| Git | [git-scm.com](https://git-scm.com) |
+
+### Deploy
+
+```bash
+git clone <repo-url>
+cd aca-project
+chmod +x scripts/deploy-all.sh
+./scripts/deploy-all.sh
+```
+
+Builds the full environment across all phases in 15–20 minutes.
+
+### Teardown
+
+```bash
+chmod +x teardown/destroy-all.sh
+./teardown/destroy-all.sh
+```
+
+Purges the Key Vault (bypassing 90-day soft-delete) and deletes the resource group. Everything gone in 3–5 minutes.
+
+---
+
+## Free Tier Coverage
+
+Every resource in this project falls within Azure's free tier:
+
+| Resource | Free Allowance |
+|----------|----------------|
+| vm-web — Linux B1s | ✅ 750 hrs/month |
+| vm-app — Windows B1s | ✅ 750 hrs/month |
+| OS disks — Standard HDD | ✅ 2 × 64 GB managed disks |
+| stqcblab — Blob Hot LRS | ✅ First 5 GB/month |
+| qcb-kv-lab — Key Vault | ✅ First 10,000 operations/month |
+| qcb-law-main — Log Analytics | ✅ First 5 GB/day ingestion |
+| Metric alert rules | ✅ First 10 rules free |
+| VNet, NSGs, NICs | ✅ Always free |
+| Public IPs | ✅ $0 — none created |
 
 ---
 
@@ -151,87 +176,20 @@ The AZ-104 exam is divided into five domains. This project covers all five:
 aca-project/
 ├── README.md
 ├── docs/
-│   ├── 00-prerequisites.md       ← Tooling, authentication, conventions
-│   ├── 01-resource-groups.md     ← Resource groups, tags, subscription scope
-│   ├── 02-networking.md          ← VNet, subnets, NSGs, inbound rules
-│   ├── 03-compute.md             ← VMs, NICs, no-public-IP pattern, run-command
-│   ├── 04-storage.md             ← Storage account, blob containers, TLS
-│   ├── 05-identity.md            ← Managed identity, RBAC role assignments
-│   ├── 06-keyvault.md            ← Key Vault, secrets, identity-based access
-│   ├── 07-monitoring.md          ← Log Analytics, action groups, metric alerts
-│   └── 08-automation.md          ← Deploy + teardown scripts, idempotency
+│   ├── 00-prerequisites.md
+│   ├── 01-resource-groups.md
+│   ├── 02-networking.md
+│   ├── 03-compute.md
+│   ├── 04-storage.md
+│   ├── 05-identity.md
+│   ├── 06-keyvault.md
+│   ├── 07-monitoring.md
+│   └── 08-automation.md
 ├── scripts/
-│   └── deploy-all.sh             ← Master deploy script (all 7 phases)
+│   └── deploy-all.sh
 └── teardown/
-    └── destroy-all.sh            ← Master teardown — purges KV, deletes RG
+    └── destroy-all.sh
 ```
-
----
-
-## Phases
-
-| Phase | Topic | AZ-104 Domain | Status |
-|-------|-------|---------------|--------|
-| [00](docs/00-prerequisites.md) | Prerequisites & Setup | All | ✅ Complete |
-| [01](docs/01-resource-groups.md) | Resource Groups & Tags | Identities & Governance | ✅ Complete |
-| [02](docs/02-networking.md) | VNet, Subnets, NSGs | Virtual Networking | ✅ Complete |
-| [03](docs/03-compute.md) | VMs, NICs, run-command | Compute Resources | ✅ Complete |
-| [04](docs/04-storage.md) | Storage Account, Blobs | Storage | ✅ Complete |
-| [05](docs/05-identity.md) | Managed Identity, RBAC | Identities & Governance | ✅ Complete |
-| [06](docs/06-keyvault.md) | Key Vault, Secrets | Monitor & Maintain | ✅ Complete |
-| [07](docs/07-monitoring.md) | Log Analytics, Alerts | Monitor & Maintain | ✅ Complete |
-| [08](docs/08-automation.md) | Deploy + Teardown Scripts | All | ✅ Complete |
-
----
-
-## Naming Convention
-
-| Resource | Name |
-|----------|------|
-| Resource Group | `qcb-rg-lab` |
-| Virtual Network | `qcb-vnet-lab` |
-| Subnet (web) | `snet-web` |
-| Subnet (app) | `snet-app` |
-| NSG (web) | `nsg-web` |
-| NSG (app) | `nsg-app` |
-| NIC (web) | `nic-web` |
-| NIC (app) | `nic-app` |
-| Linux VM | `vm-web` |
-| Windows VM | `vm-app` |
-| Storage Account | `stqcblab` *(no hyphens — Azure enforced)* |
-| Blob Container 1 | `uploads` |
-| Blob Container 2 | `backups` |
-| Key Vault | `qcb-kv-lab` |
-| Log Analytics Workspace | `qcb-law-main` |
-| Action Group | `qcb-ag-ops` |
-| CPU Alert | `qcb-alert-cpu-web` |
-
----
-
-## Free Tier Coverage
-
-| Resource | Free Tier |
-|---|---|
-| vm-web (Linux B1s) | ✅ 750 hrs/month |
-| vm-app (Windows B1s) | ✅ 750 hrs/month |
-| OS Disks (Standard HDD) | ✅ 2× 64 GB managed disks |
-| stqcblab (Blob Hot LRS) | ✅ First 5 GB/month |
-| qcb-kv-lab | ✅ First 10,000 operations/month |
-| qcb-law-main | ✅ First 5 GB/day ingestion |
-| Metric alerts | ✅ First 10 rules free |
-| VNet, NSGs, NICs | ✅ Always free |
-| **Public IPs** | **✅ $0 — none created** |
-
----
-
-## Tools Required
-
-| Tool | Install |
-|------|---------|
-| Azure CLI | [docs.microsoft.com/cli/azure](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli) |
-| PowerShell 7+ | [aka.ms/powershell](https://aka.ms/powershell) |
-| Az PowerShell module | `Install-Module -Name Az` |
-| Git | [git-scm.com](https://git-scm.com) |
 
 ---
 
@@ -239,4 +197,4 @@ aca-project/
 
 ---
 
-*Part of the Engineering Portfolio — QCB Technologies lab environment. No real client data or credentials included.*
+*Part of my engineering portfolio. No real client data or credentials included.*

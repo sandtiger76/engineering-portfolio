@@ -57,11 +57,12 @@ Throughout my career I've built, supported, and migrated infrastructure across p
 
 The stack runs Nextcloud as the core application — a self-hosted cloud collaboration and file-sharing platform — alongside PostgreSQL (in place of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
 
-**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won't claim it was written entirely from scratch. The value was two-fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self-hosted platform production-grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That's what infrastructure-as-code means in practice, and I wanted to experience it directly rather than just read about it.
-
 **Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling — areas I was curious about but had no practical experience in.
 
 **What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
+
+**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won't claim it was written entirely from scratch. The value was two-fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self-hosted platform production-grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That's what infrastructure-as-code means in practice, and I wanted to experience it directly rather than just read about it.
+
 
 **[→ View Project](./asi-project/README.md)**
 
@@ -69,19 +70,16 @@ The stack runs Nextcloud as the core application — a self-hosted cloud collabo
 
 ### ☁️ [Azure Cloud Architecture](./aca-project/README.md)
 
-> *A hands-on Azure learning project — implementing a connected infrastructure across the core Azure domains, documented as I go.*
+> *Hands-on Azure infrastructure across AZ-104 domains: networking, compute, storage, identity, monitoring, and automation — with architecture diagrams and phased deploy/destroy scripts.*
 
-This project was built to deliberately close gaps in my end-to-end Azure infrastructure experience. I learn best by implementing a real environment, testing it, and deepening that understanding through iteration.
+This project builds a complete Azure environment that touches every major AZ-104 exam domain — documented with the decisions made, the trade-offs considered, and the lessons learned along the way. A two-tier private network hosts a Linux web server and Windows application VM — neither exposed to the internet — wired together with managed identity, Key Vault secrets, blob storage, and live monitoring, all deployable from a single script and designed to tear down cleanly so you only pay for what you use.
 
-The project draws from each major area of the AZ-104 curriculum — networking, compute, storage, identity, monitoring, and automation — and turns those topics into practical, working implementations. All work is carried out in a pay-as-you-go Azure subscription, using free-tier services where possible and short-lived resources where not, keeping costs minimal while still reflecting real-world usage patterns.
-
-The documentation focuses on not just what was built, but why — covering the decisions, trade-offs, and dependencies that are often hard to grasp from reference documentation alone.
-
-**Honest disclosure:** This is an active learning project. Documentation reflects progress as it happens rather than a finished guide, and some areas are explored more deeply than others as my understanding evolves.
-
-**Why I built it:** To gain genuine hands-on Azure infrastructure experience across core domains, and to anchor that learning in real implementations rather than theory alone.
+**Why I built it:** To gain genuine hands-on Azure experience across core domains.
 
 **What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts — written from the perspective of someone working through it in real time.
+
+**Honest disclosure:** The architectural design, learning plan, and scenario are mine. Some automation scripts and deployment orchestration (e.g., multi-phase `deploy`/`destroy` scripts) were developed with AI assistance.
+
 
 **[→ View Project](./aca-project/README.md)**
 

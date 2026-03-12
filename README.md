@@ -10,11 +10,11 @@
 
 I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience spanning end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. Over the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation initiatives — guiding transitions from traditional on-premises environments to cloud-based platforms across multiple regions and sites.
 
-I've always been curious by nature and genuinely enjoy learning. As the technology landscape shifted toward cloud-native architectures, automation, and infrastructure as code, I decided to deliberately build on my existing skills — filling the gaps in modern tooling that my career hadn't naturally taken me to yet.
+I've always been curious by nature and genuinely enjoy learning. As the IT landscape continues to evolve, cloud platforms, automation, and AI‑assisted tooling have become increasingly central to how infrastructure is designed and operated. I made a deliberate decision to expand my hands‑on experience with modern tooling, building practical skills that complement my existing infrastructure background.
 
-This portfolio documents that journey. Each project represents work I have designed and implemented end-to-end, reflecting real-world decision-making as well as the outcomes and lessons learned along the way. It also reflects my use of modern tooling — including AI-assisted workflows — to accelerate learning, experimentation, and problem-solving.
+Each project reflects real‑world decision‑making, as well as the outcomes and lessons learned along the way.
 
-In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility as first-class deliverables.
+In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility.
 
 ---
 
@@ -53,13 +53,13 @@ This project documents the kind of migration I've delivered in the real world fo
 
 Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code — two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
 
-The stack runs Nextcloud as the core application — a self-hosted cloud collaboration and file-sharing platform — alongside PostgreSQL (in place of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
+The stack runs Nextcloud as the core application — a self-hosted cloud collaboration and file-sharing platform — alongside PostgreSQL (instead of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
 
 **Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling — areas I was curious about but had no practical experience in.
 
 **What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
 
-**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won't claim it was written entirely from scratch. The value was two-fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self-hosted platform production-grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That's what infrastructure-as-code means in practice, and I wanted to experience it directly rather than just read about it.
+**Honest disclosure:** The Ansible code was written with AI assistance.  The value of this project was not authorship of every line, but learning what the components do, how they fit together, and what it actually takes to build a self‑hosted cloud platform that can be torn down and redeployed from code. Experiencing that full lifecycle firsthand — including repeatable deploy and destroy from a single automated command — is what infrastructure‑as‑code means to me, and I wanted to learn it by building rather than just reading about it.
 
 
 **[→ View Project](./asi-project/README.md)**

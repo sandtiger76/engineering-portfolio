@@ -64,9 +64,28 @@ This is not a tutorial for a finished product. It is an honest account of buildi
 
 | Document | What it covers |
 |---|---|
+| [CLAUDE.md](./CLAUDE.md) | Example context file — the configuration that gives JARVIS its environmental awareness |
 | [installation.md](./installation.md) | Setting up Claude Code, CLAUDE.md, and all MCP servers |
 | [usage.md](./usage.md) | Real examples — what was asked, what JARVIS did, what the results were |
 | [evaluation.md](./evaluation.md) | Honest assessment: capabilities, limitations, and security risks |
+
+---
+
+## What's Next
+
+This project is actively evolving. Two areas are planned for exploration:
+
+### AI-Assisted Monitoring Automation
+
+The current setup handles ad-hoc queries well — ask a question, get an answer. The next step is closing the loop: using n8n as a workflow orchestrator to trigger Claude automatically in response to infrastructure events. Rather than asking JARVIS "are any containers down?", the goal is for JARVIS to tell you — diagnose the issue, attempt remediation, and document what it did, all without manual intervention.
+
+This raises interesting questions about trust, oversight, and what level of autonomy is appropriate for an AI agent operating on live infrastructure. Those questions will be documented honestly as the work progresses.
+
+### JARVIS in Your Pocket — WhatsApp and Telegram Integration
+
+One of the more compelling possibilities: integrating WhatsApp or Telegram with Claude Code so that JARVIS can be controlled directly from a phone. Send a message to yourself, JARVIS acts on it. The infrastructure assistant becomes a true personal assistant — available anywhere, not just at a workstation.
+
+The implications go well beyond homelab management. A natural language interface to your entire infrastructure, reachable from any device, at any time. The possibilities are significant. So are the security considerations, which will be explored in detail when this is implemented.
 
 ---
 

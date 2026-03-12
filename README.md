@@ -16,7 +16,7 @@ This portfolio documents that journey. Each project represents work I have desig
 
 In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility as first-class deliverables.
 
-This portfolio is relevant to infrastructure engineering, cloud engineering, platform, and migration-focused roles. Whether you're a technical engineer, a hiring manager, or someone planning a similar project yourself — I hope you find something useful here.
+All materials are published openly and may be reused freely. Feedback, corrections, and suggestions are very welcome.
 
 ---
 

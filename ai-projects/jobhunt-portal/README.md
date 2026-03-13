@@ -54,29 +54,6 @@ flowchart TD
 
 ---
 
-## The Honest Answers to the Big Questions
-
-### Can AI build a full-stack interactive system hosted in a homelab?
-
-**Yes — but the human has to stay in charge.**
-
-AI designed the architecture, wrote the code, explained every decision, and debugged real errors. What it couldn't do was know my specific environment, my goals, or what actually mattered to me. I provided the direction and context. AI provided the technical execution. Neither works well without the other.
-
-The working model that emerged: **AI handles the implementation. You handle the vision, the decisions, and the judgement.**
-
-### What are the real risks?
-
-Four risks are worth being honest about:
-
-| Risk | Reality |
-|---|---|
-| **Legal** | Terms of service vary. Review the terms of service of any site and seek appropriate legal advice. |
-| **Scraper fragility** | HTML scrapers break when sites redesign. This is inherent, not solvable — it requires monitoring and maintenance. |
-| **Homelab reliability** | A home server is not a data centre. Power cuts happen. For a job hunting tool this is acceptable. For anything critical it would not be. |
-| **AI over-reliance** | AI produces confident-sounding code that can be subtly wrong. Understanding what you're running — not just copying it — is essential. |
-
----
-
 ## Stack at a Glance
 
 | Service | Purpose |
@@ -123,6 +100,30 @@ All containers run on a single Docker bridge network inside one LXC container on
 | [docs/portal.md](docs/portal.md) | The web portal, API endpoints, how to use it | Both |
 | [docs/setup-guide.md](docs/setup-guide.md) | Full rebuild from scratch | Technical |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Real problems encountered and how they were fixed | Technical |
+
+
+---
+
+## The Honest Answers to the Big Questions
+
+### Can AI build a full-stack interactive system hosted in a homelab?
+
+**Yes — but the human has to stay in charge.**
+
+AI designed the architecture, wrote the code, explained every decision, and debugged real errors. What it couldn't do was know my specific environment, my goals, or what actually mattered to me. I provided the direction and context. AI provided the technical execution. Neither works well without the other.
+
+The working model that emerged: **AI handles the implementation. You handle the vision, the decisions, and the judgement.**
+
+### What are the real risks?
+
+Four risks are worth being honest about:
+
+| Risk | Reality |
+|---|---|
+| **Legal** | Terms of service vary. Review the terms of service of any site and seek appropriate legal advice. |
+| **Scraper fragility** | HTML scrapers break when sites redesign. This is inherent, not solvable — it requires monitoring and maintenance. |
+| **Homelab reliability** | A home server is not a data centre. Power cuts happen. For a job hunting tool this is acceptable. For anything critical it would not be. |
+| **AI over-reliance** | AI produces confident-sounding code that can be subtly wrong. Understanding what you're running — not just copying it — is essential. |
 
 ---
 

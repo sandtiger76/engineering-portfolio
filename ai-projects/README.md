@@ -1,11 +1,15 @@
 # The AI Experiment
 
-There's no shortage of AI hype. AI will transform IT operations, automate professional work, accelerate development. But most of what gets written is abstract — capability benchmarks, theoretical frameworks, carefully constructed demos that never leave the controlled environment.
+AI is everywhere right now. It’s pitched as a game changer for IT operations, development, and professional work — often with bold claims and very little practical context.
 
-Each project starts with a question I have — something that couldn't be answered without actually building it and finding out for myself. 
-The limitations are documented alongside the wins, risks and security exposure.
+I didn’t want to take those claims at face value. I wanted to see for myself what actually works, how easy it really is, and where the risks start to appear.
+
+This section of my portfolio is a collection of hands‑on experiments where I use AI as a tool and see what happens when it’s applied to real problems. Each project starts with a simple question — usually something I’m curious about, or something I’ve wondered whether AI could genuinely help with — and the only way to answer it is to build something and try it.
+
+The work is done in my homelab rather than live production environments, but the systems, constraints, and problems are real. Along the way, I document what worked, what didn’t, what felt genuinely useful, and what raised concerns — including limitations, risks, and security trade‑offs.
 
 > *How much can AI actually do — and where does human judgement remain essential?*
+
 
 ---
 
@@ -31,7 +35,7 @@ The result is more capable, and more concerning, than expected.
 
 > *A sysadmin with no development background builds a full-stack data pipeline — with AI as co-engineer.*
 
-Eight job boards. Daily automated scraping. Deduplication, classification, and shortlisting. A self-hosted web portal for tracking applications. Zero cloud dependency. Built by someone who had never written a production application before.
+Multiple job boards. Daily automated scraping. Deduplication, classification, and shortlisting. A self-hosted web portal for tracking applications. Zero cloud dependency. Built by someone who had never written a production application before.
 
 This project is two things at once: a useful job hunting tool, and an honest account of what it's like to build something real with AI when you're working outside your area of expertise.
 

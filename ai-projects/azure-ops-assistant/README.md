@@ -29,7 +29,7 @@ This project is a direct attempt to find out.
 This experiment builds on two earlier projects:
 
 - **[AZ-104 Azure Lab](https://github.com/sandtiger76/engineering-portfolio/blob/main/aca-project/README.md)** — A hands-on Azure environment built to cover every domain of the AZ-104 exam. The infrastructure (VMs, networking, storage, Key Vault, monitoring) was proven to work and fully documented.
-- **[AI Infrastructure Ops Assistant (Homelab)](../ai-projects/infra-ops-assistant/README.md)** — An earlier experiment giving an AI agent (JARVIS) access to a self-hosted homelab via SSH and MCP servers. That project explored what AI-assisted infrastructure operations looked like in practice.
+- **[AI Infrastructure Ops Assistant (Homelab)](https://github.com/sandtiger76/engineering-portfolio/blob/main/ai-projects/infra-ops-assistant/README.md)** — An earlier experiment giving an AI agent (JARVIS) access to a self-hosted homelab via SSH and MCP servers. That project explored what AI-assisted infrastructure operations looked like in practice.
 
 The natural next step was to combine them: take the proven Azure environment from the first project, and hand it entirely to an AI agent to deploy, verify, document, and destroy — with no manual steps.
 
@@ -150,4 +150,4 @@ My final recomendation
 ## Related Projects
 
 - [AZ-104 Azure Lab](https://github.com/sandtiger76/engineering-portfolio/blob/main/aca-project/README.md — The Azure infrastructure this experiment deployed
-- [AI Infrastructure Ops Assistant (Homelab)](../ai-projects/infra-ops-assistant/README.md) — The earlier homelab experiment that laid the groundwork for this one
+- [AI Infrastructure Ops Assistant (Homelab)](https://github.com/sandtiger76/engineering-portfolio/blob/main/ai-projects/infra-ops-assistant/README.md) — The earlier homelab experiment that laid the groundwork for this one

@@ -2,11 +2,8 @@
 
 There's no shortage of AI hype. AI will transform IT operations, automate professional work, accelerate development. But most of what gets written is abstract — capability benchmarks, theoretical frameworks, carefully constructed demos that never leave the controlled environment.
 
-This section is different.
-
-Each project starts with a question I have — something that couldn't be answered without actually building it and finding out for myself. The environments are real. The limitations are documented alongside the wins. And where AI introduced genuine risk — security exposure, legal grey areas, over-reliance on generated output — those risks are recorded honestly.
-
-The through-line is the same question asked at increasing levels of complexity:
+Each project starts with a question I have — something that couldn't be answered without actually building it and finding out for myself. 
+The limitations are documented alongside the wins, risks and security exposure.
 
 > *How much can AI actually do — and where does human judgement remain essential?*
 
@@ -20,7 +17,7 @@ The through-line is the same question asked at increasing levels of complexity:
 
 > *Give AI real SSH access to a live homelab. Ask it anything. See what happens.*
 
-You've probably used AI to write infrastructure commands. But what happens when it can *run* them? This project connects Claude to a real multi-host homelab via MCP servers — SSH, Docker, DNS monitoring, GitHub — and explores what a natural language interface to live infrastructure actually looks like in practice.
+You've probably used AI to write infrastructure commands. But what happens when it can *run* them? This project connects Claude code to a real multi-host homelab via MCP servers — SSH, Docker, DNS monitoring, GitHub — and explores what a natural language interface to live infrastructure actually looks like in practice.
 
 The result is more capable, and more concerning, than expected.
 

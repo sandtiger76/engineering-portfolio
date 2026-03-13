@@ -132,7 +132,7 @@ The technical mistakes (wrong SKU, wrong name) are almost never catastrophic on 
 
 ## Can an AI agent fully administer a cloud environment from a simple natural language briefing — end to end, without manual intervention?
 Yes, it worked, but it also made costly mistakes. My final recomendation:
----
+
 # AI should never have the power to make changes in a production environment
 ---
 

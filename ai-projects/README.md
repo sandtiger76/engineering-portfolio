@@ -30,7 +30,7 @@ The result is more capable, and more concerning, than expected.
 **[→ View Project](./infra-ops-assistant/README.md)**
 
 ---
-### ☁️ [AI Azure Ops — Giving an AI Agent Control of a Real Azure Environment](./azure-ops-assistant/README.md)
+### ☁️ [Giving an AI Agent Control of a Real Azure Environment](./azure-ops-assistant/README.md)
 
 > *What happens when you stop asking AI to help with infrastructure — and let it run the whole thing?*
 

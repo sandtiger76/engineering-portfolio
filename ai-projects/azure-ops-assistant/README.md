@@ -6,13 +6,13 @@
 
 *This experiment was conducted entirely within a personal, isolated Azure Pay-As-You-Go account. No production systems, real client data, or shared infrastructure were involved at any point.
 The tools, methods, and workflows documented here should not be used in a production environment. This project exists to demonstrate why — the AI agent deviated from its agreed specification, selected unintended paid services, and did so without flagging any of it. Those failure modes are manageable in a disposable lab. In production, they are not. The experiment is the warning.*
----
+
 
 > *We all know production changes shouldn't be made unless you fully understand their impact. For this experiment, I deliberately stepped away from that rule — giving AI broad control of a test machine and an Azure lab environment, guided only by a defined set of instructions.*
 >
 > *The results were impressive, but not flawless. Several mistakes were made — most of them preventable — and they reinforced an important lesson: AI can execute quickly and confidently, but it lacks the situational awareness and judgment required to operate safely without supervision.*
 
----
+
 
 ## The Question
 

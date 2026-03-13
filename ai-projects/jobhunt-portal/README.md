@@ -6,17 +6,18 @@
 
 ---
 
-## The Story
+## Introduction
 
-Job hunting is tedious in a way that feels like it should be solvable.
+Searching for jobs across numerous job boards, recruitment agencies, and duplicate listings is tedious, as each platform publishes and updates independently.
 
-On a small island there are eight job boards, several recruitment agencies, and a government listing service — all publishing independently, all updated at different times, none talking to each other. The same job appears on three different sites. Closing dates get missed. You lose track of what you've applied for. And every morning starts with the same manual ritual: open eight tabs, scroll through each one, try to remember what was there yesterday.
+The obvious question was: could this be automated? Could I build a single place where all jobs land automatically, duplicates are flagged, irrelevant roles are filtered out, and I can track my own application progress — all without paying for any cloud services?
 
-I had a homelab — a small home server I use for self-hosting and learning. I had been curious about AI-assisted development for a while but hadn't found the right project to test it properly. And I had a genuine frustration that needed solving.
+I had a homelab — a small home server I use for self-hosting and learning. I had been curious about AI-assisted development for a while but hadn't found the right project to test it properly. 
 
-The question I wanted to answer: **can AI act as a real co-engineer — helping plan, design, build, and debug a production-grade system — for someone who isn't a developer?**
+The question I wanted to answer: 
+**Could this be automated? Could I build a single place where all jobs land automatically, duplicates are flagged, irrelevant roles are filtered out — for someone who isn't a developer?**
 
-This project is the answer. It took several weeks, involved real problems and real fixes, and the result has been running in daily use ever since.
+This project is the answer. It took several days, involved real problems and real fixes, and the result have surprised me.
 
 ---
 
@@ -132,20 +133,6 @@ This project was deliberately chosen because it combined things I already knew (
 **What AI was not good at:** Knowing my environment. Handling edge cases in real data without being shown examples. Maintaining context across a multi-week project — that required deliberate effort on my part.
 
 **The biggest lesson:** AI works best when you treat it like a highly capable colleague who needs clear direction and honest context. Vague inputs produce vague outputs. Specific, well-framed questions produce genuinely useful results.
-
----
-
-## Project Status
-
-| Area | Status |
-|---|---|
-| Core infrastructure | ✅ Running |
-| All 8 scrapers | ✅ Active — daily schedule |
-| Job classifier | ✅ Active — runs at 05:45 |
-| Portal UI | ✅ Running |
-| Grafana dashboards | 📋 Planned |
-| AI cover letter generation | 📋 Planned |
-| Nginx + SSL | 📋 Planned |
 
 ---
 

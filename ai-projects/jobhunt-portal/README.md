@@ -101,39 +101,48 @@ All containers run on a single Docker bridge network inside one LXC container on
 
 ---
 
-## The Honest Answers to the Big Questions
-
-### Can AI build a full-stack interactive system hosted in a homelab?
-
-**Yes — but the human has to stay in charge.**
-
-AI designed the architecture, wrote the code, explained every decision, and debugged real errors. What it couldn't do was know my specific environment, my goals, or what actually mattered to me. I provided the direction and context. AI provided the technical execution. Neither works well without the other.
-
-The working model that emerged: **AI handles the implementation. You handle the vision, the decisions, and the judgement.**
-
+## The Answers to the Big Questions
+ 
+- **Could the entire process be automated?**
+  
+- **Could I build a self‑hosted system that pulls in job listings, detects duplicates, filters irrelevant roles, and tracks applications—without relying on paid cloud services?**
+ 
+**Absolutely — with important caveats**
+ 
+AI was capable of handling almost all of the technical work, including:
+- Designing the overall architecture
+- Assisting with planning and system breakdown
+- Writing application code
+- Explaining technical decisions
+- Debugging errors
+ 
+What it couldn't do:
+- AI had no inherent understanding of my specific environment, constraints, or personal goals
+- In long-running conversations, it could lose context or drift from the original intent without active guidance
+ 
+The model that emerged was clear: I had the vision, made the decisions, and provided direction, constraints, and priorities — while AI should be seen as a very capable work colleague who acts best on clearly framed questions.
+ 
+---
+ 
 ### What are the real risks?
-
-Four risks are worth being honest about:
-
+ 
 | Risk | Reality |
 |---|---|
 | **Legal** | Terms of service vary. Review the terms of service of any site and seek appropriate legal advice. |
 | **Scraper fragility** | HTML scrapers break when sites redesign. This is inherent, not solvable — it requires monitoring and maintenance. |
 | **Homelab reliability** | A home server is not a data centre. Power cuts happen. For a job hunting tool this is acceptable. For anything critical it would not be. |
 | **AI over-reliance** | AI produces confident-sounding code that can be subtly wrong. Understanding what you're running — not just copying it — is essential. |
-
+ 
 ---
-
-## What I Learned
-
-This project was deliberately chosen because it combined things I already knew (infrastructure, systems, networking) with things I didn't (application code, database design, workflow automation). The goal was to test whether AI could genuinely bridge that gap — and to learn the tools properly by using them on a real problem.
-
-**What AI was good at:** Architecture design. Writing code. Explaining decisions. Debugging specific errors. Keeping the build systematic.
-
-**What AI was not good at:** Knowing my environment. Handling edge cases in real data without being shown examples. Maintaining context across a multi-week project — that required deliberate effort on my part.
-
-**The biggest lesson:** AI works best when you treat it like a highly capable colleague who needs clear direction and honest context. Vague inputs produce vague outputs. Specific, well-framed questions produce genuinely useful results.
-
+ 
+### A Final Thought
+ 
+This project took longer than I initially expected — but I was extremely happy with the outcome. In the end, it did exactly what I hoped it would, and in several areas exceeded my expectations.
+ 
+One of the biggest lessons was the importance of having a well-structured plan and sticking to it, especially when working on something new with many moving parts. While building this, I was constantly surprised by the possibilities, and often found myself tempted to explore new directions beyond the original scope.
+ 
+The irony wasn't lost on me: in those moments, I was doing exactly what I'd criticised AI for — losing context and drifting from the original intent.
+ 
 ---
-
-*This project is part of a portfolio series exploring how IT engineers can use AI as a co-engineer to build infrastructure and tooling end-to-end. All website names have been omitted. The system runs privately on homelab hardware and is not accessible from the internet.*
+ 
+*All website names have been omitted. The system runs privately on homelab hardware and is not accessible from the internet.*

@@ -139,7 +139,9 @@ In this test, the worst case was unexpected charges because you were working in 
 This experiment actually exposed is the real risk quite well: the AI executed confidently without flagging it had deviated from the spec. In a lab, that means wrong names and unexpected SKUs. In production, that same behaviour — confident execution without situational awareness — is what causes the serious incidents above.
 The technical mistakes (wrong SKU, wrong name) are almost never catastrophic on their own. What makes them catastrophic is the combination of: running against real data or production workloads, no human review checkpoint before irreversible actions, and no blast-radius limiting (resource locks, isolated subscriptions, spending alerts
 
-## Can an AI agent fully administer a cloud environment from a simple natural language briefing — end to end, without manual intervention?
+---
+
+### Can an AI agent fully administer a cloud environment from a simple natural language briefing — end to end, without manual intervention?
 Yes, it worked, but it also made costly mistakes. Mistakes could be catastrophic or very costly.
 
 # AI should never have the power to make changes in a production environment

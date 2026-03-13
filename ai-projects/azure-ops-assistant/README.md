@@ -1,5 +1,5 @@
 
-# Giving an AI Agent Control of a Real Azure Environment
+# Giving an AI Agent Full Control of a Real Azure Environment
 ---
 
 ⚠️ Warning

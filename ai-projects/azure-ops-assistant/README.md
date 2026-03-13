@@ -148,5 +148,5 @@ My final recomendation
 
 ## Related Projects
 
-- [AZ-104 Azure Lab](https://github.com/sandtiger76/engineering-portfolio/blob/main/aca-project/README.md — The Azure infrastructure this experiment deployed
+- [AZ-104 Azure Lab](https://github.com/sandtiger76/engineering-portfolio/blob/main/aca-project/README.md) — The Azure infrastructure this experiment deployed
 - [AI Infrastructure Ops Assistant (Homelab)](https://github.com/sandtiger76/engineering-portfolio/blob/main/ai-projects/infra-ops-assistant/README.md) — The earlier homelab experiment that laid the groundwork for this one

@@ -2,7 +2,7 @@
 
 **A self-hosted, AI-assisted data pipeline that automates job hunting — built on homelab infrastructure by a sysadmin with no prior development experience.**
 
-> Part of the [AI-Assisted Infrastructure](../../) portfolio series — documenting how AI can act as a co-engineer to help IT professionals build things they couldn't build alone.
+> Part of the [AI Projects](/ai-projects/README.md) portfolio series — documenting how AI can act as a co-engineer to help IT professionals build things they couldn't build alone.
 
 ---
 
@@ -68,7 +68,7 @@ Four risks are worth being honest about:
 
 | Risk | Reality |
 |---|---|
-| **Legal** | Web scraping is a grey area. Terms of service vary. I took a calculated personal risk and kept the project entirely private. |
+| **Legal** | Terms of service vary. Review the terms of service of any site and seek appropriate legal advice. |
 | **Scraper fragility** | HTML scrapers break when sites redesign. This is inherent, not solvable — it requires monitoring and maintenance. |
 | **Homelab reliability** | A home server is not a data centre. Power cuts happen. For a job hunting tool this is acceptable. For anything critical it would not be. |
 | **AI over-reliance** | AI produces confident-sounding code that can be subtly wrong. Understanding what you're running — not just copying it — is essential. |

@@ -32,6 +32,15 @@ This experiment builds on two earlier projects:
 The natural next step was to combine them: take the proven Azure environment from the first project, and hand it entirely to an AI agent to deploy, verify, document, and destroy — with no manual steps.
 
 ---
+## Documents
+
+| Document | What it covers |
+|---|---|
+| [experiment.md](./experiment.md) | Full walkthrough — setup, both runs, what went right and wrong |
+| [claude-instructions.md](./claude-instructions.md) | Sanitised version of the `CLAUDE.md` briefing file Claude Code operated from |
+| [implementation-notes.md](./implementation-notes.md) | Sanitised version of the implementation notes written autonomously by Claude Code |
+
+---
 
 ## How It Worked
 
@@ -134,16 +143,6 @@ The technical mistakes (wrong SKU, wrong name) are almost never catastrophic on 
 Yes, it worked, but it also made costly mistakes. Mistakes could be catastrophic or very costly.
 
 # AI should never have the power to make changes in a production environment
----
-
-## Documents
-
-| Document | What it covers |
-|---|---|
-| [experiment.md](./experiment.md) | Full walkthrough — setup, both runs, what went right and wrong |
-| [claude-instructions.md](./claude-instructions.md) | Sanitised version of the `CLAUDE.md` briefing file Claude Code operated from |
-| [implementation-notes.md](./implementation-notes.md) | Sanitised version of the implementation notes written autonomously by Claude Code |
-
 ---
 
 ## Related Projects

@@ -1,4 +1,4 @@
----
+
 ### Safety Warning
 This experiment was conducted entirely within a personal, isolated Azure Pay-As-You-Go account. No production systems, real client data, or shared infrastructure were involved at any point.
 The tools, methods, and workflows documented here should not be used in a production environment. This project exists to demonstrate why — the AI agent deviated from its agreed specification, selected unintended paid services, and did so without flagging any of it. Those failure modes are manageable in a disposable lab. In production, they are not.

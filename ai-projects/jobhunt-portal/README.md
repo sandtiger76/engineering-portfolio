@@ -10,13 +10,11 @@
 
 Job hunting across countless boards, agencies, and duplicate listings is tedious and inefficient.
 
-That frustration sparked a simple question: What if every job posting flowed into a single database, deduplicated, filtered for relevance, and tailored to me?
-
-With a homelab already in place for self‑hosting and experimentation, and a long‑standing curiosity about AI‑assisted development (despite not being a developer), I decided to explore whether this idea was actually possible.
-
 **The core questions were straightforward:**
 - Could the entire process be automated?
 - Could I build a self‑hosted system that pulls in job listings, detects duplicates, filters irrelevant roles, and tracks applications—without relying on paid cloud services?
+
+With a homelab already in place for self‑hosting and experimentation, and a long‑standing curiosity about AI‑assisted development (despite not being a developer), I decided to explore whether this idea was actually possible.
 
 This project is the result. Built over several days, it involved real problems, real fixes, and outcomes that genuinely surprised me.
 

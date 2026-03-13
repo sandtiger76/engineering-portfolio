@@ -30,6 +30,17 @@ The result is more capable, and more concerning, than expected.
 **[→ View Project](./infra-ops-assistant/README.md)**
 
 ---
+### ☁️ [AI Azure Ops — Giving an AI Agent Control of a Real Azure Environment](./azure-ops-assistant/README.md)
+
+> *What happens when you stop asking AI to help with infrastructure — and let it run the whole thing?*
+
+We all know production changes shouldn't be made unless you fully understand their impact. For this experiment, I deliberately stepped away from that rule — giving an AI agent full control of a test machine and an Azure environment to deploy, verify, document, and destroy.
+
+**Core question:** Can AI fully administer a cloud environment from a natural language briefing — and what does it get wrong when left unsupervised?
+
+**[→ View Project](./azure-ops-assistant/README.md)**
+
+---
 
 ### 🔍 [Job Intelligence Pipeline](./jobhunt-portal/README.md)
 

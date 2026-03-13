@@ -1,16 +1,14 @@
-# AI Projects
+# The AI Experiment
 
-**In theory, AI can act as a comprehensive personal assistant — capable of designing, building, and managing an IT infrastructure end-to-end. How easily is this to implement? What are the real capabilities, limitations, and risks?**
+There's no shortage of AI hype. AI will transform IT operations, automate professional work, accelerate development. But most of what gets written is abstract — capability benchmarks, theoretical frameworks, carefully constructed demos that never leave the controlled environment.
 
----
+This section is different.
 
-## About This Section
+Each project starts with a question I have — something that couldn't be answered without actually building it and finding out for myself. The environments are real. The limitations are documented alongside the wins. And where AI introduced genuine risk — security exposure, legal grey areas, over-reliance on generated output — those risks are recorded honestly.
 
-This section documents my hands-on attempt to answer that question. Rather than isolated demos, each project represents a genuine use case — built, tested, and evaluated in a real homelab environment.
+The through-line is the same question asked at increasing levels of complexity:
 
-The Infrastructure Ops Assistant came first, because it was the most immediate test: give AI real access to live systems, and see what happens. Each project that follows escalates the complexity — moving from infrastructure operations, to automating a real personal workflow, to assisting with complex professional engagements.
-
-Where AI introduced risk — data privacy, credential exposure, over-reliance on generated output, or scraping and copyright considerations — those risks are documented honestly alongside the implementation.
+> *How much can AI actually do — and where does human judgement remain essential?*
 
 ---
 
@@ -20,11 +18,13 @@ Where AI introduced risk — data privacy, credential exposure, over-reliance on
 
 ### 🖥️ [AI Infrastructure Ops Assistant](./infra-ops-assistant/README.md)
 
-> *A natural language interface for homelab operations — query your infrastructure, interpret alerts, and surface diagnostics in plain English.*
+> *Give AI real SSH access to a live homelab. Ask it anything. See what happens.*
 
-**The question:** Can AI genuinely manage infrastructure, or does it just assist with it?
+You've probably used AI to write infrastructure commands. But what happens when it can *run* them? This project connects Claude to a real multi-host homelab via MCP servers — SSH, Docker, DNS monitoring, GitHub — and explores what a natural language interface to live infrastructure actually looks like in practice.
 
-**AI role:** Claude Code + MCP servers providing natural language access to SSH, Docker, GitHub, and network monitoring across a real homelab environment.
+The result is more capable, and more concerning, than expected.
+
+**Core question:** Can AI genuinely *manage* infrastructure, or does it just assist with it?
 
 **[→ View Project](./infra-ops-assistant/README.md)**
 
@@ -32,11 +32,13 @@ Where AI introduced risk — data privacy, credential exposure, over-reliance on
 
 ### 🔍 [Job Intelligence Pipeline](./jobhunt-portal/README.md)
 
-> *A self-hosted job hunting pipeline — automated scraping, structured storage, AI classification, and a web UI for tracking applications.*
+> *A sysadmin with no development background builds a full-stack data pipeline — with AI as co-engineer.*
 
-**The question:** Can AI automate a real personal workflow end-to-end?
+Eight job boards. Daily automated scraping. Deduplication, classification, and shortlisting. A self-hosted web portal for tracking applications. Zero cloud dependency. Built by someone who had never written a production application before.
 
-**AI role:** Keyword-based classification with planned Claude API integration for CV-matched scoring and cover letter generation.
+This project is two things at once: a useful job hunting tool, and an honest account of what it's like to build something real with AI when you're working outside your area of expertise.
+
+**Core question:** Can AI carry a complete end-to-end build — and what does the human actually need to bring?
 
 **[→ View Project](./jobhunt-portal/README.md)**
 
@@ -44,23 +46,22 @@ Where AI introduced risk — data privacy, credential exposure, over-reliance on
 
 ### 📋 [AI Migration Planner](./migration-planner/README.md)
 
-> *Feed it an environment inventory and get back a structured migration assessment, risk register, and phased plan — grounded in real-world migration practice.*
+> *Feed it an environment inventory. Get back a structured assessment, risk register, and phased migration plan.*
 
-**The question:** Can AI assist meaningfully with complex professional engagements, and where does human judgement remain essential?
+Infrastructure migrations are complex, high-stakes professional engagements. They require domain knowledge, client context, and hard-won judgement that doesn't compress easily into a prompt. This project tests how far AI can go — generating real migration artefacts from structured input, grounded in actual migration scenarios.
 
-**AI role:** Claude API for analysis and document generation, grounded by structured input from real migration scenarios.
+**Core question:** Can AI assist meaningfully with complex professional work — and where does it fall apart without human expertise behind it?
 
 **[→ View Project](./migration-planner/README.md)**
 
 ---
 
-## A Note on AI-Assisted Development
+## A Note on How These Were Built
 
-Several projects in this section were built with direct AI assistance — including code generation, debugging, and documentation. This is intentional and acknowledged throughout.
+Several projects here were built with direct AI assistance — code generation, debugging, architecture decisions, documentation. That's intentional and acknowledged throughout.
 
-Using AI effectively as an engineering tool is itself a skill. Knowing what to ask, how to validate the output, where to push back, and when not to trust it — that's the real competency. These projects document that process honestly.
+Using AI effectively as an engineering tool is itself a skill. Knowing what to ask, how to validate the output, when to push back, and when not to trust it — that's the real competency being developed and documented here.
 
 ---
 
 *All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly labelled. No client data, credentials, or confidential information appears anywhere in this repository.*
-

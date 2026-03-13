@@ -99,7 +99,33 @@ The second run succeeded precisely because those lessons were applied: fresh con
 | Verified infrastructure state after each phase | Long context sessions are unreliable for complex tasks |
 | Clean autonomous teardown | Requires human review before treating output as trustworthy |
 
-This experiment confirmed that AI can be a powerful infrastructure operations assistant. It also confirmed it should not be given unchecked control in a production environment — not because it cannot execute, but because it lacks the judgment to know when it is making a mistake.
+This experiment confirmed that AI can be a powerful infrastructure operations assistant. It also confirmed why it should not be given unchecked control in a production environment — not because it cannot execute, but because it lacks the judgment to know when it is making a mistake.
+
+## What Can go wrong?
+
+The list is almost endless, here are some of the worst-case scenarios:
+
+#### Data loss
+A teardown script with the wrong resource group name deletes the wrong environment. A storage account deletion with soft-delete disabled is permanent. A script that drops and recreates a database as part of a "redeploy" loses everything in it. In your experiment, the teardown was the riskiest single command — it was pointed at the right resource group, but that verification step only exists if a human checks.
+
+#### Cost
+The most common real-world pain. Azure will bill for whatever is running — and some services are expensive at scale. A misconfigured autoscaling rule on a VM Scale Set or AKS cluster could spin up hundreds of instances overnight. Premium SSD disks, Azure Firewall, Application Gateway, and DDoS Protection Standard are all easy to accidentally provision and quietly expensive. There are well-documented cases of people receiving five-figure bills from a single bad script run — Azure support will sometimes waive accidental charges once, but not always, and not always in full.
+
+#### Security exposure
+A script that opens NSG rules too broadly — 0.0.0.0/0 on ports it shouldn't — can expose VMs directly to the internet. Assigning overly permissive RBAC roles (Owner instead of Contributor, or Contributor where Reader was intended) widens your blast radius for any future mistake or compromise. Public blob access accidentally enabled on a storage account is a common real-world data leak vector.
+
+#### Identity and access mistakes
+Granting a managed identity or service principal more permissions than intended can have lasting consequences. If that identity is later compromised, the attacker inherits whatever the script gave it. Over-permissioned identities are one of the most common findings in Azure security reviews.
+
+### Production blast radius
+In this test, the worst case was unexpected charges because you were working in an isolated lab with its own resource group and subscription. In a shared or production environment, a script running in the wrong subscription, against the wrong resource group, or without proper resource locks could affect live workloads. Resource locks (CanNotDelete, ReadOnly) exist precisely to protect against this — but they only help if they were put there first.
+
+### The common thread 
+This experiment actually exposed is the real risk quite well: the AI executed confidently without flagging it had deviated from the spec. In a lab, that means wrong names and unexpected SKUs. In production, that same behaviour — confident execution without situational awareness — is what causes the serious incidents above.
+The technical mistakes (wrong SKU, wrong name) are almost never catastrophic on their own. What makes them catastrophic is the combination of: running against real data or production workloads, no human review checkpoint before irreversible actions, and no blast-radius limiting (resource locks, isolated subscriptions, spending alerts
+
+My final recomendation:
+# AI should never have the power to make changes in a production environment
 
 ---
 

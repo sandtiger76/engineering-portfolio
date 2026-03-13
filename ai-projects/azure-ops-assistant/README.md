@@ -131,9 +131,7 @@ This experiment actually exposed is the real risk quite well: the AI executed co
 The technical mistakes (wrong SKU, wrong name) are almost never catastrophic on their own. What makes them catastrophic is the combination of: running against real data or production workloads, no human review checkpoint before irreversible actions, and no blast-radius limiting (resource locks, isolated subscriptions, spending alerts
 
 ## Can an AI agent fully administer a cloud environment from a simple natural language briefing — end to end, without manual intervention?
-Yes, it worked, but it also made costly mistakes.
-
-My final recomendation
+Yes, it worked, but it also made costly mistakes. My final recomendation:
 ---
 # AI should never have the power to make changes in a production environment
 ---

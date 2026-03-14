@@ -1,13 +1,3 @@
----
-title: Home
-description: 
-published: true
-date: 2026-03-11T11:28:20.136Z
-tags: 
-editor: markdown
-dateCreated: 2026-02-28T17:22:22.636Z
----
-
 # Quintin Boshoff — Engineering Portfolio
 
 **IT Infrastructure Engineer & Cloud Migration Consultant**
@@ -18,15 +8,13 @@ dateCreated: 2026-02-28T17:22:22.636Z
 
 ## About This Portfolio
 
-I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience spanning end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. Over the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation initiatives — guiding transitions from traditional on-premises environments to cloud-based platforms across multiple regions and sites.
+I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience in end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. In the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation projects, guiding transitions from traditional on-premises environments to cloud platforms across multiple regions and sites.
 
-I've always been curious by nature and genuinely enjoy learning. As the technology landscape shifted toward cloud-native architectures, automation, and infrastructure as code, I decided to deliberately build on my existing skills — filling the gaps in modern tooling that my career hadn't naturally taken me to yet.
+I'm curious by nature and genuinely enjoy learning. Cloud platforms, automation, and AI-assisted tooling have become increasingly central to how infrastructure is designed and operated, so I made a deliberate decision to build hands-on experience with modern tooling alongside my existing infrastructure background.
 
-This portfolio documents that journey. Each project represents work I have designed and implemented end-to-end, reflecting real-world decision-making as well as the outcomes and lessons learned along the way. It also reflects my use of modern tooling — including AI-assisted workflows — to accelerate learning, experimentation, and problem-solving.
+Each project reflects real-world decision-making, with the outcomes and lessons learned along the way.
 
-In parallel, this space serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility as first-class deliverables.
-
-This portfolio is relevant to infrastructure engineering, cloud engineering, platform, and migration-focused roles. Whether you're a technical engineer, a hiring manager, or someone planning a similar project yourself — I hope you find something useful here.
+This space also serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility.
 
 ---
 
@@ -47,11 +35,11 @@ Lab environments and fictional scenarios are clearly labelled throughout. No rea
 
 ### 📁 [Microsoft 365 Migration](./m365-project/README.md)
 
-> *A complete end-to-end migration for a fictional 15-person SME — transitioning from a fully on-premises Windows Server environment and IMAP email to a cloud-based Microsoft 365 platform, including security hardening and infrastructure decommissioning.*
+> *A complete end-to-end migration for a fictional 15-person SME, transitioning from a fully on-premises Windows Server environment and IMAP email to Microsoft 365, including security hardening and infrastructure decommissioning.*
 
-This project documents the kind of migration I've delivered in the real world for SME clients. The scenario uses a fictional company, but every step reflects what you'd encounter in a genuine engagement — including the often-overlooked realities like SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap that Microsoft 365 doesn't solve for you.
+This project documents the kind of migration I've delivered for SME clients. The scenario uses a fictional company, but every step reflects what you'd encounter in a genuine engagement, including the often-overlooked details: SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap that Microsoft 365 doesn't solve for you.
 
-**Why I built it:** To create a repeatable, documented blueprint — useful both as a portfolio piece and as a practical guide for anyone planning a similar migration.
+**Why I built it:** To create a repeatable, documented blueprint, useful both as a portfolio piece and as a practical guide for anyone planning a similar migration.
 
 **What I hope you take from it:** A clear, honest guide to planning and delivering an M365 migration end-to-end, including the decisions that often get glossed over in vendor documentation.
 
@@ -61,17 +49,17 @@ This project documents the kind of migration I've delivered in the real world fo
 
 ### 🖥️ [Automated Self-Hosted Infrastructure](./asi-project/README.md)
 
-> *A self-hosted infrastructure platform running on a Proxmox homelab — containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
+> *A self-hosted infrastructure platform running on a Proxmox homelab, containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
 
-Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code — two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
+Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code, two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
 
-The stack runs Nextcloud as the core application — a self-hosted cloud collaboration and file-sharing platform — alongside PostgreSQL (in place of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
+The stack runs Nextcloud as the core application, a self-hosted cloud collaboration and file-sharing platform, alongside PostgreSQL (instead of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
 
-**Honest disclosure:** This was a learning project. The Ansible code was developed with AI assistance. I understand what it does and why, but I won't claim it was written entirely from scratch. The value was two-fold: first, learning how the components fit together — VLAN isolation, container networking, reverse proxying, monitoring, and what it actually takes to make a self-hosted platform production-grade; and second, using that understanding to build infrastructure that can be torn down and redeployed from a single command. That's what infrastructure-as-code means in practice, and I wanted to experience it directly rather than just read about it.
-
-**Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling — areas I was curious about but had no practical experience in.
+**Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling I was curious about but had no practical experience in.
 
 **What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
+
+**Honest disclosure:** The Ansible code was written with AI assistance. The value of this project was not authorship of every line, but learning what the components do, how they fit together, and what it actually takes to build a self-hosted cloud platform that can be torn down and redeployed from code. Experiencing that full lifecycle firsthand, including repeatable deploy and destroy from a single automated command, is what infrastructure-as-code means to me. I wanted to learn it by building, not just reading about it.
 
 **[→ View Project](./asi-project/README.md)**
 
@@ -79,25 +67,37 @@ The stack runs Nextcloud as the core application — a self-hosted cloud collabo
 
 ### ☁️ [Azure Cloud Architecture](./aca-project/README.md)
 
-> *A hands-on Azure learning project — implementing a connected infrastructure across the core Azure domains, documented as I go.*
+> *Hands-on Azure infrastructure across AZ-104 domains: networking, compute, storage, identity, monitoring, and automation, with architecture diagrams and phased deploy/destroy scripts.*
 
-This project was built to deliberately close gaps in my end-to-end Azure infrastructure experience. I learn best by implementing a real environment, testing it, and deepening that understanding through iteration.
+A two-tier private network hosts a Linux web server and Windows application VM, neither exposed to the internet, wired together with managed identity, Key Vault secrets, blob storage, and live monitoring. Everything deploys from a single script and tears down cleanly so you only pay for what you use. The project touches every major AZ-104 exam domain and is documented with the decisions made, the trade-offs considered, and the lessons learned along the way.
 
-The project draws from each major area of the AZ-104 curriculum — networking, compute, storage, identity, monitoring, and automation — and turns those topics into practical, working implementations. All work is carried out in a pay-as-you-go Azure subscription, using free-tier services where possible and short-lived resources where not, keeping costs minimal while still reflecting real-world usage patterns.
+**Why I built it:** The best way to understand Azure infrastructure is to build it, break it, and document everything.
 
-The documentation focuses on not just what was built, but why — covering the decisions, trade-offs, and dependencies that are often hard to grasp from reference documentation alone.
+**What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts, written from the perspective of someone working through it in real time.
 
-**Honest disclosure:** This is an active learning project. Documentation reflects progress as it happens rather than a finished guide, and some areas are explored more deeply than others as my understanding evolves.
-
-**Why I built it:** To gain genuine hands-on Azure infrastructure experience across core domains, and to anchor that learning in real implementations rather than theory alone.
-
-**What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts — written from the perspective of someone working through it in real time.
+**Honest disclosure:** The architectural design, learning plan, and scenario are mine. The automation scripts and deployment orchestration, including multi-phase `deploy`/`destroy` scripts, were developed with AI assistance.
 
 **[→ View Project](./aca-project/README.md)**
 
-
 ---
 
+### 🤖 [AI Projects](./ai-projects/README.md)
+
+> *Hands-on tests of AI in infrastructure engineering, real capabilities, limitations, and risks.*
+
+**Key questions explored:**
+- Can AI write and deploy IaC playbooks like Ansible?
+- Can it fully manage homelab infrastructure end-to-end?
+- Can AI build a full-stack interactive website hosted in a homelab?
+- What are the real risks?
+
+**Why I built it:** To learn what AI actually does well by building with it. Does it deliver on promises, work reliably, or need constant babysitting?
+
+**What I hope you take from it:** Honest answers to those questions, including wins, failures, and security concerns.
+
+**[→ View Projects](./ai-projects/README.md)**
+
+---
 
 ## Background
 
@@ -105,16 +105,15 @@ The documentation focuses on not just what was built, but why — covering the d
 |---|---|
 | **Cloud Migration** | Global data centre decommissions · NetApp NAS/SAN to cloud · Azure NetApp Files · Cloud Volumes ONTAP · AWS migration tooling · StorageX · SPMT · Sharegate |
 | **Microsoft 365** | Entra ID · Exchange Online · SharePoint Online · OneDrive · Teams · Intune · Conditional Access |
-| **Enterprise Storage** | NetApp NAS/SAN — architecture, administration, and global operational support |
+| **Enterprise Storage** | NetApp NAS/SAN, architecture, administration, and global operational support |
 | **Infrastructure** | Windows Server · Linux · Active Directory · DNS · DHCP · Proxmox · VMware |
 | **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively learning)* |
 | **Automation & IaC** | Ansible · PowerShell · Bash *(actively learning)* |
 | **Monitoring** | Prometheus · Grafana · cAdvisor *(actively learning)* |
 | **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT *(actively learning)* |
-| **Cloud Platforms** | Microsoft Azure · AWS *(actively building hands-on experience)* |
+| **Cloud Platforms** | Microsoft Azure · AWS *(actively learning)* |
 | **Version Control** | Git · GitHub *(actively learning)* |
 
 ---
 
-*All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly documented. No client data, credentials, or confidential information is included anywhere in this repository.*
-```
+*All projects represent genuine hands-on work. Lab environments and fictional scenarios are clearly documented. No client data, credentials, or confidential information is included anywhere in this repository. All materials are published openly and may be reused freely. Feedback, corrections, and suggestions are very welcome.*

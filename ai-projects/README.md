@@ -56,15 +56,13 @@ This project is two things at once: a useful job hunting tool, and an honest acc
 
 ---
 
-### 🔐 [AI Homelab Reconnaissance & Security Audit](./homelab-inventory/README.md)
+### 🔐 [AI Homelab Inventory](./homelab-inventory/README.md)
 
 > *I asked an AI agent to document my homelab. What came back was not what I had in mind.*
 
-A routine documentation task. Three SSH credentials. One prompt asking for a hardware inventory. What the agent returned was a 527-line report covering every service, every container, every config file it could reach — and a security findings section nobody asked for, ordered by severity, with remediation commands attached.
+I deleberately gave AI ssh access to audit my homelab and documents it. One prompt asking for a hardware and software inventory. What the agent returned was a 527-line report covering every service, every container, every config file it could reach — and a security findings section nobody asked for, ordered by severity, with remediation commands attached.
 
-Two critical vulnerabilities. Fourteen more behind them. All found as a side effect of building a hardware list.
-
-**Core question:** If a documentation request produces this, what does a deliberate security engagement produce?
+**Core question:** Can AI create a complete inventory and document my HomeLab?
 
 **[→ View Project](./homelab-inventory/README.md)**
 

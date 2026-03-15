@@ -238,7 +238,7 @@ The Gitea asi-platform credential and the n8n database-stored password were both
 
 | File | 
 |------|
-| [Master project context — network layout, phase structure, ground rules](CLAUDE.md)
+| [Master project context ](CLAUDE.md)| network layout, phase structure, ground rules|
 | [Blue Team brief — read-only audit methodology](phase1-blue-audit/CLAUDE.md)
 | [Blue Team findings — 12 findings across both hosts](phase1-blue-audit/report.md)
 | [Red Team brief — active attack methodology](phase2-red-attack/CLAUDE.md)

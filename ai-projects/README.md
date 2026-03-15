@@ -56,15 +56,17 @@ This project is two things at once: a useful job hunting tool, and an honest acc
 
 ---
 
-### 📋 [AI Migration Planner](./migration-planner/README.md)
+### 🔐 [AI Homelab Reconnaissance & Security Audit](./homelab-inventory/README.md)
 
-> *Feed it an environment inventory. Get back a structured assessment, risk register, and phased migration plan.*
+> *I asked an AI agent to document my homelab. What came back was not what I had in mind.*
 
-Infrastructure migrations are complex, high-stakes professional engagements. They require domain knowledge, client context, and hard-won judgement that doesn't compress easily into a prompt. This project tests how far AI can go, generating real migration artefacts from structured input, grounded in actual migration scenarios.
+A routine documentation task. Three SSH credentials. One prompt asking for a hardware inventory. What the agent returned was a 527-line report covering every service, every container, every config file it could reach — and a security findings section nobody asked for, ordered by severity, with remediation commands attached.
 
-**Core question:** Can AI assist meaningfully with complex professional work, and where does it fall apart without human expertise behind it?
+Two critical vulnerabilities. Fourteen more behind them. All found as a side effect of building a hardware list.
 
-**[→ View Project](./migration-planner/README.md)**
+**Core question:** If a documentation request produces this, what does a deliberate security engagement produce?
+
+**[→ View Project](./homelab-inventory/README.md)**
 
 ---
 

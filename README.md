@@ -49,7 +49,7 @@ Inside: a repeatable blueprint covering the decisions that vendor documentation 
 
 A two-tier private network hosts a Linux web server and Windows application VM, wired together with managed identity, Key Vault secrets, blob storage, and live monitoring. Nothing is exposed to the internet. Everything deploys from a single script and tears down cleanly.
 
-**Disclosure:** The architecture and learning approach are mine. The full deploy and destroy scripts were written with AI assistance, reviewed and tested throughout.
+**Disclosure:** The architecture and learning approach are mine. The deploy and destroy scripts were written with AI assistance, reviewed and tested throughout.
 
 Inside: a practical end-to-end reference for core Azure concepts, documented from someone working through it in real time.
 
@@ -92,23 +92,6 @@ Five experiments testing AI on real infrastructure: SSH access to a live homelab
 Inside: what worked, what failed, and where human judgement still mattered.
 
 **[→ View Project](./ai-projects/README.md)**
-
----
-
-## Background
-
-| Area | Experience |
-|---|---|
-| **Cloud Migration** | Global data centre decommissions · NetApp NAS/SAN to cloud · Azure NetApp Files · Cloud Volumes ONTAP · AWS migration tooling · StorageX · SPMT · Sharegate |
-| **Microsoft 365** | Entra ID · Exchange Online · SharePoint Online · OneDrive · Teams · Intune · Conditional Access |
-| **Enterprise Storage** | NetApp NAS/SAN, architecture, administration, and global operational support |
-| **Infrastructure** | Windows Server · Linux · Active Directory · DNS · DHCP · Proxmox · VMware |
-| **Containerisation** | Docker · Docker Compose · Portainer · LXC *(actively learning)* |
-| **Automation & IaC** | Ansible · PowerShell · Bash *(actively learning)* |
-| **Monitoring** | Prometheus · Grafana · cAdvisor *(actively learning)* |
-| **Networking** | VLANs · Tailscale · Nginx · pfSense · OpenWRT *(actively learning)* |
-| **Cloud Platforms** | Microsoft Azure · AWS *(actively learning)* |
-| **Version Control** | Git · GitHub *(actively learning)* |
 
 ---
 

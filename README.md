@@ -46,25 +46,6 @@ This project documents the kind of migration I've delivered for SME clients. The
 **[→ View Project](./m365-project/README.md)**
 
 ---
-
-### 🖥️ [Automated Self-Hosted Infrastructure](./asi-project/README.md)
-
-> *A self-hosted infrastructure platform running on a Proxmox homelab, containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
-
-Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code, two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
-
-The stack runs Nextcloud as the core application, a self-hosted cloud collaboration and file-sharing platform, alongside PostgreSQL (instead of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
-
-**Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling I was curious about but had no practical experience in.
-
-**What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
-
-**Honest disclosure:** The Ansible code was written with AI assistance. The value of this project was not authorship of every line, but learning what the components do, how they fit together, and what it actually takes to build a self-hosted cloud platform that can be torn down and redeployed from code. Experiencing that full lifecycle firsthand, including repeatable deploy and destroy from a single automated command, is what infrastructure-as-code means to me. I wanted to learn it by building, not just reading about it.
-
-**[→ View Project](./asi-project/README.md)**
-
----
-
 ### ☁️ [Azure Cloud Architecture](./aca-project/README.md)
 
 > *Hands-on Azure infrastructure across AZ-104 domains: networking, compute, storage, identity, monitoring, and automation, with architecture diagrams and phased deploy/destroy scripts.*
@@ -88,9 +69,26 @@ NetApp's ONTAP simulator is the standard tool for learning and studying the plat
 The guide covers the full process: VM creation with the exact settings ONTAP requires, the pre-boot disk preparation that isn't mentioned anywhere in official documentation, navigating the two-stage bootloader, disk initialisation, cluster setup, licensing, SSH access, and snapshotting for easy recovery and cloning.
 Why I built it: I have an ONTAP background from enterprise storage work and wanted a simulator running permanently on my homelab rather than tying up a laptop. No reliable Proxmox guide existed.
 
-What I hope you take from it: A working simulator in a few hours rather than a few days of debugging undocumented errors.
+**What I hope you take from it:** A working simulator in a few hours rather than a few days of debugging undocumented errors.
 
 **[→ View Project](./netapp-ontap-proxmox/README.md)**
+
+---
+### 🖥️ [Automated Self-Hosted Infrastructure](./asi-project/README.md)
+
+> *A self-hosted infrastructure platform running on a Proxmox homelab, containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
+
+Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code, two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
+
+The stack runs Nextcloud as the core application, a self-hosted cloud collaboration and file-sharing platform, alongside PostgreSQL (instead of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
+
+**Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling I was curious about but had no practical experience in.
+
+**What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
+
+**Honest disclosure:** The Ansible code was written with AI assistance. The value of this project was not authorship of every line, but learning what the components do, how they fit together, and what it actually takes to build a self-hosted cloud platform that can be torn down and redeployed from code. Experiencing that full lifecycle firsthand, including repeatable deploy and destroy from a single automated command, is what infrastructure-as-code means to me. I wanted to learn it by building, not just reading about it.
+
+**[→ View Project](./asi-project/README.md)**
 
 ---
 ### 🤖 [AI Projects](./ai-projects/README.md)

@@ -8,13 +8,11 @@
 
 ## About This Portfolio
 
-I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience in end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. In the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation projects, guiding transitions from traditional on-premises environments to cloud platforms across multiple regions and sites.
+I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience across end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. In the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation projects, guiding transitions from on-premises environments to cloud platforms across multiple regions and sites.
 
-I'm curious by nature and genuinely enjoy learning. Cloud platforms, automation, and AI-assisted tooling have become increasingly central to how infrastructure is designed and operated, so I made a deliberate decision to build hands-on experience with modern tooling alongside my existing infrastructure background.
+Cloud platforms, automation, and AI-assisted tooling have become increasingly central to how infrastructure is designed and operated. I made a deliberate decision to build hands-on experience with modern tooling alongside my existing background, and these projects are the result.
 
-Each project reflects real-world decision-making, with the outcomes and lessons learned along the way.
-
-This space also serves as a practical exercise in applying Git and GitHub effectively, with an emphasis on clear structure, documentation, and reproducibility.
+Each project reflects real-world decision-making. The outcomes and trade-offs are documented, including what went wrong.
 
 ---
 
@@ -22,8 +20,8 @@ This space also serves as a practical exercise in applying Git and GitHub effect
 
 Each project has two layers of documentation:
 
-- **A plain-English summary** — what the project is, why it exists, and what it achieves, written for any audience
-- **Detailed technical documentation** — implementation steps, decisions, and rationale for engineers and hiring managers who want to go deeper
+- A plain-English summary covering what the project is, why it exists, and what it achieves, written for any audience
+- Detailed technical documentation with implementation steps, decisions, and rationale for engineers and hiring managers who want to go deeper
 
 Lab environments and fictional scenarios are clearly labelled throughout. No real client data, credentials, or confidential information appears anywhere in this repository.
 
@@ -35,79 +33,68 @@ Lab environments and fictional scenarios are clearly labelled throughout. No rea
 
 ### 📁 [Microsoft 365 Migration](./m365-project/README.md)
 
-> *A complete end-to-end migration for a fictional 15-person SME, transitioning from a fully on-premises Windows Server environment and IMAP email to Microsoft 365, including security hardening and infrastructure decommissioning.*
+> *A complete on-premises to Microsoft 365 migration for a fictional 15-person SME, from planning to decommission.*
 
-This project documents the kind of migration I've delivered for SME clients. The scenario uses a fictional company, but every step reflects what you'd encounter in a genuine engagement, including the often-overlooked details: SharePoint information architecture decisions, NTFS permission cleanup, and the backup gap that Microsoft 365 doesn't solve for you.
+This documents the kind of migration that catches people out in practice: SharePoint information architecture decisions, NTFS permission cleanup before cutover, and the backup gap Microsoft 365 doesn't solve for you. The scenario is fictional. Every step reflects a real engagement.
 
-**Why I built it:** To create a repeatable, documented blueprint, useful both as a portfolio piece and as a practical guide for anyone planning a similar migration.
-
-**What I hope you take from it:** A clear, honest guide to planning and delivering an M365 migration end-to-end, including the decisions that often get glossed over in vendor documentation.
+Inside: a repeatable blueprint covering the decisions that vendor documentation tends to gloss over.
 
 **[→ View Project](./m365-project/README.md)**
 
 ---
+
 ### ☁️ [Azure Cloud Architecture](./aca-project/README.md)
 
-> *Hands-on Azure infrastructure across AZ-104 domains: networking, compute, storage, identity, monitoring, and automation, with architecture diagrams and phased deploy/destroy scripts.*
+> *Hands-on Azure infrastructure across all AZ-104 exam domains, with architecture diagrams and deploy/destroy scripts.*
 
-A two-tier private network hosts a Linux web server and Windows application VM, neither exposed to the internet, wired together with managed identity, Key Vault secrets, blob storage, and live monitoring. Everything deploys from a single script and tears down cleanly so you only pay for what you use. The project touches every major AZ-104 exam domain and is documented with the decisions made, the trade-offs considered, and the lessons learned along the way.
+A two-tier private network hosts a Linux web server and Windows application VM, wired together with managed identity, Key Vault secrets, blob storage, and live monitoring. Nothing is exposed to the internet. Everything deploys from a single script and tears down cleanly.
 
-**Why I built it:** The best way to understand Azure infrastructure is to build it, break it, and document everything.
+**Disclosure:** The architecture and learning approach are mine. The full deploy and destroy scripts were written with AI assistance, reviewed and tested throughout.
 
-**What I hope you take from it:** A practical, end-to-end reference for core Azure infrastructure concepts, written from the perspective of someone working through it in real time.
-
-**Honest disclosure:** The architectural design, learning plan, and scenario are mine. The automation scripts and deployment orchestration, including multi-phase `deploy`/`destroy` scripts, were developed with AI assistance.
+Inside: a practical end-to-end reference for core Azure concepts, documented from someone working through it in real time.
 
 **[→ View Project](./aca-project/README.md)**
 
 ---
+
 ### 🗄️ [NetApp ONTAP Simulator on Proxmox](./netapp-ontap-proxmox/README.md)
 
-> *A complete guide to running the NetApp ONTAP 9.6 simulator on Proxmox VE. The official documentation only covers VMware. This fills that gap.*
+> *The official ONTAP simulator guide covers VMware. This one covers Proxmox, including every undocumented failure along the way.*
 
-NetApp's ONTAP simulator is the standard tool for learning and studying the platform without physical hardware. The official setup guide covers VMware Workstation. Getting it working on Proxmox took significant trial and error and produced enough undocumented issues that writing it up seemed worthwhile.
-The guide covers the full process: VM creation with the exact settings ONTAP requires, the pre-boot disk preparation that isn't mentioned anywhere in official documentation, navigating the two-stage bootloader, disk initialisation, cluster setup, licensing, SSH access, and snapshotting for easy recovery and cloning.
-Why I built it: I have an ONTAP background from enterprise storage work and wanted a simulator running permanently on my homelab rather than tying up a laptop. No reliable Proxmox guide existed.
+Getting the ONTAP 9.6 simulator running on Proxmox took significant trial and error. The CPU type, machine type, RAM allocation, disk prep before first boot, and LIF placement after setup are all wrong by default and none of it is in the official docs.
 
-**What I hope you take from it:** A working simulator in a few hours rather than a few days of debugging undocumented errors.
+Inside: a full walkthrough from OVA to working cluster, with every panic explained and fixed.
 
 **[→ View Project](./netapp-ontap-proxmox/README.md)**
 
 ---
+
 ### 🖥️ [Automated Self-Hosted Infrastructure](./asi-project/README.md)
 
-> *A self-hosted infrastructure platform running on a Proxmox homelab, containerised, monitored, security-hardened, and fully provisioned from a single Ansible command.*
+> *A self-hosted platform on a Proxmox homelab, containerised, monitored, security-hardened, and provisioned from a single Ansible command.*
 
-Throughout my career I've built, supported, and migrated infrastructure across physical, virtualised, and cloud environments. What I hadn't done was work with containerisation or infrastructure-as-code, two areas that have become increasingly central to modern infrastructure practice. This project was my attempt to change that.
+Nextcloud, PostgreSQL, Redis, Nginx, Grafana, and Portainer, all version-controlled and reproducible. The entire stack deploys from one command and tears down the same way. This was a deliberate attempt to build hands-on experience with containerisation and infrastructure-as-code from scratch.
 
-The stack runs Nextcloud as the core application, a self-hosted cloud collaboration and file-sharing platform, alongside PostgreSQL (instead of the default SQLite), Redis, Nginx, Prometheus, Grafana, and Portainer. The entire platform is provisioned via Ansible and version-controlled in Git.
+**Disclosure:** The Ansible code was written with AI assistance. The value was learning what the components do, how they fit together, and what it takes to build something that can be torn down and redeployed from code.
 
-**Why I built it:** To get hands-on with containerisation, IaC, and modern infrastructure tooling I was curious about but had no practical experience in.
-
-**What I hope you take from it:** A working reference for anyone building a similar homelab platform, and an honest account of what the learning process actually looks like.
-
-**Honest disclosure:** The Ansible code was written with AI assistance. The value of this project was not authorship of every line, but learning what the components do, how they fit together, and what it actually takes to build a self-hosted cloud platform that can be torn down and redeployed from code. Experiencing that full lifecycle firsthand, including repeatable deploy and destroy from a single automated command, is what infrastructure-as-code means to me. I wanted to learn it by building, not just reading about it.
+Inside: a working reference for anyone building a similar platform, plus an account of what the learning process actually looks like.
 
 **[→ View Project](./asi-project/README.md)**
 
 ---
+
 ### 🤖 [AI Projects](./ai-projects/README.md)
 
-> *Hands-on tests of AI in infrastructure engineering, real capabilities, limitations, and risks.*
+> *What can AI actually do in a real IT environment? Not in demos. On live systems, with real consequences.*
 
-**Key questions explored:**
-- Can AI write and deploy IaC playbooks like Ansible?
-- Can it fully manage homelab infrastructure end-to-end?
-- Can AI build a full-stack interactive website hosted in a homelab?
-- What are the real risks?
+Five experiments testing AI on real infrastructure: SSH access to a live homelab, full control of an Azure environment, building a production application with no development background, an inventory request that came back as a security audit, and a controlled test pitting an AI security analyst against an AI ethical hacker on the same live environment.
 
-**Why I built it:** To learn what AI actually does well by building with it. Does it deliver on promises, work reliably, or need constant babysitting?
+Inside: what worked, what failed, and where human judgement still mattered.
 
-**What I hope you take from it:** Honest answers to those questions, including wins, failures, and security concerns.
-
-**[→ View Projects](./ai-projects/README.md)**
+**[→ View Project](./ai-projects/README.md)**
 
 ---
+
 ## Background
 
 | Area | Experience |

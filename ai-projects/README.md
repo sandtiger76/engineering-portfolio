@@ -17,68 +17,65 @@ I document what worked, what didn't, and where human judgement still mattered.
 
 ### 🖥️ [AI Infrastructure Ops Assistant](./infra-ops-assistant/README.md)
 
-> *Give AI real SSH access to a live homelab. Ask it anything. See what happens.*
+> *What happens when AI can actually run commands on live infrastructure, not just suggest them?*
 
-You've probably used AI to write infrastructure commands. But what happens when it can *run* them? This project connects Claude Code to a real multi-host homelab via MCP servers, SSH, Docker, DNS monitoring, and GitHub, and explores what a natural language interface to live infrastructure actually looks like in practice.
+Claude Code was given SSH access to a live multi-host homelab and asked to operate it through natural language. Some tasks worked first time. Others exposed real limitations. A few raised questions about what that level of access means if something goes wrong.
 
-The result is more capable, and more concerning, than expected.
-
-
+This documents what AI-assisted infrastructure operations looks like in practice, including where it earns trust and where it doesn't.
 
 **[→ View Project](./infra-ops-assistant/README.md)**
 
 ---
 
-### ☁️ [Giving an AI Agent Control of a Real Azure Environment](./azure-ops-assistant/README.md)
+### ☁️ [AI Agent Given Full Control of a Real Azure Environment](./azure-ops-assistant/README.md)
 
-> *What happens when you stop asking AI to help with infrastructure and let it run the whole thing?*
+> *Deploy, verify, document, tear down. No manual steps. What actually happened?*
 
-Production changes shouldn't be made unless you fully understand their impact. For this experiment, I deliberately stepped away from that rule, giving an AI agent full control of a test machine and an Azure environment to deploy, verify, document, and destroy.
+An AI agent was given a plain-English briefing and full control of an Azure lab. It deployed infrastructure across seven phases, handled errors without prompting, wrote its own documentation, and ran teardown. It also silently chose paid services when free ones were specified, and drifted from the agreed spec without flagging it.
 
-
+Both runs are documented. The failure matters as much as the success.
 
 **[→ View Project](./azure-ops-assistant/README.md)**
 
 ---
 
-### 🔍 [Job Intelligence Pipeline](./jobhunt-portal/README.md)
+### 🔍 [AI as Co-Engineer: Building a Job Intelligence Pipeline](./jobhunt-portal/README.md)
 
-> *A sysadmin with no development background builds a full-stack data pipeline, with AI as co-engineer.*
+> *Multiple job boards, daily scraping, automatic classification, a self-hosted tracking portal. Built by a sysadmin with no development background, using AI as co-engineer.*
 
-Multiple job boards. Daily automated scraping. Deduplication, classification, and shortlisting. A self-hosted web portal for tracking applications. Zero cloud dependency. Built by someone who had never written a production application before.
-
-This project is two things at once: a useful job hunting tool, and an honest account of what it's like to build something real with AI when you're working outside your area of expertise.
-
+The tool works. The more interesting story is what the build process actually looked like: where AI carried the work, where it needed constant correction, and where it lost the plot entirely. No cloud dependency, no ongoing cost.
 
 **[→ View Project](./jobhunt-portal/README.md)**
 
 ---
 
-### 🔐 [AI Homelab Inventory](./homelab-inventory/README.md)
+### 🗂️ [AI Homelab Inventory: Asked for Documentation, Got a Security Audit](./homelab-inventory/README.md)
 
-> *I asked an AI agent to document my homelab. What came back was not what I had in mind.*
+> *The brief was simple: connect to my homelab and document what's running. Hardware specs, software, versions.*
 
-I deleberately gave AI ssh access to audit my homelab and documents it. One prompt asking for a hardware and software inventory. What the agent returned was a 527-line report covering every service, every container, every config file it could reach — and a security findings section nobody asked for, ordered by severity, with remediation commands attached.
+The AI did exactly that. It also came back with a security findings section nobody asked for, ordered by severity, with remediation commands attached. Two critical vulnerabilities were real. One had been forgotten about entirely.
 
-
+This documents what the agent found, what it meant, and what the same access could produce with different intent.
 
 **[→ View Project](./homelab-inventory/README.md)**
 
 ---
-### 🔐 [AI Security Lab — Analyst vs Ethical Hacker](./security-testing/README.md)
 
-> *Can AI do the job of a security analyst and an ethical hacker at the same time?*
+### 🔐 [AI Security Analyst vs AI Ethical Hacker: Can AI Security-Harden Your Systems?](./security-testing/README.md)
 
-One agent audited a real network. A separate agent attacked it blind. Then remediation and a retest. This documents what each found, what each missed, and whether AI can replace specialist security skills.
+> *Two AI agents, two opposing briefs. One acts as a security analyst and audits the environment. A separate agent acts as an ethical hacker and attacks it blind.*
+
+The analyst found the vulnerabilities. The ethical hacker exploited them and reached full access to both hosts in under five minutes, no exploits, no brute force, one misconfigured service. Then fixes were applied and the hacker came back to retest. The gap between what the analyst reported and what the hacker actually did with it is where the real findings are.
 
 **[→ View Project](./security-testing/README.md)**
 
 ---
+
 ## A Note on How These Were Built
 
 Several projects here were built with direct AI assistance, including code generation, debugging, architecture decisions, and documentation. That's intentional and acknowledged throughout.
 
-Using AI effectively as an engineering tool is itself a skill. Knowing what to ask, how to validate the output, when to push back, and when not to trust it, that's the real competency being developed and documented here.
+Using AI effectively as an engineering tool is itself a skill. Knowing what to ask, how to validate the output, when to push back, and when not to trust it — that's the real competency being developed and documented here.
 
 ---
 

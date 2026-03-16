@@ -1,18 +1,4 @@
-# Quintin Boshoff — Engineering Portfolio
-
-**IT Infrastructure Engineer & Cloud Migration Consultant**
-
-[LinkedIn](https://www.linkedin.com/in/quintin-boshoff-1905033/)
-
----
-
-## About This Portfolio
-
-I'm an IT infrastructure engineer and cloud migration consultant with over 25 years of experience across end-user computing, server and platform operations, enterprise storage, and large-scale infrastructure transformation. In the latter part of my career, my focus shifted toward planning and delivering complex data migration and modernisation projects, guiding transitions from on-premises environments to cloud platforms across multiple regions and sites.
-
-Cloud platforms, automation, and AI-assisted tooling have become increasingly central to how infrastructure is designed and operated. I made a deliberate decision to build hands-on experience with modern tooling alongside my existing background, and these projects are the result.
-
-Each project reflects real-world decision-making. The outcomes and trade-offs are documented, including what went wrong.
+# Engineering Portfolio
 
 ---
 

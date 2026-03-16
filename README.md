@@ -82,7 +82,7 @@ A two-tier private network hosts a Linux web server and Windows application VM, 
 ---
 ### 🗄️ [NetApp ONTAP Simulator on Proxmox](./netapp-ontap-proxmox/README.md)
 
-A complete guide to running the NetApp ONTAP 9.6 simulator on Proxmox VE. The official documentation only covers VMware. This fills that gap.
+> *A complete guide to running the NetApp ONTAP 9.6 simulator on Proxmox VE. The official documentation only covers VMware. This fills that gap.*
 
 NetApp's ONTAP simulator is the standard tool for learning and studying the platform without physical hardware. The official setup guide covers VMware Workstation. Getting it working on Proxmox took significant trial and error and produced enough undocumented issues that writing it up seemed worthwhile.
 The guide covers the full process: VM creation with the exact settings ONTAP requires, the pre-boot disk preparation that isn't mentioned anywhere in official documentation, navigating the two-stage bootloader, disk initialisation, cluster setup, licensing, SSH access, and snapshotting for easy recovery and cloning.
@@ -91,8 +91,8 @@ Why I built it: I have an ONTAP background from enterprise storage work and want
 What I hope you take from it: A working simulator in a few hours rather than a few days of debugging undocumented errors.
 
 **[→ View Project](./netapp-ontap-proxmox/README.md)**
----
 
+---
 ### 🤖 [AI Projects](./ai-projects/README.md)
 
 > *Hands-on tests of AI in infrastructure engineering, real capabilities, limitations, and risks.*
@@ -110,7 +110,6 @@ What I hope you take from it: A working simulator in a few hours rather than a f
 **[→ View Projects](./ai-projects/README.md)**
 
 ---
-
 ## Background
 
 | Area | Experience |

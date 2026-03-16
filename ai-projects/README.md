@@ -1,14 +1,13 @@
 # The AI Experiment
 
-AI is everywhere right now. It's pitched as a game changer for IT operations, development, and professional work, often with bold claims and very little practical context.
+I wanted to find out what AI can actually do in a real IT environment — not in demos or
+controlled benchmarks, but on live systems with real constraints and real consequences.
 
-I didn't want to take those claims at face value. I wanted to see for myself what actually works, how easy it really is, and where the risks start to appear.
+Each project starts with a question I couldn't answer without building something. The
+work runs on my homelab rather than production, but the systems and problems are genuine.
+I document what worked, what didn't, and where human judgement still mattered.
 
-This section of my portfolio is a collection of hands-on experiments where I use AI as a tool and apply it to real problems. Each project starts with a simple question, usually something I'm curious about or something I've wondered whether AI could genuinely help with. The only way to answer it is to build something and try it.
-
-The work is done in my homelab rather than live production environments, but the systems, constraints, and problems are real. I document what worked, what didn't, what felt genuinely useful, and what raised concerns, including limitations, risks, and security trade-offs.
-
-> *How much can AI actually do — and where does human judgement remain essential?*
+> *How much can AI actually do — and does human judgement remain essential?*
 
 ---
 
@@ -24,7 +23,7 @@ You've probably used AI to write infrastructure commands. But what happens when 
 
 The result is more capable, and more concerning, than expected.
 
-**Core question:** Can AI genuinely *manage* infrastructure, or does it just assist with it?
+
 
 **[→ View Project](./infra-ops-assistant/README.md)**
 
@@ -36,7 +35,7 @@ The result is more capable, and more concerning, than expected.
 
 Production changes shouldn't be made unless you fully understand their impact. For this experiment, I deliberately stepped away from that rule, giving an AI agent full control of a test machine and an Azure environment to deploy, verify, document, and destroy.
 
-**Core question:** Can AI fully administer a cloud environment from a natural language briefing, and what does it get wrong when left unsupervised?
+
 
 **[→ View Project](./azure-ops-assistant/README.md)**
 
@@ -50,7 +49,6 @@ Multiple job boards. Daily automated scraping. Deduplication, classification, an
 
 This project is two things at once: a useful job hunting tool, and an honest account of what it's like to build something real with AI when you're working outside your area of expertise.
 
-**Core question:** Can AI carry a complete end-to-end build, and what does the human actually need to bring?
 
 **[→ View Project](./jobhunt-portal/README.md)**
 
@@ -62,12 +60,20 @@ This project is two things at once: a useful job hunting tool, and an honest acc
 
 I deleberately gave AI ssh access to audit my homelab and documents it. One prompt asking for a hardware and software inventory. What the agent returned was a 527-line report covering every service, every container, every config file it could reach — and a security findings section nobody asked for, ordered by severity, with remediation commands attached.
 
-**Core question:** Can AI create a complete inventory and document my HomeLab?
+
 
 **[→ View Project](./homelab-inventory/README.md)**
 
 ---
+### 🔐 [AI Security Lab — Analyst vs Ethical Hacker](./security-testing/README.md)
 
+> *Can AI do the job of a security analyst and an ethical hacker at the same time?*
+
+One agent audited a real network. A separate agent attacked it blind. Then remediation and a retest. This documents what each found, what each missed, and whether AI can replace specialist security skills.
+
+**[→ View Project](./security-testing/README.md)**
+
+---
 ## A Note on How These Were Built
 
 Several projects here were built with direct AI assistance, including code generation, debugging, architecture decisions, and documentation. That's intentional and acknowledged throughout.

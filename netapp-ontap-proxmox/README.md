@@ -1,18 +1,18 @@
-# NetApp ONTAP Simulator on Proxmox VE
+# Building a Self-Hosted NetApp Lab on Proxmox VE
 
-A complete, battle-tested guide for running the NetApp ONTAP 9.6 simulator on Proxmox VE — from a bare Proxmox host to a two-node HA cluster with a single-node DR target and SnapMirror replication.
+A complete guide to deploying NetApp ONTAP simulators on self-hosted Proxmox VE. Covers a two-node HA cluster with SnapMirror DR replication 
+to a single-node cluster, with support for nearly all ONTAP features including SVMs, NFS, CIFS, iSCSI, FlexClone, SnapVault and more.
 
 ---
 
 ## Why This Exists
 
-Learning NetApp ONTAP properly requires hands-on time. The official NetApp simulator (vSim) is the standard way to do this without physical hardware, but NetApp only documents it for VMware Workstation and VMware Player.
+I set up a self-hosted NetApp simulator lab on my Proxmox homelab to practice ONTAP. The official guides focus on VMware Workstation or Player, which works well on a PC or Laptop but is resources intensive and only works when the machine is powered on. 
 
-VMware on a laptop works, but it means the lab only runs when the laptop is open. A homelab Proxmox server runs 24/7, which is far more useful for learning — you can leave long-running tests overnight, come back to a running cluster, and always have something to connect a client to.
+Proxmox lets the lab run 24/7 on dedicated hardware and the Netapp Lab is always ready to connect to.
+No complete Proxmox guide existed at the time. Forum posts covered bits for specific ONTAP versions, but they skipped the full process and common issues.
 
-The problem is that no end-to-end Proxmox guide existed. There were forum posts, short write-ups for different ONTAP versions, and partial answers scattered across threads — but nothing that covered the full process including all the things that go wrong.
-
-This guide documents exactly what worked, including every panic, every gotcha, and every decision made along the way. The goal is that someone following it gets a working lab in a few hours rather than a few days.
+This guide covers what worked for me, step by step, including the errors, fixes, and choices made. 
 
 ---
 
@@ -272,12 +272,12 @@ Built from real experience setting up the ONTAP simulator on a Proxmox homelab. 
 
 Sources used:
 - NetApp *Simulate ONTAP 9.6 Installation and Setup Guide* (official)
-- Neil Anderson's VMware lab guide at [flackbox.com](https://www.flackbox.com) — excellent VMware reference, adapted for Proxmox
+- Neil Anderson's VMware lab guide at [flackbox.com](https://www.flackbox.com) — excellent VMware reference
 - Proxmox VE documentation
-- Hard-won experience from a morning of memory panics, vol0 explosions, and failed joins
+- My own experience from trial and error
 
 Pull requests welcome if something is wrong or out of date.
 
 ---
 
-*Tested on: Proxmox VE 9.1.5 | ONTAP Simulator 9.6 | 2026*
+*Tested on: Proxmox VE 9.1.5 | ONTAP Simulator 9.6*

@@ -43,13 +43,14 @@ Inside: a practical end-to-end reference for core Azure concepts, documented fro
 
 ---
 
-### 🗄️ [NetApp ONTAP Simulator on Proxmox](./netapp-ontap-proxmox/README.md)
+### 🗄️ [Building a Self-Hosted NetApp Lab on Proxmox VE](./netapp-ontap-proxmox/README.md)
 
 > *The official ONTAP simulator guide covers VMware. This one covers Proxmox, including every undocumented failure along the way.*
 
-Getting the ONTAP 9.6 simulator running on Proxmox took significant trial and error. The CPU type, machine type, RAM allocation, disk prep before first boot, and LIF placement after setup are all wrong by default and none of it is in the official docs.
+A complete guide to deploying NetApp ONTAP simulators on self-hosted Proxmox VE. Covers a two-node HA cluster with SnapMirror DR replication 
+to a single-node cluster, with support for nearly all ONTAP features including SVMs, NFS, CIFS, iSCSI, FlexClone, SnapVault and more.
 
-Inside: a full walkthrough from OVA to working cluster, with every panic explained and fixed.
+Inside: a complete guide with every panic explained and fixed.
 
 **[→ View Project](./netapp-ontap-proxmox/README.md)**
 

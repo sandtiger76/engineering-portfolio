@@ -19,15 +19,16 @@ Tested on Proxmox VE 9.1.5 with the ONTAP 9.6 simulator. Other ONTAP simulator v
 4. [Getting the Files onto Proxmox](#getting-the-files-onto-proxmox)
 5. [VM Creation](#vm-creation)
 6. [Pre-Boot Disk Preparation](#pre-boot-disk-preparation)
-7. [First Boot — Navigating the Bootloader](#first-boot--navigating-the-bootloader)
-8. [Disk Initialization — Boot Menu Option 4](#disk-initialization--boot-menu-option-4)
-9. [Cluster Setup Wizard](#cluster-setup-wizard)
-10. [Post-Setup Tasks](#post-setup-tasks)
-11. [Accessing the Cluster](#accessing-the-cluster)
-12. [Snapshots, Backups and Cloning](#snapshots-backups-and-cloning)
-13. [Hibernate and Shutdown](#hibernate-and-shutdown)
-14. [Safe Shutdown Procedure](#safe-shutdown-procedure)
-15. [Troubleshooting](#troubleshooting)
+7. [Taking the fresh-install Snapshot](#taking-the-fresh-install-snapshot)
+8. [First Boot — Navigating the Bootloader](#first-boot--navigating-the-bootloader)
+9. [Disk Initialization — Boot Menu Option 4](#disk-initialization--boot-menu-option-4)
+10. [Cluster Setup Wizard](#cluster-setup-wizard)
+11. [Post-Setup Tasks](#post-setup-tasks)
+12. [Accessing the Cluster](#accessing-the-cluster)
+13. [Snapshots and Backups](#snapshots-and-backups)
+14. [Hibernate and Shutdown](#hibernate-and-shutdown)
+15. [Safe Shutdown Procedure](#safe-shutdown-procedure)
+16. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -39,7 +40,7 @@ Simulate ONTAP is a NetApp-provided simulator for learning and testing ONTAP wit
 - A single-node ONTAP 9.6 cluster running on Proxmox
 - SSH access from the Proxmox host
 - All feature licenses installed
-- Snapshots saved so you can restore or clone at any time
+- A `fresh-install` snapshot taken at the correct point for cloning additional nodes in Part 2
 
 **What a single-node cluster gives you:**
 - Full ONTAP CLI
@@ -49,7 +50,7 @@ Simulate ONTAP is a NetApp-provided simulator for learning and testing ONTAP wit
 - System Manager web UI
 - Enough to study for ONTAP certification or learn the platform
 
-The one thing a single node cannot do is HA failover, which requires a partner node. Part 2 covers building a two-node HA cluster using the snapshot from this guide as a starting point.
+The one thing a single node cannot do is HA failover, which requires a partner node. Part 2 covers building a two-node HA cluster.
 
 ---
 
@@ -71,7 +72,7 @@ Download the following from the [NetApp Support Site](https://mysupport.netapp.c
 | CPU | 2 cores, VT-x enabled | Check BIOS if virtualisation is disabled |
 | RAM | 5 GB free | 4 GB will panic during disk initialisation |
 | Disk | 40 GB free | Per node. The disk shelf image is sparse but grows with use |
-| Proxmox VE | 7.x or 8.x | Tested on 9.1.5 |
+| Proxmox VE | 7.x or later | Tested on 9.1.5 |
 
 **RAM note:** ONTAP pre-allocates memory at boot. It does not support the QEMU balloon driver so whatever you allocate, it holds. 5120 MB is the minimum that works reliably. Do not be tempted to try 4096 MB.
 
@@ -254,16 +255,13 @@ qm create ${VMID} \
 
 ### Import the Four Disks
 
-Import each disk individually and attach immediately as IDE. **Order matters** —
-disk1 must be ide0, disk2 must be ide1, etc.
+Import each disk individually. **Order matters** — disk1 must be ide0, disk2 must be ide1, etc.
 
 ```bash
-# Import all 4 disks
-for n in 1 2 3 4; do
-    qm disk import ${VMID} \
-        ${VMDK_DIR}/vsim-netapp-DOT9.6-cm-disk${n}.vmdk \
-        ${STORAGE} --format raw
-done
+qm importdisk ${VMID} ${VMDK_DIR}/vsim-netapp-DOT9.6-cm-disk1.vmdk ${STORAGE} --format raw
+qm importdisk ${VMID} ${VMDK_DIR}/vsim-netapp-DOT9.6-cm-disk2.vmdk ${STORAGE} --format raw
+qm importdisk ${VMID} ${VMDK_DIR}/vsim-netapp-DOT9.6-cm-disk3.vmdk ${STORAGE} --format raw
+qm importdisk ${VMID} ${VMDK_DIR}/vsim-netapp-DOT9.6-cm-disk4.vmdk ${STORAGE} --format raw
 
 # Attach as IDE devices in order
 qm set ${VMID} --ide0 ${STORAGE}:vm-${VMID}-disk-0
@@ -320,6 +318,25 @@ data from the disk shelf, allowing ONTAP to initialise it fresh.
 
 > **Only wipe disk4 (disk-3 in Proxmox naming).** Do not wipe disk1, disk2,
 > or disk3 — these contain the ONTAP operating system and are needed for booting.
+
+---
+
+## Taking the fresh-install Snapshot
+
+> **Take this snapshot now, before first boot. This is the correct point for the fresh-install snapshot.**
+
+Once the VM is created, disks are attached, and disk4 is wiped — but before the VM has ever been booted — take the `fresh-install` snapshot. This is the snapshot you will clone from when building additional nodes in Part 2.
+
+```bash
+qm snapshot ${VMID} fresh-install --description "Virgin disks, disk4 pre-wiped, never booted — safe to clone for new nodes"
+qm listsnapshot ${VMID}
+```
+
+**Why here and not after option 4?**
+
+Taking the snapshot after option 4 (as some guides suggest) bakes C1N1's node identity into the disk shelf. Any clone made from that snapshot carries C1N1's WWN addresses and System ID. ONTAP will panic when it detects the conflict — and the panic happens early enough that neither option 4 nor maintenance mode can recover it. The only fix is to reimport the VMDKs from scratch.
+
+Taking the snapshot here gives you truly virgin disks. When you clone this snapshot for a new node you boot it, set a unique System ID at VLOADER, run option 4, and ONTAP initialises the disk shelf with the new node's identity from scratch. No conflicts, no panics.
 
 ---
 
@@ -642,20 +659,18 @@ Login with username `admin` and your cluster password.
 
 ---
 
-## Snapshots, Backups and Cloning
+## Snapshots and Backups
 
-This is one of the bigger advantages of running the simulator on Proxmox rather than a laptop. You can snapshot at any point, restore instantly if something goes wrong, and clone the node to create additional cluster members without reimporting VMDKs.
-
-### Two Snapshots Worth Keeping
+### Snapshots Worth Keeping
 
 | Snapshot | When | Purpose |
 |----------|------|---------|
-| `fresh-install` | After option 4, before the wizard | Clean initialised node. Use this when cloning nodes for a cluster. |
+| `fresh-install` | After disk import and dd wipe, **before first boot** | Virgin disks. Clone from this when building new nodes in Part 2. |
 | `part1-complete` | After full setup and licensing | Working standalone cluster. Restore this if you break something. |
 
-### Taking a Snapshot
+### Taking the part1-complete Snapshot
 
-Always shut down cleanly before snapshotting. A snapshot of a running ONTAP VM will corrupt the internal database. This is a known issue and not specific to Proxmox.
+Always shut down cleanly before snapshotting. A snapshot of a running ONTAP VM will corrupt the internal database.
 
 ```bash
 # Step 1 — halt from the ONTAP CLI
@@ -683,24 +698,6 @@ qm rollback 301 part1-complete
 qm start 301
 ```
 
-### Cloning — The Time Saver for Part 2
-
-The `fresh-install` snapshot is the key to building a multi-node lab without repeating the full setup process. Rather than reimporting four VMDKs and running option 4 for every node, you clone the already-initialised VM. Each clone starts from a clean wiped state, ready for the setup wizard.
-
-```bash
-# Clone VM 301 to create two additional nodes
-qm clone 301 302 --name C1N2 --full --snapname fresh-install
-qm clone 301 303 --name C2N1 --full --snapname fresh-install
-```
-
-The `--full` flag creates independent copies with their own disks. The `--snapname` flag clones from the clean pre-setup state rather than the current configured state.
-
-Each cloned node will still need a System ID change at VLOADER before first boot. That is covered in Part 2.
-
-> **Disk space note:** Each clone copies the full disk set including the 230 GB sparse disk4.
-> On thin-provisioned storage this is fast and uses minimal real space until ONTAP writes data.
-> Expect a few minutes per clone.
-
 ---
 
 ## Hibernate and Shutdown
@@ -722,8 +719,6 @@ qm resume 301
 ```
 
 Hibernate frees all RAM. ONTAP uses around 4.5 GB when running idle, so hibernating gives that back to the host immediately. The VM resumes in seconds without a full boot.
-
-Hibernate state is stored on disk as a file roughly equal to the VM's RAM size (5 GB in this case).
 
 **Single node cluster:** Hibernate works reliably. No caveats.
 
@@ -783,30 +778,25 @@ qm start 301
 
 ### PANIC: /sim/dev/,disks directory not found
 
-**Cause:** disk4 is blank or was wiped incorrectly.
+**Cause:** disk4 is blank — either freshly wiped or freshly imported from OVA.
 
-**Fix:** This is actually expected if you wiped disk4 — run option 4
-from the boot menu and ONTAP will rebuild the disk shelf structure fresh.
+**Fix:** This is expected after a wipe. Run option 4 from the boot menu and ONTAP will rebuild the disk shelf structure fresh.
 
 ### PANIC: No /dev/ad2s1 file found
 
-**Cause:** disk2 or disk3 was wiped. These contain essential ONTAP
-filesystem data and must not be wiped.
+**Cause:** disk2 or disk3 was wiped. These contain essential ONTAP filesystem data and must not be wiped.
 
-**Fix:** Destroy the VM and reimport the VMDKs fresh from the OVA.
-Only wipe disk4.
+**Fix:** Destroy the VM and reimport the VMDKs fresh from the OVA. Only ever wipe disk4.
 
 ### Landed at `boot:` instead of `VLOADER>`
 
 **Cause:** Pressed Ctrl-C too early, before all 4 BIOS drive lines appeared.
 
-**Fix:** Type `boot` at the `boot:` prompt and try again next cycle —
-wait until all 4 drives appear before pressing Ctrl-C.
+**Fix:** Type `boot` at the `boot:` prompt and try again next cycle — wait until all 4 drives appear before pressing Ctrl-C.
 
 ### Cluster management LIF unreachable after setup
 
-**Cause:** The setup wizard assigns `cluster_mgmt` to `e0a` which is
-connected to the isolated `vmbr2` bridge.
+**Cause:** The setup wizard assigns `cluster_mgmt` to `e0a` which is connected to the isolated `vmbr2` bridge.
 
 **Fix:** Move the LIF to `e0c` as described in the Post-Setup Tasks section.
 
@@ -836,8 +826,6 @@ qm snapshot 301 <name>
 
 ---
 
----
-
-*Part 2 covers building a two-node HA cluster and a second standalone cluster for SnapMirror replication.*
+*Part 2 covers building a two-node HA cluster with VyOS routing and iSCSI fabric.*
 
 *Tested on: Proxmox VE 9.1.5 | ONTAP Simulator 9.6 | 2026*

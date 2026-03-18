@@ -236,19 +236,19 @@ The Gitea asi-platform credential and the n8n database-stored password were both
 
 ## Files
 
-| File | sadf | 
+| File | Description | 
 |------| ------ | 
 | [Master project context ](CLAUDE.md) | network layout, phase structure, ground rules|
-| [Blue Team brief — read-only audit methodology](phase1-blue-audit/CLAUDE.md)
-| [Blue Team findings — 12 findings across both hosts](phase1-blue-audit/report.md)
-| [Red Team brief — active attack methodology](phase2-red-attack/CLAUDE.md)
-| [Red Team findings — full kill chain, all compromised services](phase2-red-attack/report.md)
-| [Remediation brief — prioritisation and fix patterns](phase3-blue-remediation/CLAUDE.md)
-| [Remediation log — what was fixed, what broke, what was skipped](phase3-blue-remediation/report.md)
-| [Retest brief — same scope, post-remediation](phase4-red-retest/CLAUDE.md)
-| [Retest findings — 8 confirmed fixed, 4 still open](phase4-red-retest/report.md)
-| [Gap analysis brief](phase5-gap-analysis/CLAUDE.md)
-| [Gap analysis — discovery gap, calibration gap, execution gap](phase5-gap-analysis/report.md)
+| [Blue Team brief](phase1-blue-audit/CLAUDE.md) | read-only audit methodology |
+| [Blue Team findings](phase1-blue-audit/report.md)| 12 findings across both hosts |
+| [Red Team brief](phase2-red-attack/CLAUDE.md) | active attack methodology |
+| [Red Team findings](phase2-red-attack/report.md) | full kill chain, all compromised services |
+| [Remediation brief](phase3-blue-remediation/CLAUDE.md) | prioritisation and fix patterns |
+| [Remediation log](phase3-blue-remediation/report.md) | what was fixed, what broke, what was skipped |
+| [Retest brief](phase4-red-retest/CLAUDE.md) | same scope, post-remediation |
+| [Retest findings](phase4-red-retest/report.md) | 8 confirmed fixed, 4 still open |
+| [Gap analysis brief](phase5-gap-analysis/CLAUDE.md) | |
+| [Gap analysis](phase5-gap-analysis/report.md) | discovery gap, calibration gap, execution gap |
 
 ---
 

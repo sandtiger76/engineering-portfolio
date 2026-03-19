@@ -10,6 +10,8 @@ Build the second node and join it to cluster17. By the end of this part you will
 
 1. [Overview](#overview)
 2. [Before You Start](#before-you-start)
+   - [Step 1 — Prepare the cluster interconnect on node 1](#step-1--prepare-the-cluster-interconnect-on-node-1)
+   - [Step 2 — Check vol0 on node 1](#step-2--check-vol0-on-node-1)
 3. [Create the c17n2 VM](#create-the-c17n2-vm)
 4. [Take the fresh-install Snapshot](#take-the-fresh-install-snapshot)
 5. [Set a Unique System ID at VLOADER](#set-a-unique-system-id-at-vloader)
@@ -53,25 +55,76 @@ flowchart TD
 
 ## Before You Start
 
-### Verify cluster interconnect is ready on node 1
+### Step 1 — Prepare the cluster interconnect on node 1
 
-Before starting node 2, confirm node 1 has its cluster LIFs configured:
+**This must be done on cluster17-01 before node 2 is even built.** When ONTAP creates a single-node cluster, it does not configure the cluster interconnect ports (e0a/e0b). Without this preparation, node 2 has nothing to connect to and the join will fail immediately.
+
+SSH to cluster17-01:
+
+```bash
+ssh admin@172.17.17.11
+```
+
+**Remove e0a and e0b from the Default broadcast domain:**
+
+```
+cluster17::> network port broadcast-domain remove-ports -ipspace Default -broadcast-domain Default -ports cluster17-01:e0a,cluster17-01:e0b
+```
+
+**Add them to the Cluster broadcast domain:**
+
+```
+cluster17::> network port broadcast-domain add-ports -ipspace Cluster -broadcast-domain Cluster -ports cluster17-01:e0a,cluster17-01:e0b
+```
+
+**Fix the MTU — this is critical:**
+
+The Cluster broadcast domain defaults to MTU 9000. Proxmox bridges pass a maximum of 1500. This mismatch causes the cluster join to hang silently during DB sync — the most common join failure in this lab. Fix it now:
+
+```
+cluster17::> network port broadcast-domain modify -ipspace Cluster -broadcast-domain Cluster -mtu 1500
+```
+
+Answer `y` to the warning.
+
+**Create the cluster LIFs:**
+
+```
+cluster17::> network interface create -vserver Cluster -lif cluster17-01_clus1 -home-node cluster17-01 -home-port e0a -address 169.254.1.1 -netmask 255.255.0.0
+cluster17::> network interface create -vserver Cluster -lif cluster17-01_clus2 -home-node cluster17-01 -home-port e0b -address 169.254.1.2 -netmask 255.255.0.0
+```
+
+**Verify everything is correct:**
 
 ```
 cluster17::> network interface show -vserver Cluster
 ```
 
-You should see two LIFs — `cluster17-01_clus1` and `cluster17-01_clus2` — both up/up on e0a and e0b. If this shows no entries, go back to the **Prepare Cluster Interconnect for Node 2** section in Part 2 and complete it first.
+Expected output:
 
-Also confirm the Cluster broadcast domain MTU is 1500:
+```
+Vserver     Interface          Admin/Oper  Address/Mask        Port   Home
+----------- ------------------ ----------  ------------------- -----  ----
+Cluster
+            cluster17-01_clus1 up/up       169.254.1.1/16      e0a    true
+            cluster17-01_clus2 up/up       169.254.1.2/16      e0b    true
+```
 
 ```
 cluster17::> network port broadcast-domain show -ipspace Cluster
 ```
 
-MTU must be **1500**, not 9000. A 9000 MTU mismatch causes the join to hang silently during cluster DB sync — the most common join failure in this lab.
+MTU must show **1500**. If it shows 9000, run the modify command again.
 
-### Check vol0 on node 1
+```
+cluster17::> network port show
+```
+
+e0a and e0b must show IPspace `Cluster`. e0c and e0d remain in `Default`.
+
+Node 1 is now ready to accept a join from node 2.
+
+### Step 2 — Check vol0 on node 1
 
 A full vol0 on node 1 will cause the join to fail mid-way. Verify it has space:
 

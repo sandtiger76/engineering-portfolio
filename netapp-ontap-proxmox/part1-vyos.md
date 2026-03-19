@@ -1,6 +1,6 @@
 # Part 1 — VyOS Virtual Router
 
-[← README](README.md) | [Part 2 — First ONTAP Node →](part2-c17n1.md)
+[← README](README.md) | [Part 2 — First ONTAP Node →](part2-cluster17-01.md)
 
 Build the network foundation before touching any ONTAP nodes. VyOS is the gateway for all lab subnets, provides NAT to the internet, and routes traffic between management and data networks. Everything else in this guide depends on it being up first.
 
@@ -15,14 +15,15 @@ Build the network foundation before touching any ONTAP nodes. VyOS is the gatewa
 5. [Install VyOS](#install-vyos)
 6. [Configure VyOS](#configure-vyos)
 7. [Verify Routing](#verify-routing)
-8. [Snapshot and Startup Notes](#snapshot-and-startup-notes)
-9. [Troubleshooting](#troubleshooting)
+8. [Workstation Static Route](#workstation-static-route)
+9. [Snapshot and Startup Notes](#snapshot-and-startup-notes)
+10. [Troubleshooting](#troubleshooting)
 
 ---
 
 ## Overview
 
-VyOS is a Linux-based network operating system. In this lab it plays the role that a physical router or layer-3 switch would play in a real datacenter — it connects all the lab subnets together and provides a default gateway for each one.
+VyOS is a Linux-based network operating system. In this lab it plays the role that a physical router or layer-3 switch would play in a real datacenter — connecting all the lab subnets together and providing a default gateway for each one.
 
 ```mermaid
 graph LR
@@ -34,7 +35,7 @@ graph LR
     end
     eth1 <--> vmbr1[vmbr1\n172.17.17.0/24]
     eth2 <--> vmbr3[vmbr3\n172.17.170.0/24]
-    vmbr1 <--> ONTAP[ONTAP nodes\nc17n1, c17n2, c17dr]
+    vmbr1 <--> ONTAP[ONTAP nodes\ncluster17-01, cluster17-02, cluster17dr-01]
     vmbr3 <--> ONTAP
 ```
 
@@ -46,16 +47,14 @@ graph LR
 
 **With VyOS:**
 - All subnets are routed
-- NAT provides internet access for NTP and AutoSupport
+- NAT provides internet access for NTP
 - Your workstation can reach all lab IPs via a single static route
 
 ---
 
 ## Add Lab Bridges to Proxmox
 
-Run these commands on the **Proxmox1 host** as root.
-
-Three bridges are needed. vmbr1 and vmbr2 may already exist from earlier work — check first:
+Run these commands on the **Proxmox1 host** as root. Check what already exists first:
 
 ```bash
 ip link show vmbr1
@@ -63,7 +62,7 @@ ip link show vmbr2
 ip link show vmbr3
 ```
 
-Add any that are missing:
+Add any that are missing to `/etc/network/interfaces`:
 
 ```bash
 cat >> /etc/network/interfaces << 'EOF'
@@ -100,11 +99,6 @@ Verify all three are up:
 ip link show vmbr1 && ip link show vmbr2 && ip link show vmbr3
 ```
 
-Expected output for each:
-```
-N: vmbr1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ... state UNKNOWN
-```
-
 **Bridge summary:**
 
 | Bridge | IP on Proxmox host | Purpose |
@@ -113,8 +107,7 @@ N: vmbr1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 ... state UNKNOWN
 | vmbr2 | none | ONTAP cluster interconnect — completely isolated |
 | vmbr3 | none | Data and intercluster traffic — routed by VyOS |
 
-> **Why does vmbr1 have a Proxmox IP but vmbr3 does not?**
-> vmbr1 gives the Proxmox host itself an address on the management network so you can SSH to ONTAP directly from the host without needing VyOS running. vmbr3 is data-only — Proxmox has no reason to have an address there.
+> vmbr1 gives the Proxmox host an address on the management network so you can SSH to ONTAP directly from the host without needing VyOS running. vmbr3 is data-only — Proxmox has no reason to have an address there.
 
 ---
 
@@ -132,16 +125,12 @@ https://vyos.net/get/nightly-builds/
 
 Download the `amd64` ISO. Filename will be similar to:
 ```
-vyos-1.5-rolling-20260101-amd64.iso
+vyos-1.5-rolling-202601010000-amd64.iso
 ```
 
 Upload it to Proxmox local storage:
 
 ```bash
-# Enable ISO content type on local storage if needed
-pvesm set local --content iso,vztmpl,backup,snippets
-
-# Upload via scp from your workstation
 scp vyos-*.iso root@<proxmox-ip>:/var/lib/vz/template/iso/
 ```
 
@@ -181,7 +170,7 @@ Replace `<your-vyos-iso-filename>` with the actual filename of the ISO you uploa
 | net1 | vmbr1 | eth1 | Management network gateway |
 | net2 | vmbr3 | eth2 | Data/intercluster gateway |
 
-> **Memory note:** VyOS requires a minimum of **1536 MB**. 1024 MB causes OOM kills of python3 processes during boot and VyOS will not start reliably. Do not go below 1536 MB.
+> **Memory note:** VyOS requires a minimum of **1536 MB**. 1024 MB causes OOM kills of python3 processes during boot. Do not go below 1536 MB.
 
 ---
 
@@ -193,9 +182,7 @@ Start the VM and open the Proxmox console:
 qm start 304
 ```
 
-In the Proxmox web UI, open the console for VM 304. VyOS will boot from the ISO into a live environment.
-
-Login with:
+VyOS boots from the ISO into a live environment. Login with:
 ```
 Username: vyos
 Password: vyos
@@ -207,15 +194,7 @@ Install VyOS to the virtual disk:
 install image
 ```
 
-Work through the installer — accept all defaults:
-- `Proceed with installation? [yes]` → **yes**
-- `Would you like to try to partition a disk automatically? [yes]` → **yes**
-- `Install the image on? [sda]` → **Enter**
-- `Continue? [No]` → **yes**
-- `How big a root partition? [...]` → **Enter** (use full disk)
-- `Image name? [...]` → **Enter**
-- `Copy config? [yes]` → **Enter**
-- Set a password for the `vyos` user when prompted
+Work through the installer — accept all defaults. Set a password for the `vyos` user when prompted.
 
 When installation completes:
 
@@ -223,7 +202,7 @@ When installation completes:
 poweroff
 ```
 
-After the VM shuts down, remove the CD-ROM so it boots from disk:
+After the VM shuts down, remove the CD-ROM:
 
 ```bash
 qm set 304 --ide2 none,media=cdrom
@@ -239,9 +218,7 @@ qm start 304
 
 ## Configure VyOS
 
-Login on the console (username `vyos`, password you set during install).
-
-First, enable SSH so you can configure from a proper terminal:
+Login on the console, then enable SSH first so you can configure from a proper terminal:
 
 ```bash
 configure
@@ -258,19 +235,17 @@ Find the DHCP address assigned to eth0:
 show interfaces ethernet eth0
 ```
 
-Note the IP address shown. SSH in from your workstation or from the Proxmox host:
+SSH in from your workstation:
 
 ```bash
 ssh vyos@<eth0-ip>
 ```
 
-Now apply the full configuration:
+Now apply the full configuration. Replace `<your-LAN-gateway>` with your actual router IP (e.g. `192.168.1.1`):
 
 ```bash
 configure
-```
 
-```
 # WAN uplink
 set interfaces ethernet eth0 address dhcp
 set interfaces ethernet eth0 description 'LAN-uplink'
@@ -297,9 +272,10 @@ set protocols static route 0.0.0.0/0 next-hop <your-LAN-gateway>
 
 commit
 save
+exit
 ```
 
-Replace `<your-LAN-gateway>` with your actual router IP (e.g. `192.168.1.1`).
+> **Tip:** Assign a DHCP reservation for VyOS in your router using its MAC address. This prevents the eth0 IP from changing after a reboot and breaking your workstation static route.
 
 ---
 
@@ -313,31 +289,44 @@ show interfaces
 
 Expected:
 ```
-Interface    IP Address         S/L  Description
----------    ----------         ---  -----------
-eth0         192.168.x.y/24     u/u  LAN-uplink
-eth1         172.17.17.1/24     u/u  lab-mgmt
-eth2         172.17.170.1/24    u/u  lab-data
-lo           127.0.0.1/8        u/u
+Interface    IP Address          S/L  Description
+-----------  ------------------  ---  -----------
+eth0         192.168.x.y/24      u/u  LAN-uplink
+eth1         172.17.17.1/24      u/u  lab-mgmt
+eth2         172.17.170.1/24     u/u  lab-data
+lo           127.0.0.1/8         u/u
 ```
+
+```bash
+show ip route
+```
+
+You should see the static default route `S>*` via your LAN gateway, and connected routes for both lab subnets.
 
 Test connectivity:
 
 ```bash
-# Can VyOS reach Proxmox on the management bridge?
-ping 172.17.17.254 count 3
-
-# Can VyOS reach the internet?
-ping 8.8.8.8 count 3
+ping 172.17.17.254 count 3   # Proxmox management bridge
+ping 8.8.8.8 count 3          # Internet — confirms NAT is working
 ```
 
-Both pings should succeed.
+---
 
-### Verify from your workstation
+## Workstation Static Route
 
-Add a static route on your workstation so you can reach all lab subnets:
+Add a static route on your workstation so you can reach all lab subnets directly. The `/16` covers both `172.17.17.0/24` and `172.17.170.0/24` and any future subnets.
 
-**Linux:**
+**Linux (persistent via NetworkManager):**
+```bash
+# Find your connection name
+nmcli connection show
+
+# Add the route (replace 'sandtiger' with your connection name)
+nmcli connection modify 'sandtiger' +ipv4.routes '172.17.0.0/16 <vyos-eth0-ip>'
+nmcli connection up 'sandtiger'
+```
+
+**Linux (temporary, lost on reboot):**
 ```bash
 sudo ip route add 172.17.0.0/16 via <vyos-eth0-ip>
 ```
@@ -352,7 +341,11 @@ sudo route add -net 172.17.0.0/16 <vyos-eth0-ip>
 route add 172.17.0.0 mask 255.255.0.0 <vyos-eth0-ip> -p
 ```
 
-Once this is in place, you can SSH directly to any lab IP from your workstation without a jump host.
+Verify:
+```bash
+ping 172.17.17.1    # VyOS management interface
+ping 172.17.17.254  # Proxmox management bridge
+```
 
 ---
 
@@ -361,37 +354,34 @@ Once this is in place, you can SSH directly to any lab IP from your workstation 
 Take a snapshot of the clean VyOS configuration:
 
 ```bash
-# VyOS does not need to be stopped for a snapshot — it is a standard Linux VM
-# But stop it cleanly anyway for consistency
 qm stop 304
 qm snapshot 304 vyos-configured --description "VyOS fully configured, routing and NAT working"
 qm start 304
 ```
 
-### Important — VyOS Does Not Support Suspend to Disk
+### VyOS Does Not Support Suspend to Disk
 
 ```bash
 # DO NOT do this with VyOS
-qm suspend 304 --todisk 1   # ← causes OOM on resume
+qm suspend 304 --todisk 1   # causes OOM on resume
 ```
 
-VyOS uses python3 processes during startup that are killed by the OOM handler when resuming from a memory snapshot on a tight host. Always stop and start VyOS cold:
+VyOS uses python3 processes during startup that are killed by the OOM handler when resuming from a memory snapshot. Always stop and start VyOS cold:
 
 ```bash
-# Correct way to stop VyOS
 qm stop 304
-
-# Correct way to start VyOS
 qm start 304
 ```
 
 ### Startup Order
 
-VyOS must be started **before** any ONTAP nodes. If ONTAP boots without a gateway it will have no management connectivity and the setup wizard cannot verify network reachability.
+VyOS must be started **before** any ONTAP nodes. ONTAP nodes need the management gateway to be available when their LIFs come online.
 
 ```
-Start order: vyos17 → c17n1 → c17n2 → c17dr
+Start order: vyos17 → cluster17-01 → cluster17-02 → cluster17dr-01
 ```
+
+Wait for each component to be fully up before starting the next.
 
 ---
 
@@ -420,29 +410,22 @@ qm start 304
 
 **Cause:** Configuration was not saved before reboot.
 
-**Fix:** Re-apply the configuration and make sure to run `save` after `commit`.
-
-### Ping from ONTAP to gateway fails
-
-**Cause:** VyOS is not running, or eth1/eth2 are down.
-
-**Fix:**
-```bash
-# Check VyOS is running
-qm status 304
-
-# Check interfaces from VyOS CLI
-show interfaces
-```
+**Fix:** Re-apply the configuration and run `save` after `commit`.
 
 ### Cannot reach lab from workstation
 
-**Cause:** Static route not added to workstation, or VyOS eth0 IP changed (DHCP).
+**Cause:** Static route not added to workstation, or VyOS eth0 IP changed after reboot.
 
-**Fix:** Re-check the VyOS eth0 IP and update the static route on your workstation. Consider assigning a DHCP reservation for VyOS in your router.
+**Fix:** Re-check the VyOS eth0 IP and update the static route. Assign a DHCP reservation for VyOS in your router to prevent IP changes.
+
+### ONTAP cannot ping its gateway after boot
+
+**Cause:** VyOS is not running, or started after the ONTAP node.
+
+**Fix:** Start VyOS first, wait for it to be fully up, then start ONTAP nodes.
 
 ---
 
-[← README](README.md) | [Part 2 — First ONTAP Node →](part2-c17n1.md)
+[← README](README.md) | [Part 2 — First ONTAP Node →](part2-cluster17-01.md)
 
 *Tested on: Proxmox VE 9.1.5 | VyOS rolling 2026 | 2026*

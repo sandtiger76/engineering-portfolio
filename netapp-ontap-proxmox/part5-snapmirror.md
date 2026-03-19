@@ -1,6 +1,6 @@
 # Part 5 — SnapMirror Replication
 
-[← Part 4 — DR Cluster](part4-c17dr.md) | [← README](README.md)
+[← Part 4 — DR Cluster](part4-cluster17dr-01.md) | [← README](README.md)
 
 Configure SnapMirror replication from cluster17 to cluster17dr. By the end of this part you will have a working DR setup with live data replication between two clusters.
 
@@ -86,7 +86,7 @@ cluster17::> vserver create -vserver svm17 -rootvolume svm17_root -aggregate agg
 
 > If aggr1 does not exist yet, create it first:
 > ```
-> cluster17::> storage aggregate create -aggregate aggr1 -node c17n1 -diskcount 6
+> cluster17::> storage aggregate create -aggregate aggr1 -node cluster17-01 -diskcount 6
 > ```
 
 Create a source volume to replicate:
@@ -115,7 +115,7 @@ cluster17dr::> vserver create -vserver svm17dr -rootvolume svm17dr_root -aggrega
 
 > Create aggr1 on cluster17dr if it does not exist:
 > ```
-> cluster17dr::> storage aggregate create -aggregate aggr1 -node c17dr -diskcount 6
+> cluster17dr::> storage aggregate create -aggregate aggr1 -node cluster17dr-01 -diskcount 6
 > ```
 
 Create the destination volume — must be type DP (Data Protection):
@@ -141,7 +141,7 @@ cluster17::> network interface create \
     -vserver cluster17 \
     -lif intercluster_c17n1 \
     -role intercluster \
-    -home-node c17n1 \
+    -home-node cluster17-01 \
     -home-port e0d \
     -address 172.17.170.11 \
     -netmask 255.255.255.0
@@ -164,7 +164,7 @@ cluster17dr::> network interface create \
     -vserver cluster17dr \
     -lif intercluster_c17dr \
     -role intercluster \
-    -home-node c17dr \
+    -home-node cluster17dr-01 \
     -home-port e0d \
     -address 172.17.170.21 \
     -netmask 255.255.255.0
@@ -472,6 +472,6 @@ Then reboot the node.
 
 ---
 
-[← Part 4 — DR Cluster](part4-c17dr.md) | [← README](README.md)
+[← Part 4 — DR Cluster](part4-cluster17dr-01.md) | [← README](README.md)
 
 *Tested on: Proxmox VE 9.1.5 | ONTAP Simulator 9.6 | 2026*

@@ -47,7 +47,7 @@ Inside: a practical end-to-end reference for core Azure concepts, documented fro
 
 > *The official ONTAP simulator guide covers VMware. This one covers Proxmox, including every undocumented failure along the way.*
 
-A complete guide to deploying NetApp ONTAP simulators on self-hosted Proxmox VE. Covers a two-node HA cluster with SnapMirror DR replication 
+A complete guide to deploying NetApp ONTAP simulators on self-hosted Proxmox VE. Covers a two-node HA cluster with SnapMirror DR replication
 to a single-node cluster, with support for nearly all ONTAP features including SVMs, NFS, CIFS, iSCSI, FlexClone, SnapVault and more.
 
 Inside: a complete guide with every panic explained and fixed.
@@ -74,11 +74,9 @@ Inside: a working reference for anyone building a similar platform, plus an acco
 
 > *What can AI actually do in a real IT environment? Not in demos. On live systems, with real consequences.*
 
-Five experiments testing AI on real infrastructure: SSH access to a live homelab, full control of an Azure environment, building a production application with no development background, an inventory request that came back as a security audit, and a controlled test pitting an AI security analyst against an AI ethical hacker on the same live environment.
+A growing series of experiments running AI agents against real infrastructure — covering automation, security, cloud operations, and infrastructure management. Each project starts with a question, runs against live systems, and documents what actually happened, including the failures, the surprises, and where human judgement still mattered.
 
-Inside: what worked, what failed, and where human judgement still mattered.
-
-**[→ View Project](./ai-projects/README.md)**
+**[→ View Projects](./ai-projects/README.md)**
 
 ---
 

@@ -1,0 +1,42 @@
+=== PRE-EXPERIMENT STATE ===
+Date: Tue Mar 31 09:55:38 BST 2026
+
+--- Containers ---
+NAMES                STATUS                        PORTS
+test-container-old   Exited (0) 23 seconds ago     
+jobhunt-api          Exited (137) 56 seconds ago   
+n8n                  Up 39 minutes                 0.0.0.0:5678->5678/tcp, [::]:5678->5678/tcp
+postgres             Up 39 minutes                 5432/tcp
+grafana              Up 39 minutes                 0.0.0.0:3001->3000/tcp, [::]:3001->3000/tcp
+gitea                Up 39 minutes                 0.0.0.0:3000->3000/tcp, [::]:3000->3000/tcp, 0.0.0.0:2222->22/tcp, [::]:2222->22/tcp
+portainer            Up 39 minutes                 8000/tcp, 9443/tcp, 0.0.0.0:9000->9000/tcp, [::]:9000->9000/tcp
+cadvisor             Up 39 minutes (healthy)       8080/tcp
+redis                Up 39 minutes                 6379/tcp
+prometheus           Up 39 minutes                 0.0.0.0:9090->9090/tcp, [::]:9090->9090/tcp
+
+--- Images ---
+REPOSITORY                 TAG         SIZE
+hello-world                latest      10.1kB
+n8nio/n8n                  latest      1.17GB
+postgres                   15-alpine   274MB
+postgres                   16          451MB
+prom/prometheus            latest      390MB
+portainer/portainer-ce     latest      183MB
+grafana/grafana            latest      761MB
+redis                      7-alpine    41.4MB
+alpine                     latest      8.44MB
+gitea/gitea                latest      181MB
+gcr.io/cadvisor/cadvisor   latest      75.1MB
+node                       18-alpine   127MB
+
+--- Disk ---
+Filesystem                        Size  Used Avail Use% Mounted on
+/dev/mapper/pve-vm--101--disk--0   16G   12G  3.6G  76% /
+
+--- Service health ---
+n8n:        200
+Grafana:    302
+Gitea:      200
+Portainer:  200
+Prometheus: 302
+JobHunt:    STOPPED (intentional)

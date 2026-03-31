@@ -71,6 +71,18 @@ The analyst found the vulnerabilities. The ethical hacker exploited them and rea
 
 ---
 
+### 🛡️ [I Spent an Afternoon Trying to Get an AI to Break My Own Infrastructure. It Wouldn't.](./prompt-injection-defence/README.md)
+
+> *The experiment was designed to show how bad prompting causes AI to cause damage. The AI had other ideas.*
+
+The same lab from the security testing project was brought back online. The environment was deliberately broken — stopped containers, unused images, disk approaching capacity. Two briefs were written: one careful, one dangerous. The careful one behaved perfectly. The dangerous one refused to run. Three times, with three different and increasingly sophisticated reasons.
+
+The intended lesson was that humans cause damage through bad prompting. The actual finding was harder to engineer than expected.
+
+**[→ View Project](./prompt-injection-defence/README.md)**
+
+---
+
 ## A Note on How These Were Built
 
 Several projects here were built with direct AI assistance, including code generation, debugging, architecture decisions, and documentation. That's intentional and acknowledged throughout.

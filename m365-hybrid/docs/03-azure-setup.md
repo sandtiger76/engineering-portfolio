@@ -28,6 +28,59 @@ All resources are deployed to the UK South region, which is the closest Azure re
 
 ---
 
+## Azure Resource Hierarchy
+
+The diagram below shows the full resource hierarchy — from subscription down to individual components — and how the networking layer connects to the identity infrastructure.
+
+```mermaid
+graph TD
+    SUB["☁️ Azure Subscription\nQCB PAYG PersonalCloud"]
+
+    SUB --> RGI["📁 RG-Identity\nUK South"]
+    SUB --> RGN["📁 RG-Networking\nUK South"]
+    SUB --> RGM["📁 RG-Management\nUK South"]
+    SUB --> RGU["📁 RG-UserServices\nUK South"]
+    SUB --> RGS["📁 RG-Shared\nUK South"]
+
+    RGI --> SVM["🖥️ Sync VM\nEntra Connect Sync"]
+    RGI --> NIC["🔌 Network Interface"]
+
+    RGN --> VNET["🌐 VNET-QCBHomelab\n10.10.0.0/16"]
+    VNET --> SNI["SNET-Identity\n10.10.1.0/24"]
+    VNET --> SNM["SNET-Management\n10.10.2.0/24"]
+    SNI --> NSG["🔒 NSG-Identity\nAllow RDP :3389"]
+
+    RGM --> LAW["📊 Log Analytics Workspace\nLAW-QCBHomelab\nPerGB2018"]
+
+    RGU --> STG["📦 Migration Staging\nFile transfer resources"]
+
+    RGS --> AUTO["⚙️ Automation Account\nShared runbooks"]
+
+    NIC --> SNI
+```
+
+### Network Detail
+
+```mermaid
+graph LR
+    subgraph VNET["VNET-QCBHomelab — 10.10.0.0/16"]
+        subgraph SNET1["SNET-Identity — 10.10.1.0/24"]
+            NSG["NSG-Identity\nInbound: RDP 3389\nOutbound: All"]
+            SYNCVM["Entra Connect Sync VM\n10.10.1.x"]
+            NSG --> SYNCVM
+        end
+        subgraph SNET2["SNET-Management — 10.10.2.0/24"]
+            MGMT["Management resources\n10.10.2.x"]
+        end
+    end
+
+    ONPREM["🏢 On-Premises\nQCBHC-DC01"] -->|"AD sync traffic"| SYNCVM
+    SYNCVM -->|"HTTPS to Entra ID"| CLOUD["🔐 Microsoft Entra ID"]
+    SYNCVM -->|"logs"| LAW["📊 Log Analytics"]
+```
+
+---
+
 ## Implementation Steps
 
 ### Step 1 — Log in to Azure

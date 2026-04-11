@@ -28,6 +28,51 @@ The server runs as a virtual machine — either in Proxmox, Hyper-V, or VirtualB
 
 ---
 
+## Infrastructure Diagram
+
+The diagram below shows how QCBHC-DC01 fits into the lab network and how DNS resolution works — internal queries are handled locally, all other queries are forwarded upstream.
+
+```mermaid
+graph TB
+    subgraph LAB["🏠  Lab Network (192.168.1.0/24)"]
+        subgraph VM["QCBHC-DC01 — 192.168.1.10"]
+            ADDS["Active Directory\nDomain Services\nqcbhomelab.online"]
+            DNS["DNS Server\n127.0.0.1"]
+            ADDS <--> DNS
+        end
+        WS1["WS-LDN-CARTER\n192.168.1.x"]
+        WS2["WS-LDN-BROWN\n192.168.1.x"]
+        GW["Router / Gateway\n192.168.1.1"]
+    end
+
+    subgraph UPSTREAM["🌐  Internet"]
+        CF["Cloudflare DNS\n1.1.1.1"]
+        GG["Google DNS\n8.8.8.8"]
+    end
+
+    WS1 -->|"DNS queries"| DNS
+    WS2 -->|"DNS queries"| DNS
+    DNS -->|"internal: resolves locally\nqcbhomelab.online"| ADDS
+    DNS -->|"external: forwards\ngoogle.com, etc."| CF
+    DNS -->|"fallback forwarder"| GG
+    GW --> UPSTREAM
+```
+
+---
+
+## DNS Resolution Flow
+
+```mermaid
+flowchart LR
+    Q["Client DNS query"] --> DC{"Is it\nqcbhomelab.online?"}
+    DC -->|"Yes — internal"| AD["AD DNS\nresolves locally"]
+    DC -->|"No — external"| FWD["Forward to\n1.1.1.1 or 8.8.8.8"]
+    AD --> ANS["Answer returned\nto client"]
+    FWD --> ANS
+```
+
+---
+
 ## Implementation Steps
 
 ### Step 1 — Create the Virtual Machine

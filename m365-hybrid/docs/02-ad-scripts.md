@@ -24,6 +24,79 @@ All scripts are idempotent — they can be run more than once without creating d
 
 ---
 
+## Directory Structure
+
+The diagrams below show the full Active Directory layout that the scripts produce — the OU tree, the user accounts within it, and how security groups connect to licences and access control.
+
+### OU Tree
+
+```mermaid
+graph TD
+    ROOT["🌐 qcbhomelab.online"]
+
+    ROOT --> USERS["OU=Users"]
+    ROOT --> WS["OU=Workstations"]
+    ROOT --> SRV["OU=Servers"]
+    ROOT --> GRP["OU=Groups"]
+    ROOT --> SVC["OU=ServiceAccounts"]
+
+    USERS --> ULD["OU=London\nj.carter\no.brown"]
+    USERS --> UNY["OU=NewYork\nm.reed\ns.miller"]
+    USERS --> UHK["OU=HongKong\nd.wong\ne.chan"]
+    USERS --> UHM["OU=Home"]
+
+    WS --> WLD["OU=London\nWS-LDN-CARTER\nWS-LDN-BROWN"]
+    WS --> WNY["OU=NewYork\nWS-NYC-REED\nWS-NYC-MILLER"]
+    WS --> WHK["OU=HongKong\nWS-HKG-WONG\nWS-HKG-CHAN"]
+    WS --> WHM["OU=Home"]
+
+    SRV --> SLD["OU=London\nQCBHC-DC01"]
+    SRV --> SNY["OU=NewYork"]
+    SRV --> SHK["OU=HongKong"]
+```
+
+### Group Membership & Licence Assignment
+
+```mermaid
+graph LR
+    subgraph LONDON["London Users"]
+        JC["j.carter"]
+        OB["o.brown"]
+    end
+    subgraph NEWYORK["New York Users"]
+        MR["m.reed"]
+        SM["s.miller"]
+    end
+    subgraph HONGKONG["Hong Kong Users"]
+        DW["d.wong"]
+        EC["e.chan"]
+    end
+
+    subgraph GROUPS["Security Groups"]
+        GLL["GRP-Location-London"]
+        GLN["GRP-Location-NewYork"]
+        GLH["GRP-Location-HongKong"]
+        GAS["GRP-AllStaff"]
+        GLI["GRP-License-M365BusinessPremium"]
+    end
+
+    subgraph OUTCOME["Outcome"]
+        LIC["M365 Business Premium\nLicence Assigned"]
+        POL["Intune & CA\nPolicies Applied"]
+    end
+
+    JC & OB --> GLL
+    MR & SM --> GLN
+    DW & EC --> GLH
+    JC & OB & MR & SM & DW & EC --> GAS
+    JC & OB & MR & SM & DW & EC --> GLI
+
+    GLI -->|"group-based licensing"| LIC
+    GAS -->|"policy targeting"| POL
+```
+
+---
+
 ## Implementation Steps
 
 ### Step 1 — Create the OU Structure
@@ -207,7 +280,7 @@ $workstations = @(
     @{ Name = "WS-LDN-BROWN";   OU = "OU=London,OU=Workstations,$domain" },
     @{ Name = "WS-NYC-REED";    OU = "OU=NewYork,OU=Workstations,$domain" },
     @{ Name = "WS-NYC-MILLER";  OU = "OU=NewYork,OU=Workstations,$domain" },
-    @{ Name = "WS-HKG-WONG";   OU = "OU=HongKong,OU=Workstations,$domain" },
+    @{ Name = "WS-HKG-WONG";    OU = "OU=HongKong,OU=Workstations,$domain" },
     @{ Name = "WS-HKG-CHAN";    OU = "OU=HongKong,OU=Workstations,$domain" }
 )
 

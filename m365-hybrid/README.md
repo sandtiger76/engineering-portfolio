@@ -82,18 +82,18 @@ Work through these in order. Each document is self-contained but builds on the o
 
 | # | Document | What it covers |
 |---|---|---|
-| 01 | [On-Premises Infrastructure](01-on-premises-dc.md) | Windows Server 2022, Active Directory, DNS |
-| 02 | [AD Provisioning Scripts](02-ad-scripts.md) | PowerShell scripts to build the full AD structure |
-| 03 | [Azure Resource Setup](03-azure-setup.md) | Resource groups, networking, and Azure foundations |
-| 04 | [Hybrid Identity](04-hybrid-identity.md) | Entra Connect Sync, Password Hash Sync |
-| 05 | [Microsoft 365 & Exchange Online](05-m365-exchange.md) | Tenant setup, domain, email flow, DNS |
-| 06 | [SharePoint & OneDrive](06-sharepoint-onedrive.md) | Team sites, personal storage, file migration |
-| 07 | [Microsoft Teams](07-teams.md) | Communication layer, governance, structure |
-| 08 | [Intune — Windows](08-intune-windows.md) | Device enrolment, compliance, patching |
-| 09 | [Intune — iOS MAM](09-intune-ios.md) | BYOD mobile app management |
-| 10 | [Conditional Access & MFA](10-conditional-access.md) | Zero Trust access policies |
-| 11 | [Defender for Business](11-defender.md) | Endpoint and email security |
-| 12 | [User Lifecycle](12-user-lifecycle.md) | Onboarding and offboarding procedures |
+| 01 | [On-Premises Infrastructure](docs/01-on-premises-dc.md) | Windows Server 2022, Active Directory, DNS |
+| 02 | [AD Provisioning Scripts](docs/02-ad-scripts.md) | PowerShell scripts to build the full AD structure |
+| 03 | [Azure Resource Setup](docs/03-azure-setup.md) | Resource groups, networking, and Azure foundations |
+| 04 | [Hybrid Identity](docs/04-hybrid-identity.md) | Entra Connect Sync, Password Hash Sync |
+| 05 | [Microsoft 365 & Exchange Online](docs/05-m365-exchange.md) | Tenant setup, domain, email flow, DNS |
+| 06 | [SharePoint & OneDrive](docs/06-sharepoint-onedrive.md) | Team sites, personal storage, file migration |
+| 07 | [Microsoft Teams](docs/07-teams.md) | Communication layer, governance, structure |
+| 08 | [Intune — Windows](docs/08-intune-windows.md) | Device enrolment, compliance, patching |
+| 09 | [Intune — iOS MAM](docs/09-intune-ios.md) | BYOD mobile app management |
+| 10 | [Conditional Access & MFA](docs/10-conditional-access.md) | Zero Trust access policies |
+| 11 | [Defender for Business](docs/11-defender.md) | Endpoint and email security |
+| 12 | [User Lifecycle](docs/12-user-lifecycle.md) | Onboarding and offboarding procedures |
 
 ---
 

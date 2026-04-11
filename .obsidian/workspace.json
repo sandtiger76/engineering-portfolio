@@ -185,6 +185,8 @@
   },
   "active": "deb732741a652d74",
   "lastOpenFiles": [
+    "m365-hybrid/docs/Unconfirmed 126688.crdownload",
+    "m365-hybrid/docs/Unconfirmed 993492.crdownload",
     "m365-hybrid/docs/Unconfirmed 603749.crdownload",
     "m365-hybrid/docs/Unconfirmed 264279.crdownload",
     "m365-hybrid/scripts/Unconfirmed 24276.crdownload",
@@ -194,8 +196,6 @@
     "m365-hybrid/scripts/Unconfirmed 40745.crdownload",
     "m365-hybrid/scripts/Unconfirmed 612965.crdownload",
     "m365-hybrid/scripts/Unconfirmed 160134.crdownload",
-    "m365-hybrid/scripts/Unconfirmed 814359.crdownload",
-    "m365-hybrid/scripts/00-Teardown-AD.ps1",
     "m365-hybrid/docs/01-on-premises-dc.md",
     "m365-hybrid/README.md",
     "m365-hybrid/docs/02-ad-scripts.md",

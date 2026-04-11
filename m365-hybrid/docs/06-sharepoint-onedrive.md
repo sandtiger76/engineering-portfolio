@@ -1,4 +1,4 @@
-[← 05 — Microsoft 365 & Exchange Online](05-m365-exchange.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [07 — Microsoft Teams →](07-teams.md)
+[← 05 — Microsoft 365 & Exchange Online](05-m365-exchange.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [07 — Microsoft Teams →](07-teams.md)
 
 ---
 
@@ -132,4 +132,4 @@ This is handled through Intune policy in document 08, which silently configures 
 
 ---
 
-[← 05 — Microsoft 365 & Exchange Online](05-m365-exchange.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [07 — Microsoft Teams →](07-teams.md)
+[← 05 — Microsoft 365 & Exchange Online](05-m365-exchange.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [07 — Microsoft Teams →](07-teams.md)

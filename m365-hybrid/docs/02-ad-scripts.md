@@ -1,4 +1,4 @@
-[← 01 — On-Premises Infrastructure](01-on-premises-dc.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [03 — Azure Resource Setup →](03-azure-setup.md)
+[← 01 — On-Premises Infrastructure](01-on-premises-dc.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [03 — Azure Resource Setup →](03-azure-setup.md)
 
 ---
 
@@ -327,4 +327,4 @@ The directory is now ready for synchronisation to Microsoft Entra ID, covered in
 
 ---
 
-[← 01 — On-Premises Infrastructure](01-on-premises-dc.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [03 — Azure Resource Setup →](03-azure-setup.md)
+[← 01 — On-Premises Infrastructure](01-on-premises-dc.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [03 — Azure Resource Setup →](03-azure-setup.md)

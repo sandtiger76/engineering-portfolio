@@ -1,4 +1,4 @@
-[← 08 — Intune: Windows](08-intune-windows.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [10 — Conditional Access & MFA →](10-conditional-access.md)
+[← 08 — Intune: Windows](08-intune-windows.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [10 — Conditional Access & MFA →](10-conditional-access.md)
 
 ---
 
@@ -115,4 +115,4 @@ Users experience minimal friction — they install familiar apps from the App St
 
 ---
 
-[← 08 — Intune: Windows](08-intune-windows.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [10 — Conditional Access & MFA →](10-conditional-access.md)
+[← 08 — Intune: Windows](08-intune-windows.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [10 — Conditional Access & MFA →](10-conditional-access.md)

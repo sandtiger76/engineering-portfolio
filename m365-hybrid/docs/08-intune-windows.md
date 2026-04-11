@@ -1,4 +1,4 @@
-[← 07 — Microsoft Teams](07-teams.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [09 — Intune: iOS MAM →](09-intune-ios.md)
+[← 07 — Microsoft Teams](07-teams.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [09 — Intune: iOS MAM →](09-intune-ios.md)
 
 ---
 
@@ -150,4 +150,4 @@ Once enrolled, devices receive all configuration profiles and compliance policie
 
 ---
 
-[← 07 — Microsoft Teams](07-teams.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [09 — Intune: iOS MAM →](09-intune-ios.md)
+[← 07 — Microsoft Teams](07-teams.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [09 — Intune: iOS MAM →](09-intune-ios.md)

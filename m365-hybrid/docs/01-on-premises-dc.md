@@ -1,4 +1,4 @@
-[← README — Project Overview](README.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [02 — AD Provisioning Scripts →](02-ad-scripts.md)
+[← README — Project Overview](../README.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [02 — AD Provisioning Scripts →](02-ad-scripts.md)
 
 ---
 
@@ -168,4 +168,4 @@ After completing these steps, QCBHC-DC01 is a fully functioning domain controlle
 
 ---
 
-[← README — Project Overview](README.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [02 — AD Provisioning Scripts →](02-ad-scripts.md)
+[← README — Project Overview](../README.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [02 — AD Provisioning Scripts →](02-ad-scripts.md)

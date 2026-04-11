@@ -1,4 +1,4 @@
-[← 03 — Azure Resource Setup](03-azure-setup.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [05 — Microsoft 365 & Exchange Online →](05-m365-exchange.md)
+[← 03 — Azure Resource Setup](03-azure-setup.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [05 — Microsoft 365 & Exchange Online →](05-m365-exchange.md)
 
 ---
 
@@ -117,4 +117,4 @@ After completing these steps, users created in Active Directory will automatical
 
 ---
 
-[← 03 — Azure Resource Setup](03-azure-setup.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [05 — Microsoft 365 & Exchange Online →](05-m365-exchange.md)
+[← 03 — Azure Resource Setup](03-azure-setup.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [05 — Microsoft 365 & Exchange Online →](05-m365-exchange.md)

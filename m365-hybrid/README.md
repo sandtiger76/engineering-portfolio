@@ -1,4 +1,4 @@
-[🏠 README](README.md) &nbsp;|&nbsp; [01 — On-Premises Infrastructure →](01-on-premises-dc.md)
+[🏠 README](README.md) &nbsp;|&nbsp; [01 — On-Premises Infrastructure →](docs/01-on-premises-dc.md)
 
 ---
 
@@ -122,4 +122,4 @@ This is an SMB-scale environment by design. Enterprise features such as Azure AD
 
 ---
 
-[🏠 README](README.md) &nbsp;|&nbsp; [01 — On-Premises Infrastructure →](01-on-premises-dc.md)
+[🏠 README](README.md) &nbsp;|&nbsp; [01 — On-Premises Infrastructure →](docs/01-on-premises-dc.md)

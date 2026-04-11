@@ -1,4 +1,4 @@
-[← 04 — Hybrid Identity](04-hybrid-identity.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [06 — SharePoint & OneDrive →](06-sharepoint-onedrive.md)
+[← 04 — Hybrid Identity](04-hybrid-identity.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [06 — SharePoint & OneDrive →](06-sharepoint-onedrive.md)
 
 ---
 
@@ -130,4 +130,4 @@ Once these steps are complete, email flows correctly in both directions, outboun
 
 ---
 
-[← 04 — Hybrid Identity](04-hybrid-identity.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [06 — SharePoint & OneDrive →](06-sharepoint-onedrive.md)
+[← 04 — Hybrid Identity](04-hybrid-identity.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [06 — SharePoint & OneDrive →](06-sharepoint-onedrive.md)

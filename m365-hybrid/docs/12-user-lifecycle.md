@@ -1,4 +1,4 @@
-[← 11 — Defender for Business](11-defender.md) &nbsp;|&nbsp; [🏠 README](README.md)
+[← 11 — Defender for Business](11-defender.md) &nbsp;|&nbsp; [🏠 README](../README.md)
 
 ---
 
@@ -210,4 +210,4 @@ A well-executed onboarding means a new user is productive from their first hour.
 
 ---
 
-[← 11 — Defender for Business](11-defender.md) &nbsp;|&nbsp; [🏠 README](README.md)
+[← 11 — Defender for Business](11-defender.md) &nbsp;|&nbsp; [🏠 README](../README.md)

@@ -1,4 +1,4 @@
-[← 02 — AD Provisioning Scripts](02-ad-scripts.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [04 — Hybrid Identity →](04-hybrid-identity.md)
+[← 02 — AD Provisioning Scripts](02-ad-scripts.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [04 — Hybrid Identity →](04-hybrid-identity.md)
 
 ---
 
@@ -216,4 +216,4 @@ az vm list -d --output table
 
 ---
 
-[← 02 — AD Provisioning Scripts](02-ad-scripts.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [04 — Hybrid Identity →](04-hybrid-identity.md)
+[← 02 — AD Provisioning Scripts](02-ad-scripts.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [04 — Hybrid Identity →](04-hybrid-identity.md)

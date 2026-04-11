@@ -1,4 +1,4 @@
-[← 09 — Intune: iOS MAM](09-intune-ios.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [11 — Defender for Business →](11-defender.md)
+[← 09 — Intune: iOS MAM](09-intune-ios.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [11 — Defender for Business →](11-defender.md)
 
 ---
 
@@ -127,4 +127,4 @@ Every sign-in to the environment now goes through the Conditional Access engine.
 
 ---
 
-[← 09 — Intune: iOS MAM](09-intune-ios.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [11 — Defender for Business →](11-defender.md)
+[← 09 — Intune: iOS MAM](09-intune-ios.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [11 — Defender for Business →](11-defender.md)

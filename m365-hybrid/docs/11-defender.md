@@ -1,4 +1,4 @@
-[← 10 — Conditional Access & MFA](10-conditional-access.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [12 — User Lifecycle →](12-user-lifecycle.md)
+[← 10 — Conditional Access & MFA](10-conditional-access.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [12 — User Lifecycle →](12-user-lifecycle.md)
 
 ---
 
@@ -107,4 +107,4 @@ Once devices are onboarded and policies are applied, Defender monitors all devic
 
 ---
 
-[← 10 — Conditional Access & MFA](10-conditional-access.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [12 — User Lifecycle →](12-user-lifecycle.md)
+[← 10 — Conditional Access & MFA](10-conditional-access.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [12 — User Lifecycle →](12-user-lifecycle.md)

@@ -1,4 +1,4 @@
-[← 06 — SharePoint & OneDrive](06-sharepoint-onedrive.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [08 — Intune: Windows →](08-intune-windows.md)
+[← 06 — SharePoint & OneDrive](06-sharepoint-onedrive.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [08 — Intune: Windows →](08-intune-windows.md)
 
 ---
 
@@ -112,4 +112,4 @@ Teams is ready to use across all locations. Files shared in Teams are stored in 
 
 ---
 
-[← 06 — SharePoint & OneDrive](06-sharepoint-onedrive.md) &nbsp;|&nbsp; [🏠 README](README.md) &nbsp;|&nbsp; [08 — Intune: Windows →](08-intune-windows.md)
+[← 06 — SharePoint & OneDrive](06-sharepoint-onedrive.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [08 — Intune: Windows →](08-intune-windows.md)

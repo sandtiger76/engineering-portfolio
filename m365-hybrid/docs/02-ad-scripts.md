@@ -8,26 +8,46 @@
 
 Once Active Directory is installed, it is an empty directory with only the built-in default objects. In a real environment, populating it manually would take hours and be error-prone. In a lab, doing it manually would also miss the point — the goal is to demonstrate that you can automate the work a senior engineer would be expected to script.
 
-This document covers the PowerShell scripts that build the complete Active Directory structure for QCB Homelab Consultants: Organisational Units (OUs), user accounts, security groups, workstation objects, and server objects. Running these scripts produces a realistic, populated directory that can then be synchronised to Microsoft Entra ID.
+This document covers the PowerShell scripts that build the complete Active Directory structure for QCB Homelab Consultants: Organisational Units (OUs), user accounts, security groups, and workstation objects. Running these scripts produces a realistic, populated directory that can then be synchronised to Microsoft Entra ID.
 
 All scripts are idempotent — they can be run more than once without creating duplicates or throwing errors.
 
 ---
 
+## Design Decisions
+
+### OU Hierarchy
+
+The OU structure follows modern hybrid identity best practice — OUs are used where they provide value (GPO scoping for user accounts, clean object separation) and kept flat where Intune and Entra ID handle policy targeting through group membership instead.
+
+**`OU=Accounts`** is the parent for all human identity objects. The name avoids the `CN=Users` built-in container conflict that exists in every AD domain, and cleanly separates people from devices and infrastructure.
+
+**`OU=Staff`** with location sub-OUs allows location-specific GPOs to be applied — useful for office-specific drive mappings or printer deployment. Staff are permanent employees with corporate-managed devices.
+
+**`OU=Contractors`** is a flat OU with no location sub-OUs. Contractors are remote by nature, work from personal devices, and their policy differences are handled entirely through group membership in Intune and Entra ID — not through GPO.
+
+**`OU=Devices`** groups all managed device objects. The `OU=Workstations` child OU is intentionally flat — Intune targets devices by group membership, not by OU, so location sub-OUs for devices add no value in a hybrid environment.
+
+**`OU=Groups`** and **`OU=ServiceAccounts`** sit at the root level alongside `OU=Accounts` and `OU=Devices`. Keeping them separate maintains clean delegation boundaries — rights granted to manage accounts do not inadvertently extend to groups or service accounts.
+
+### Server Objects
+
+`QCBHC-DC01` is automatically placed in `OU=Domain Controllers` by Active Directory during domain promotion. In this lab it also serves as the file server. No separate server computer object is created — the DC's existing object in `OU=Domain Controllers` is the authoritative record.
+
+---
+
 ## What We Are Building
 
-- OU structure reflecting the organisation's locations and object types
-- 6 staff user accounts across three offices
-- 2 contractor accounts under the Home OU with a reduced licence
-- Location-based, function-based, and contractor security groups
-- Placeholder workstation objects for each staff user
-- Placeholder server objects
+- OU hierarchy separating accounts, devices, groups, and service accounts
+- 6 staff accounts across three office locations
+- 2 contractor accounts with a reduced licence, managed separately
+- 10 security groups covering location, membership, licensing, and device targeting
+- 6 workstation objects for staff — one per user, flat under `OU=Workstations`
+- No workstation objects for contractors — they are BYOD, managed via MAM only
 
 ---
 
 ## Directory Structure
-
-The diagrams below show the full Active Directory layout that the scripts produce — the OU tree, user accounts, and how security groups connect to licences and access control.
 
 ### OU Tree
 
@@ -35,28 +55,25 @@ The diagrams below show the full Active Directory layout that the scripts produc
 graph TD
     ROOT["🌐 qcbhomelab.online"]
 
-    ROOT --> USERS["OU=Users"]
-    ROOT --> WS["OU=Workstations"]
-    ROOT --> SRV["OU=Servers"]
+    ROOT --> ACC["OU=Accounts"]
+    ROOT --> DEV["OU=Devices"]
     ROOT --> GRP["OU=Groups"]
     ROOT --> SVC["OU=ServiceAccounts"]
 
-    USERS --> ULD["OU=London\nj.carter\no.brown"]
-    USERS --> UNY["OU=NewYork\nm.reed\ns.miller"]
-    USERS --> UHK["OU=HongKong\nd.wong\ne.chan"]
-    USERS --> UHM["OU=Home\na.hassan\np.novak"]
+    ACC --> STF["OU=Staff"]
+    ACC --> CTR["OU=Contractors\na.hassan\np.novak"]
 
-    WS --> WLD["OU=London\nWS-LDN-CARTER\nWS-LDN-BROWN"]
-    WS --> WNY["OU=NewYork\nWS-NYC-REED\nWS-NYC-MILLER"]
-    WS --> WHK["OU=HongKong\nWS-HKG-WONG\nWS-HKG-CHAN"]
-    WS --> WHM["OU=Home"]
+    STF --> SLD["OU=London\nj.carter\no.brown"]
+    STF --> SNY["OU=NewYork\nm.reed\ns.miller"]
+    STF --> SHK["OU=HongKong\nd.wong\ne.chan"]
 
-    SRV --> SLD["OU=London\nQCBHC-DC01"]
-    SRV --> SNY["OU=NewYork"]
-    SRV --> SHK["OU=HongKong"]
+    DEV --> WS["OU=Workstations\nWS-LDN-CARTER\nWS-LDN-BROWN\nWS-NYC-REED\nWS-NYC-MILLER\nWS-HKG-WONG\nWS-HKG-CHAN"]
+
+    DC["OU=Domain Controllers\nQCBHC-DC01\n(created by AD — not scripted)"]
+    ROOT --> DC
 ```
 
-> Contractors (`a.hassan`, `p.novak`) sit in `OU=Home` under `OU=Users`. They use their own devices so no workstation objects are created for them. They receive a reduced M365 licence and are deliberately excluded from `GRP-AllStaff` to allow separate policy targeting.
+> `OU=Domain Controllers` and its contents are created automatically by Active Directory. `QCBHC-DC01` lives there and is not touched by these scripts.
 
 ### Group Membership & Licence Assignment
 
@@ -77,7 +94,7 @@ graph LR
         end
     end
 
-    subgraph CONTRACTORS["Contractors (Home)"]
+    subgraph CONTRACTORS["Contractors"]
         AH["a.hassan"]
         PN["p.novak"]
     end
@@ -86,7 +103,6 @@ graph LR
         GLL["GRP-Location-London"]
         GLN["GRP-Location-NewYork"]
         GLH["GRP-Location-HongKong"]
-        GLO["GRP-Location-Home"]
         GAS["GRP-AllStaff"]
         GCT["GRP-Contractors"]
         GLI["GRP-License-M365BusinessPremium"]
@@ -103,7 +119,6 @@ graph LR
     JC & OB --> GLL
     MR & SM --> GLN
     DW & EC --> GLH
-    AH & PN --> GLO
     AH & PN --> GCT
 
     JC & OB & MR & SM & DW & EC --> GAS
@@ -113,6 +128,8 @@ graph LR
     GLI -->|"group-based licensing"| LPREM
     GLC -->|"group-based licensing"| LBASE
 ```
+
+> `GRP-Location-Home` is removed. Contractors are targeted through `GRP-Contractors` directly — a location group for remote workers adds no policy value in this environment.
 
 ---
 
@@ -124,7 +141,7 @@ Run all scripts in order from an elevated PowerShell session on QCBHC-DC01.
 
 ### Step 1 — Create the OU Structure
 
-Save the following as `01-Create-OUs.ps1` and run it on QCBHC-DC01 as a Domain Admin.
+Save the following as `01-Create-OUs.ps1`.
 
 ```powershell
 # 01-Create-OUs.ps1
@@ -135,44 +152,38 @@ Import-Module ActiveDirectory
 $domain = "DC=qcbhomelab,DC=online"
 
 $ous = @(
-    # Top-level OUs
-    @{ Name = "Users";           Path = $domain },
-    @{ Name = "Workstations";    Path = $domain },
-    @{ Name = "Servers";         Path = $domain },
+    # Root-level OUs
+    @{ Name = "Accounts";        Path = $domain },
+    @{ Name = "Devices";         Path = $domain },
     @{ Name = "Groups";          Path = $domain },
     @{ Name = "ServiceAccounts"; Path = $domain },
 
-    # Users sub-OUs (4 locations)
-    @{ Name = "London";   Path = "OU=Users,$domain" },
-    @{ Name = "NewYork";  Path = "OU=Users,$domain" },
-    @{ Name = "HongKong"; Path = "OU=Users,$domain" },
-    @{ Name = "Home";     Path = "OU=Users,$domain" },
+    # Accounts sub-OUs
+    @{ Name = "Staff";       Path = "OU=Accounts,$domain" },
+    @{ Name = "Contractors"; Path = "OU=Accounts,$domain" },
 
-    # Workstations sub-OUs (4 locations)
-    @{ Name = "London";   Path = "OU=Workstations,$domain" },
-    @{ Name = "NewYork";  Path = "OU=Workstations,$domain" },
-    @{ Name = "HongKong"; Path = "OU=Workstations,$domain" },
-    @{ Name = "Home";     Path = "OU=Workstations,$domain" },
+    # Staff location sub-OUs
+    @{ Name = "London";   Path = "OU=Staff,OU=Accounts,$domain" },
+    @{ Name = "NewYork";  Path = "OU=Staff,OU=Accounts,$domain" },
+    @{ Name = "HongKong"; Path = "OU=Staff,OU=Accounts,$domain" },
 
-    # Servers sub-OUs (no Home — servers are always office-based)
-    @{ Name = "London";   Path = "OU=Servers,$domain" },
-    @{ Name = "NewYork";  Path = "OU=Servers,$domain" },
-    @{ Name = "HongKong"; Path = "OU=Servers,$domain" }
+    # Devices sub-OUs
+    @{ Name = "Workstations"; Path = "OU=Devices,$domain" }
 )
 
 foreach ($ou in $ous) {
     $ouDN = "OU=$($ou.Name),$($ou.Path)"
     try {
         Get-ADOrganizationalUnit -Identity $ouDN -ErrorAction Stop | Out-Null
-        Write-Host "EXISTS: $ouDN" -ForegroundColor Yellow
+        Write-Host "EXISTS:   $ouDN" -ForegroundColor Yellow
     }
     catch {
         try {
             New-ADOrganizationalUnit -Name $ou.Name -Path $ou.Path -ProtectedFromAccidentalDeletion $true
-            Write-Host "CREATED: $ouDN" -ForegroundColor Green
+            Write-Host "CREATED:  $ouDN" -ForegroundColor Green
         }
         catch {
-            Write-Host "FAILED: $ouDN — $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "FAILED:   $ouDN — $($_.Exception.Message)" -ForegroundColor Red
         }
     }
 }
@@ -183,22 +194,34 @@ Write-Host "`nOU structure complete." -ForegroundColor Cyan
 #### Verification
 
 ```powershell
-# Full list sorted by distinguished name
 Get-ADOrganizationalUnit -Filter * |
     Select-Object Name, DistinguishedName |
     Sort-Object DistinguishedName
+```
 
-# Confirm protection is enabled on all OUs
-Get-ADOrganizationalUnit -Filter * |
-    Where-Object ProtectedFromAccidentalDeletion -eq $true |
-    Measure-Object
+#### Expected Output
+
+```
+Name               DistinguishedName
+----               -----------------
+Domain Controllers OU=Domain Controllers,DC=qcbhomelab,DC=online
+Accounts           OU=Accounts,DC=qcbhomelab,DC=online
+Devices            OU=Devices,DC=qcbhomelab,DC=online
+Groups             OU=Groups,DC=qcbhomelab,DC=online
+ServiceAccounts    OU=ServiceAccounts,DC=qcbhomelab,DC=online
+Contractors        OU=Contractors,OU=Accounts,DC=qcbhomelab,DC=online
+Staff              OU=Staff,OU=Accounts,DC=qcbhomelab,DC=online
+HongKong           OU=HongKong,OU=Staff,OU=Accounts,DC=qcbhomelab,DC=online
+London             OU=London,OU=Staff,OU=Accounts,DC=qcbhomelab,DC=online
+NewYork            OU=NewYork,OU=Staff,OU=Accounts,DC=qcbhomelab,DC=online
+Workstations       OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
 ```
 
 ---
 
 ### Step 2 — Create User Accounts
 
-Staff accounts go into their office location OUs. Contractor accounts go into `OU=Home`. All accounts require a password change on first logon.
+Staff accounts are placed in their office location OU under `OU=Staff`. Contractor accounts are placed flat in `OU=Contractors`. All accounts require a password change on first logon.
 
 Save the following as `02-Create-Users.ps1`.
 
@@ -213,17 +236,17 @@ $upnSuffix  = "@qcbhomelab.online"
 $defaultPwd = ConvertTo-SecureString "Welcome2024!" -AsPlainText -Force
 
 $users = @(
-    # Staff — placed in their office location OU
-    @{ First="James";  Last="Carter"; Office="London";    OU="OU=London,OU=Users,$domain";   Dept="Consulting" },
-    @{ First="Olivia"; Last="Brown";  Office="London";    OU="OU=London,OU=Users,$domain";   Dept="Consulting" },
-    @{ First="Michael";Last="Reed";   Office="New York";  OU="OU=NewYork,OU=Users,$domain";  Dept="Consulting" },
-    @{ First="Sophia"; Last="Miller"; Office="New York";  OU="OU=NewYork,OU=Users,$domain";  Dept="Consulting" },
-    @{ First="Daniel"; Last="Wong";   Office="Hong Kong"; OU="OU=HongKong,OU=Users,$domain"; Dept="Consulting" },
-    @{ First="Emily";  Last="Chan";   Office="Hong Kong"; OU="OU=HongKong,OU=Users,$domain"; Dept="Consulting" },
+    # Staff — placed in their office location OU under OU=Staff
+    @{ First="James";  Last="Carter"; Office="London";    OU="OU=London,OU=Staff,OU=Accounts,$domain";   Dept="Consulting" },
+    @{ First="Olivia"; Last="Brown";  Office="London";    OU="OU=London,OU=Staff,OU=Accounts,$domain";   Dept="Consulting" },
+    @{ First="Michael";Last="Reed";   Office="New York";  OU="OU=NewYork,OU=Staff,OU=Accounts,$domain";  Dept="Consulting" },
+    @{ First="Sophia"; Last="Miller"; Office="New York";  OU="OU=NewYork,OU=Staff,OU=Accounts,$domain";  Dept="Consulting" },
+    @{ First="Daniel"; Last="Wong";   Office="Hong Kong"; OU="OU=HongKong,OU=Staff,OU=Accounts,$domain"; Dept="Consulting" },
+    @{ First="Emily";  Last="Chan";   Office="Hong Kong"; OU="OU=HongKong,OU=Staff,OU=Accounts,$domain"; Dept="Consulting" },
 
-    # Contractors — placed in Home OU, separate department for policy targeting
-    @{ First="Amir";  Last="Hassan"; Office="Remote"; OU="OU=Home,OU=Users,$domain"; Dept="Contractor" },
-    @{ First="Petra"; Last="Novak";  Office="Remote"; OU="OU=Home,OU=Users,$domain"; Dept="Contractor" }
+    # Contractors — flat in OU=Contractors, no location sub-OU
+    @{ First="Amir";  Last="Hassan"; Office="Remote"; OU="OU=Contractors,OU=Accounts,$domain"; Dept="Contractor" },
+    @{ First="Petra"; Last="Novak";  Office="Remote"; OU="OU=Contractors,OU=Accounts,$domain"; Dept="Contractor" }
 )
 
 foreach ($u in $users) {
@@ -232,7 +255,7 @@ foreach ($u in $users) {
     $display = "$($u.First) $($u.Last)"
 
     if (Get-ADUser -Filter "SamAccountName -eq '$sam'" -ErrorAction SilentlyContinue) {
-        Write-Host "EXISTS: $sam" -ForegroundColor Yellow
+        Write-Host "EXISTS:   $sam" -ForegroundColor Yellow
         continue
     }
 
@@ -250,7 +273,7 @@ foreach ($u in $users) {
         -Enabled               $true `
         -ChangePasswordAtLogon $true
 
-    Write-Host "CREATED: $upn [$($u.Dept)]" -ForegroundColor Green
+    Write-Host "CREATED:  $upn [$($u.Dept)]" -ForegroundColor Green
 }
 
 Write-Host "`nUser accounts complete." -ForegroundColor Cyan
@@ -259,16 +282,10 @@ Write-Host "`nUser accounts complete." -ForegroundColor Cyan
 #### Verification
 
 ```powershell
-# All users with department and office
-Get-ADUser -Filter * -SearchBase "OU=Users,DC=qcbhomelab,DC=online" `
+Get-ADUser -Filter * -SearchBase "OU=Accounts,DC=qcbhomelab,DC=online" `
     -Properties Department, Office |
     Select-Object Name, SamAccountName, Department, Office |
     Sort-Object Department, Name
-
-# Contractors only
-Get-ADUser -Filter "Department -eq 'Contractor'" `
-    -SearchBase "OU=Users,DC=qcbhomelab,DC=online" |
-    Select-Object Name, SamAccountName, DistinguishedName
 ```
 
 #### Expected Output
@@ -302,13 +319,12 @@ $domain  = "DC=qcbhomelab,DC=online"
 $groupOU = "OU=Groups,$domain"
 
 $groups = @(
-    # Location groups — used for GPO and Intune policy targeting
+    # Location groups — GPO and Intune policy targeting for staff
     "GRP-Location-London",
     "GRP-Location-NewYork",
     "GRP-Location-HongKong",
-    "GRP-Location-Home",
 
-    # Staff and contractor membership groups
+    # Membership groups
     "GRP-AllStaff",
     "GRP-Contractors",
 
@@ -316,18 +332,18 @@ $groups = @(
     "GRP-License-M365BusinessPremium",
     "GRP-License-M365Basic",
 
-    # Device platform groups — used for Intune policy targeting
+    # Device platform groups — Intune policy targeting
     "GRP-Devices-Windows",
     "GRP-Devices-iOS"
 )
 
 foreach ($g in $groups) {
     if (Get-ADGroup -Filter "Name -eq '$g'" -ErrorAction SilentlyContinue) {
-        Write-Host "EXISTS: $g" -ForegroundColor Yellow
+        Write-Host "EXISTS:   $g" -ForegroundColor Yellow
         continue
     }
     New-ADGroup -Name $g -GroupScope Global -GroupCategory Security -Path $groupOU
-    Write-Host "CREATED: $g" -ForegroundColor Green
+    Write-Host "CREATED:  $g" -ForegroundColor Green
 }
 
 Write-Host "`nSecurity groups complete." -ForegroundColor Cyan
@@ -344,6 +360,8 @@ Get-ADGroup -Filter * -SearchBase "OU=Groups,DC=qcbhomelab,DC=online" |
 #### Expected Output
 
 ```
+Name
+----
 GRP-AllStaff
 GRP-Contractors
 GRP-Devices-iOS
@@ -351,7 +369,6 @@ GRP-Devices-Windows
 GRP-License-M365Basic
 GRP-License-M365BusinessPremium
 GRP-Location-HongKong
-GRP-Location-Home
 GRP-Location-London
 GRP-Location-NewYork
 ```
@@ -360,7 +377,7 @@ GRP-Location-NewYork
 
 ### Step 4 — Add Users to Groups
 
-Contractors are assigned to `GRP-Location-Home`, `GRP-Contractors`, and `GRP-License-M365Basic` only. They are deliberately excluded from `GRP-AllStaff` and `GRP-License-M365BusinessPremium`.
+Contractors are assigned to `GRP-Contractors` and `GRP-License-M365Basic` only. They are deliberately excluded from `GRP-AllStaff` and `GRP-License-M365BusinessPremium`.
 
 Save the following as `04-Add-GroupMembers.ps1`.
 
@@ -372,17 +389,16 @@ Save the following as `04-Add-GroupMembers.ps1`.
 Import-Module ActiveDirectory
 
 $members = @(
-    # Location groups
+    # Staff location groups
     @{ Group = "GRP-Location-London";             Users = @("j.carter","o.brown") },
     @{ Group = "GRP-Location-NewYork";            Users = @("m.reed","s.miller") },
     @{ Group = "GRP-Location-HongKong";           Users = @("d.wong","e.chan") },
-    @{ Group = "GRP-Location-Home";               Users = @("a.hassan","p.novak") },
 
-    # Staff membership and licensing (6 users — no contractors)
+    # Staff membership and licensing
     @{ Group = "GRP-AllStaff";                    Users = @("j.carter","o.brown","m.reed","s.miller","d.wong","e.chan") },
     @{ Group = "GRP-License-M365BusinessPremium"; Users = @("j.carter","o.brown","m.reed","s.miller","d.wong","e.chan") },
 
-    # Contractor membership and licensing (2 users only)
+    # Contractor membership and licensing
     @{ Group = "GRP-Contractors";                 Users = @("a.hassan","p.novak") },
     @{ Group = "GRP-License-M365Basic";           Users = @("a.hassan","p.novak") }
 )
@@ -391,10 +407,10 @@ foreach ($entry in $members) {
     foreach ($user in $entry.Users) {
         try {
             Add-ADGroupMember -Identity $entry.Group -Members $user -ErrorAction Stop
-            Write-Host "ADDED: $user → $($entry.Group)" -ForegroundColor Green
+            Write-Host "ADDED:    $user → $($entry.Group)" -ForegroundColor Green
         }
         catch [Microsoft.ActiveDirectory.Management.ADException] {
-            Write-Host "EXISTS: $user in $($entry.Group)" -ForegroundColor Yellow
+            Write-Host "EXISTS:   $user in $($entry.Group)" -ForegroundColor Yellow
         }
     }
 }
@@ -405,7 +421,6 @@ Write-Host "`nGroup membership complete." -ForegroundColor Cyan
 #### Verification
 
 ```powershell
-# All GRP- groups with member counts
 Get-ADGroup -Filter "Name -like 'GRP-*'" |
     Select-Object Name, @{ N="Members"; E={ (Get-ADGroupMember $_).Count } } |
     Sort-Object Name
@@ -414,66 +429,63 @@ Get-ADGroup -Filter "Name -like 'GRP-*'" |
 #### Expected Output
 
 ```
-Group                           Members
------                           -------
+Name                            Members
+----                            -------
 GRP-AllStaff                    6
 GRP-Contractors                 2
-GRP-Devices-iOS                 0  (populated when devices enrol)
-GRP-Devices-Windows             0  (populated when devices enrol)
+GRP-Devices-iOS                 0   (populated when devices enrol)
+GRP-Devices-Windows             0   (populated when devices enrol)
 GRP-License-M365Basic           2
 GRP-License-M365BusinessPremium 6
 GRP-Location-HongKong           2
-GRP-Location-Home               2
 GRP-Location-London             2
 GRP-Location-NewYork            2
 ```
 
 ---
 
-### Step 5 — Create Workstation and Server Objects
+### Step 5 — Create Workstation Objects
 
-Workstation objects are created only for staff users. Contractors use their own personal devices and are managed via MAM only — no corporate device objects are created for them.
+Workstation objects are created for staff users only, placed flat in `OU=Workstations` under `OU=Devices`. Intune targets devices by group membership, not by OU, so no location sub-OUs are needed. Contractors use personal devices managed via MAM — no computer objects are created for them.
 
 Save the following as `05-Create-ComputerObjects.ps1`.
 
 ```powershell
 # 05-Create-ComputerObjects.ps1
-# Creates placeholder workstation objects for staff and a member server
-# No workstation objects for contractors — they are BYOD/MAM only
+# Creates workstation objects for staff users
+# No objects for contractors — BYOD/MAM only
+# QCBHC-DC01 lives in OU=Domain Controllers — not touched here
 # Idempotent — safe to run multiple times
 
 Import-Module ActiveDirectory
 $domain = "DC=qcbhomelab,DC=online"
+$wsOU   = "OU=Workstations,OU=Devices,$domain"
 
-$computers = @(
-    # Staff workstations — one per user, in their location OU
-    @{ Name = "WS-LDN-CARTER";  OU = "OU=London,OU=Workstations,$domain" },
-    @{ Name = "WS-LDN-BROWN";   OU = "OU=London,OU=Workstations,$domain" },
-    @{ Name = "WS-NYC-REED";    OU = "OU=NewYork,OU=Workstations,$domain" },
-    @{ Name = "WS-NYC-MILLER";  OU = "OU=NewYork,OU=Workstations,$domain" },
-    @{ Name = "WS-HKG-WONG";    OU = "OU=HongKong,OU=Workstations,$domain" },
-    @{ Name = "WS-HKG-CHAN";    OU = "OU=HongKong,OU=Workstations,$domain" },
-
-    # Member server
-    @{ Name = "SRV-LDN-FILE01"; OU = "OU=London,OU=Servers,$domain" }
+$workstations = @(
+    "WS-LDN-CARTER",
+    "WS-LDN-BROWN",
+    "WS-NYC-REED",
+    "WS-NYC-MILLER",
+    "WS-HKG-WONG",
+    "WS-HKG-CHAN"
 )
 
-foreach ($c in $computers) {
-    if (Get-ADComputer -Filter "Name -eq '$($c.Name)'" -ErrorAction SilentlyContinue) {
-        Write-Host "EXISTS: $($c.Name)" -ForegroundColor Yellow
+foreach ($name in $workstations) {
+    if (Get-ADComputer -Filter "Name -eq '$name'" -ErrorAction SilentlyContinue) {
+        Write-Host "EXISTS:   $name" -ForegroundColor Yellow
         continue
     }
-    New-ADComputer -Name $c.Name -SamAccountName $c.Name -Path $c.OU -Enabled $true
-    Write-Host "CREATED: $($c.Name) → $($c.OU)" -ForegroundColor Green
+    New-ADComputer -Name $name -SamAccountName $name -Path $wsOU -Enabled $true
+    Write-Host "CREATED:  $name" -ForegroundColor Green
 }
 
-Write-Host "`nComputer objects complete." -ForegroundColor Cyan
+Write-Host "`nWorkstation objects complete." -ForegroundColor Cyan
 ```
 
 #### Verification
 
 ```powershell
-Get-ADComputer -Filter "Name -like 'WS-*' -or Name -like 'SRV-*'" |
+Get-ADComputer -Filter * -SearchBase "OU=Devices,DC=qcbhomelab,DC=online" |
     Select-Object Name, DistinguishedName |
     Sort-Object Name
 ```
@@ -481,15 +493,14 @@ Get-ADComputer -Filter "Name -like 'WS-*' -or Name -like 'SRV-*'" |
 #### Expected Output
 
 ```
-Name            DistinguishedName
-----            -----------------
-SRV-LDN-FILE01  CN=SRV-LDN-FILE01,OU=London,OU=Servers,DC=qcbhomelab,DC=online
-WS-HKG-CHAN     CN=WS-HKG-CHAN,OU=HongKong,OU=Workstations,DC=qcbhomelab,DC=online
-WS-HKG-WONG     CN=WS-HKG-WONG,OU=HongKong,OU=Workstations,DC=qcbhomelab,DC=online
-WS-LDN-BROWN    CN=WS-LDN-BROWN,OU=London,OU=Workstations,DC=qcbhomelab,DC=online
-WS-LDN-CARTER   CN=WS-LDN-CARTER,OU=London,OU=Workstations,DC=qcbhomelab,DC=online
-WS-NYC-MILLER   CN=WS-NYC-MILLER,OU=NewYork,OU=Workstations,DC=qcbhomelab,DC=online
-WS-NYC-REED     CN=WS-NYC-REED,OU=NewYork,OU=Workstations,DC=qcbhomelab,DC=online
+Name          DistinguishedName
+----          -----------------
+WS-HKG-CHAN   CN=WS-HKG-CHAN,OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
+WS-HKG-WONG   CN=WS-HKG-WONG,OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
+WS-LDN-BROWN  CN=WS-LDN-BROWN,OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
+WS-LDN-CARTER CN=WS-LDN-CARTER,OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
+WS-NYC-MILLER CN=WS-NYC-MILLER,OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
+WS-NYC-REED   CN=WS-NYC-REED,OU=Workstations,OU=Devices,DC=qcbhomelab,DC=online
 ```
 
 ---
@@ -505,9 +516,9 @@ Get-ADOrganizationalUnit -Filter * |
     Sort-Object DistinguishedName
 
 Write-Host "`n=== Users ===" -ForegroundColor Cyan
-Get-ADUser -Filter * -SearchBase "OU=Users,DC=qcbhomelab,DC=online" `
-    -Properties Department |
-    Select-Object Name, SamAccountName, Department |
+Get-ADUser -Filter * -SearchBase "OU=Accounts,DC=qcbhomelab,DC=online" `
+    -Properties Department, Office |
+    Select-Object Name, SamAccountName, Department, Office |
     Sort-Object Department, Name
 
 Write-Host "`n=== Groups & Member Counts ===" -ForegroundColor Cyan
@@ -515,8 +526,8 @@ Get-ADGroup -Filter "Name -like 'GRP-*'" |
     Select-Object Name, @{ N="Members"; E={ (Get-ADGroupMember $_).Count } } |
     Sort-Object Name
 
-Write-Host "`n=== Computers ===" -ForegroundColor Cyan
-Get-ADComputer -Filter "Name -like 'WS-*' -or Name -like 'SRV-*'" |
+Write-Host "`n=== Workstations ===" -ForegroundColor Cyan
+Get-ADComputer -Filter * -SearchBase "OU=Devices,DC=qcbhomelab,DC=online" |
     Select-Object Name, DistinguishedName |
     Sort-Object Name
 ```

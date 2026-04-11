@@ -1,22 +1,29 @@
-# 05-Create-ComputerObjects.ps1 - Creates workstation and server objects
+# 05-Create-ComputerObjects.ps1
+# Creates workstation objects for staff users
+# No objects for contractors — BYOD/MAM only
+# QCBHC-DC01 lives in OU=Domain Controllers — not touched here
+# Idempotent — safe to run multiple times
 
+Import-Module ActiveDirectory
 $domain = "DC=qcbhomelab,DC=online"
+$wsOU   = "OU=Workstations,OU=Devices,$domain"
 
-$computers = @(
-    @{ Name = "WS-LDN-CARTER"; OU = "OU=London,OU=Workstations,$domain" },
-    @{ Name = "WS-LDN-BROWN";  OU = "OU=London,OU=Workstations,$domain" },
-    @{ Name = "WS-NYC-REED";   OU = "OU=NewYork,OU=Workstations,$domain" },
-    @{ Name = "WS-NYC-MILLER"; OU = "OU=NewYork,OU=Workstations,$domain" },
-    @{ Name = "WS-HKG-WONG";   OU = "OU=HongKong,OU=Workstations,$domain" },
-    @{ Name = "WS-HKG-CHAN";   OU = "OU=HongKong,OU=Workstations,$domain" },
-    @{ Name = "QCBHC-DC01";    OU = "OU=London,OU=Servers,$domain" }
+$workstations = @(
+    "WS-LDN-CARTER",
+    "WS-LDN-BROWN",
+    "WS-NYC-REED",
+    "WS-NYC-MILLER",
+    "WS-HKG-WONG",
+    "WS-HKG-CHAN"
 )
 
-foreach ($c in $computers) {
-    if (Get-ADComputer -Filter "Name -eq '$($c.Name)'" -ErrorAction SilentlyContinue) {
-        Write-Host "Exists: $($c.Name)" -ForegroundColor Yellow
-    } else {
-        New-ADComputer -Name $c.Name -Path $c.OU -Enabled $true
-        Write-Host "Created: $($c.Name)" -ForegroundColor Green
+foreach ($name in $workstations) {
+    if (Get-ADComputer -Filter "Name -eq '$name'" -ErrorAction SilentlyContinue) {
+        Write-Host "EXISTS:   $name" -ForegroundColor Yellow
+        continue
     }
+    New-ADComputer -Name $name -SamAccountName $name -Path $wsOU -Enabled $true
+    Write-Host "CREATED:  $name" -ForegroundColor Green
 }
+
+Write-Host "`nWorkstation objects complete." -ForegroundColor Cyan

@@ -20,36 +20,56 @@ This document defines the standard procedures for both processes, with PowerShel
 
 When a new user joins, the following must be completed:
 
-1. Create AD account and add to correct groups
+1. Create AD account in the correct OU and add to correct groups
 2. Sync to Entra ID
 3. Assign Microsoft 365 licence via group membership
 4. Configure shared mailbox access if required
-5. Prepare and enrol the device
-6. Communicate credentials to the user securely
+5. For staff: prepare and enrol the corporate Windows device
+6. For contractors: no corporate device — confirm MAM policy applies when they sign into Outlook and Teams on their personal iPhone
+7. Communicate credentials to the user securely
 
 ### Onboarding Script
 
 Save the following as `ONBOARD-NewUser.ps1` and run it on QCBHC-DC01 when a new user joins.
 
+The script handles both staff and contractor onboarding. Staff are placed in their office location OU and receive a Business Premium licence. Contractors are placed in `OU=Contractors` and receive a Business Basic licence with no Intune MDM enrolment.
+
 ```powershell
 # ONBOARD-NewUser.ps1
-# Creates a new user account and adds them to standard groups
+# Creates a new user account and adds them to the correct groups
+# Supports both staff (London, NewYork, HongKong) and contractors (Remote)
 # Run as Domain Admin on QCBHC-DC01
 
 param(
     [Parameter(Mandatory=$true)] [string]$FirstName,
     [Parameter(Mandatory=$true)] [string]$LastName,
-    [Parameter(Mandatory=$true)] [ValidateSet("London","NewYork","HongKong","Home")] [string]$Office,
-    [Parameter(Mandatory=$true)] [string]$Department
+    [Parameter(Mandatory=$true)] [ValidateSet("London","NewYork","HongKong","Remote")] [string]$Office,
+    [Parameter(Mandatory=$true)] [ValidateSet("Consulting","Contractor")] [string]$Department
 )
 
+Import-Module ActiveDirectory
 $domain    = "DC=qcbhomelab,DC=online"
 $upnSuffix = "@qcbhomelab.online"
 $sam       = ($FirstName[0] + "." + $LastName).ToLower()
 $upn       = $sam + $upnSuffix
 $display   = "$FirstName $LastName"
-$ouPath    = "OU=$Office,OU=Users,$domain"
 $tempPwd   = ConvertTo-SecureString "Welcome2024!" -AsPlainText -Force
+
+# Determine OU path and group assignments based on user type
+if ($Department -eq "Contractor") {
+    $ouPath = "OU=Contractors,OU=Accounts,$domain"
+    $groups = @(
+        "GRP-Contractors",
+        "GRP-License-M365Basic"
+    )
+} else {
+    $ouPath = "OU=$Office,OU=Staff,OU=Accounts,$domain"
+    $groups = @(
+        "GRP-AllStaff",
+        "GRP-License-M365BusinessPremium",
+        "GRP-Location-$Office"
+    )
+}
 
 # Check for duplicate
 if (Get-ADUser -Filter "SamAccountName -eq '$sam'" -ErrorAction SilentlyContinue) {
@@ -59,31 +79,25 @@ if (Get-ADUser -Filter "SamAccountName -eq '$sam'" -ErrorAction SilentlyContinue
 
 # Create the account
 New-ADUser `
-    -GivenName         $FirstName `
-    -Surname           $LastName `
-    -Name              $display `
-    -DisplayName       $display `
-    -SamAccountName    $sam `
-    -UserPrincipalName $upn `
-    -Path              $ouPath `
-    -Department        $Department `
-    -Office            $Office `
-    -AccountPassword   $tempPwd `
-    -Enabled           $true `
+    -GivenName            $FirstName `
+    -Surname              $LastName `
+    -Name                 $display `
+    -DisplayName          $display `
+    -SamAccountName       $sam `
+    -UserPrincipalName    $upn `
+    -Path                 $ouPath `
+    -Department           $Department `
+    -Office               $Office `
+    -AccountPassword      $tempPwd `
+    -Enabled              $true `
     -ChangePasswordAtLogon $true
 
-Write-Host "Created AD account: $upn" -ForegroundColor Green
+Write-Host "CREATED: $upn [$Department]" -ForegroundColor Green
 
-# Add to standard groups
-$groups = @(
-    "GRP-AllStaff",
-    "GRP-License-M365BusinessPremium",
-    "GRP-Location-$Office"
-)
-
+# Add to groups
 foreach ($g in $groups) {
     Add-ADGroupMember -Identity $g -Members $sam
-    Write-Host "Added to group: $g" -ForegroundColor Green
+    Write-Host "ADDED:   $sam → $g" -ForegroundColor Green
 }
 
 # Trigger sync to Entra ID
@@ -92,12 +106,19 @@ Start-ADSyncSyncCycle -PolicyType Delta
 
 Write-Host ""
 Write-Host "Onboarding complete for $display" -ForegroundColor Green
-Write-Host "UPN:          $upn" -ForegroundColor White
+Write-Host "UPN:           $upn" -ForegroundColor White
+Write-Host "Type:          $Department" -ForegroundColor White
 Write-Host "Temp password: Welcome2024!" -ForegroundColor White
-Write-Host "Action:       Communicate credentials to user securely and arrange device setup." -ForegroundColor Yellow
+if ($Department -eq "Contractor") {
+    Write-Host "Action: Communicate credentials. No corporate device — user accesses M365 via personal device and MAM policy." -ForegroundColor Yellow
+} else {
+    Write-Host "Action: Communicate credentials and arrange corporate device setup." -ForegroundColor Yellow
+}
 ```
 
 ### Device Setup
+
+**Staff — Corporate Windows device:**
 
 Once the account is ready and the user's Windows device is available:
 
@@ -107,6 +128,15 @@ Once the account is ready and the user's Windows device is available:
 4. Complete MFA registration when prompted
 5. The device will join Entra ID and enrol in Intune automatically
 6. Intune will apply all policies within 15 to 30 minutes — compliance settings, OneDrive Known Folder Move, and Defender configuration are all applied silently
+
+**Contractors — Personal device (BYOD):**
+
+Contractors have no corporate device. Their access is governed entirely by the iOS MAM policy configured in document 09:
+
+1. The contractor installs Outlook, Teams, and OneDrive from the App Store on their personal iPhone
+2. They sign in with their work account (e.g. a.hassan@qcbhomelab.online)
+3. The MAM policy is applied automatically — they will be prompted to set a PIN
+4. Company data is isolated within managed apps — no MDM enrolment of the personal device occurs
 
 ---
 
@@ -169,8 +199,9 @@ foreach ($g in $groups) {
     }
 }
 
-# Step 4 — Move to a Disabled Users OU (optional — create this OU first if needed)
-# Move-ADObject -Identity $user.DistinguishedName -TargetPath "OU=DisabledUsers,DC=qcbhomelab,DC=online"
+# Step 4 — Move to a Disabled accounts OU to keep AD tidy (optional)
+# Uncomment the line below — create OU=Disabled,OU=Accounts first if using this
+# Move-ADObject -Identity $user.DistinguishedName -TargetPath "OU=Disabled,OU=Accounts,DC=qcbhomelab,DC=online"
 
 # Step 5 — Trigger sync to push changes to Entra ID
 Start-ADSyncSyncCycle -PolicyType Delta

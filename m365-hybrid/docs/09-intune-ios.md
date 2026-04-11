@@ -83,9 +83,11 @@ Name the policy `APP-iOS-BYOD-Protection` and configure the following:
 
 ### Step 3 — Assign the Policy
 
-In the Assignments tab of the App Protection Policy, assign the policy to the GRP-AllStaff group (or GRP-Devices-iOS once that group has been populated).
+In the Assignments tab of the App Protection Policy, assign the policy to both `GRP-AllStaff` and `GRP-Contractors`.
 
-All users in the assigned group will have this policy applied to the targeted apps (Outlook, Teams, OneDrive) on any iOS device they use to sign in.
+Staff use personal iPhones alongside their corporate Windows laptops. Contractors use personal devices exclusively — iOS MAM is their only managed access point into company data, making this policy particularly important for that group.
+
+All users in the assigned groups will have this policy applied to the targeted apps (Outlook, Teams, OneDrive) on any iOS device they use to sign in.
 
 ### Step 4 — Test the MAM Policy
 

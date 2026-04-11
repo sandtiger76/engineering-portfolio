@@ -11,10 +11,14 @@
             "id": "deb732741a652d74",
             "type": "leaf",
             "state": {
-              "type": "empty",
-              "state": {},
+              "type": "markdown",
+              "state": {
+                "file": "m365-hybrid/docs/02-ad-scripts.md",
+                "mode": "source",
+                "source": false
+              },
               "icon": "lucide-file",
-              "title": "New tab"
+              "title": "02-ad-scripts"
             }
           }
         ]
@@ -181,20 +185,20 @@
   },
   "active": "deb732741a652d74",
   "lastOpenFiles": [
-    "m365-hybrid/docs/Unconfirmed 466799.crdownload",
-    "m365-hybrid/docs/Unconfirmed 152374.crdownload",
-    "m365-hybrid/docs/02-ad-scripts.md",
-    "m365-hybrid/docs/Unconfirmed 996337.crdownload",
+    "m365-hybrid/docs/Unconfirmed 603749.crdownload",
+    "m365-hybrid/docs/Unconfirmed 264279.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 24276.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 179569.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 131599.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 283990.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 40745.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 612965.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 160134.crdownload",
+    "m365-hybrid/scripts/Unconfirmed 814359.crdownload",
+    "m365-hybrid/scripts/00-Teardown-AD.ps1",
     "m365-hybrid/docs/01-on-premises-dc.md",
     "m365-hybrid/README.md",
-    "m365-hybrid/docs/Unconfirmed 274834.crdownload",
-    "m365-hybrid/docs/Unconfirmed 330390.crdownload",
-    "m365-hybrid/docs/Unconfirmed 74002.crdownload",
-    "m365-hybrid/docs/Unconfirmed 446460.crdownload",
-    "m365-hybrid/docs/Unconfirmed 74310.crdownload",
-    "m365-hybrid/docs/Unconfirmed 860551.crdownload",
-    "m365-hybrid/docs/Unconfirmed 298571.crdownload",
-    "m365-hybrid/docs/Unconfirmed 142753.crdownload",
+    "m365-hybrid/docs/02-ad-scripts.md",
     "m365-project/README.md",
     "m365-hybrid/docs/12-user-lifecycle.md",
     "m365-hybrid/docs/11-defender.md",

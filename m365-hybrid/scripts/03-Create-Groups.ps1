@@ -1,20 +1,37 @@
-# 03-Create-Groups.ps1 - Creates security groups for QCB Homelab Consultants
+# 03-Create-Groups.ps1
+# Creates all security groups for QCB Homelab Consultants
+# Idempotent — safe to run multiple times
 
+Import-Module ActiveDirectory
 $domain  = "DC=qcbhomelab,DC=online"
 $groupOU = "OU=Groups,$domain"
 
 $groups = @(
-    "GRP-Location-London", "GRP-Location-NewYork", "GRP-Location-HongKong", "GRP-Location-Home",
+    # Location groups — GPO and Intune policy targeting for staff
+    "GRP-Location-London",
+    "GRP-Location-NewYork",
+    "GRP-Location-HongKong",
+
+    # Membership groups
+    "GRP-AllStaff",
+    "GRP-Contractors",
+
+    # Licensing groups — drive group-based licence assignment in Entra ID
     "GRP-License-M365BusinessPremium",
-    "GRP-Devices-Windows", "GRP-Devices-iOS",
-    "GRP-AllStaff"
+    "GRP-License-M365Basic",
+
+    # Device platform groups — Intune policy targeting
+    "GRP-Devices-Windows",
+    "GRP-Devices-iOS"
 )
 
 foreach ($g in $groups) {
     if (Get-ADGroup -Filter "Name -eq '$g'" -ErrorAction SilentlyContinue) {
-        Write-Host "Exists: $g" -ForegroundColor Yellow
-    } else {
-        New-ADGroup -Name $g -GroupScope Global -GroupCategory Security -Path $groupOU
-        Write-Host "Created: $g" -ForegroundColor Green
+        Write-Host "EXISTS:   $g" -ForegroundColor Yellow
+        continue
     }
+    New-ADGroup -Name $g -GroupScope Global -GroupCategory Security -Path $groupOU
+    Write-Host "CREATED:  $g" -ForegroundColor Green
 }
+
+Write-Host "`nSecurity groups complete." -ForegroundColor Cyan

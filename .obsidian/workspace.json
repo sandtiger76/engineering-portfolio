@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "0d4c23380ce4eb6a",
+        "id": "17dfe71b9e237627",
         "type": "tabs",
         "children": [
           {
-            "id": "24780a6d08297750",
+            "id": "deb732741a652d74",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "m365-hybrid/docs/01-on-premises-dc.md",
-                "mode": "source",
-                "source": false
-              },
+              "type": "empty",
+              "state": {},
               "icon": "lucide-file",
-              "title": "01-on-premises-dc"
+              "title": "New tab"
             }
           }
         ]
@@ -183,8 +179,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "24780a6d08297750",
+  "active": "deb732741a652d74",
   "lastOpenFiles": [
+    "m365-hybrid/docs/Unconfirmed 152374.crdownload",
+    "m365-hybrid/docs/02-ad-scripts.md",
+    "m365-hybrid/docs/Unconfirmed 996337.crdownload",
+    "m365-hybrid/docs/01-on-premises-dc.md",
+    "m365-hybrid/README.md",
     "m365-hybrid/docs/Unconfirmed 274834.crdownload",
     "m365-hybrid/docs/Unconfirmed 330390.crdownload",
     "m365-hybrid/docs/Unconfirmed 74002.crdownload",
@@ -194,11 +195,6 @@
     "m365-hybrid/docs/Unconfirmed 298571.crdownload",
     "m365-hybrid/docs/Unconfirmed 142753.crdownload",
     "m365-hybrid/docs/Unconfirmed 634436.crdownload",
-    "m365-hybrid/docs/Unconfirmed 593579.crdownload",
-    "m365-hybrid/docs/Unconfirmed 521270.crdownload",
-    "m365-hybrid/README.md",
-    "m365-hybrid/docs/02-ad-scripts.md",
-    "m365-hybrid/docs/01-on-premises-dc.md",
     "m365-project/README.md",
     "m365-hybrid/docs/12-user-lifecycle.md",
     "m365-hybrid/docs/11-defender.md",

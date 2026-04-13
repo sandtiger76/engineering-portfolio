@@ -2,9 +2,9 @@
 
 ---
 
-# QCB Homelab — Hybrid Microsoft Environment
+# Hybrid Microsoft Environment
 
-## What This Project Is — A Plain English Overview
+## About the project
 
 This project documents the design and implementation of a complete hybrid Microsoft environment, built from scratch for a fictional professional services firm called QCB Homelab Consultants. It was created as a hands-on portfolio piece to demonstrate practical, real-world capability across the Microsoft 365 and Azure technology stack.
 

@@ -4,6 +4,16 @@
 
 # 07 — Microsoft Teams
 
+## Overview — What This Document Covers
+
+For a business with staff in multiple locations, the challenge of communication is real. Email works for formal messages but not for quick questions. Phone calls work for one-to-one but not for team conversations. Microsoft Teams solves this by bringing chat, video calls, file sharing, and structured team spaces into a single application that works from any device, anywhere.
+
+Teams is also more than a chat tool — it is built on top of SharePoint and Microsoft 365 Groups, meaning that every team has shared file storage, a shared calendar, and a shared email address automatically created behind the scenes. It is the front door to most of what people do in Microsoft 365 day to day.
+
+This document covers setting Teams up correctly for a multi-location organisation: restricting who can create teams to prevent clutter, configuring the right policies for meetings and messaging, creating location-based teams for each office, and setting up a company-wide space for announcements.
+
+---
+
 ## Introduction
 
 Microsoft Teams is the communication and collaboration hub in Microsoft 365. It brings together chat, video meetings, file sharing, and app integrations into a single interface. For an organisation spread across London, New York, Hong Kong, and remote locations, Teams is the tool that makes it feel like everyone is working from the same building.
@@ -216,4 +226,26 @@ Moderation settings are only visible to team owners. If the option is missing, c
 
 ---
 
-[← 06 — SharePoint & OneDrive](06-sharepoint-onedrive.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [08 — Intune: Windows →](08-intune-windows.md)
+## Common Questions & Troubleshooting
+
+**Q1: Users are receiving duplicate notifications and seeing the same content in both Teams channels and SharePoint. Is this normal?**
+
+Yes — this is by design. Files shared in a Teams channel are stored in the corresponding SharePoint document library, so they are accessible from both places. This is not a bug or misconfiguration; it is the intended integration between the two services. Users can be reassured that there is only one copy of each file — Teams and SharePoint are showing the same content through different interfaces. The practical implication is that SharePoint permissions affect what users can see in Teams, and vice versa.
+
+**Q2: A user says they cannot find a team they were added to. It is not appearing in their Teams client. What should I check?**
+
+Teams can be hidden by the user accidentally. Ask them to click the three dots (...) next to Teams in the left panel and select "Manage teams" — hidden teams appear here and can be unhidden. If the team is not listed at all, confirm they are actually a member in the Teams Admin Center under Teams → Manage teams → [Team] → Members. If they were added very recently, it can take a few minutes for the team to appear in the client. Also check whether the team is private and whether they were added as a member or just invited.
+
+**Q3: The group creation restriction was applied but users can still create new Teams. The policy does not appear to be working. What might be wrong?**
+
+First confirm the `EnableGroupCreation` value is actually set to `false` — retrieve it with `Get-MgBetaDirectorySetting` and check the value explicitly. If the setting shows false but users can still create teams, check whether those users are members of the `GroupCreators` security group — accounts in that group are exempt from the restriction. Also allow up to an hour for the policy to propagate across the tenant after it is first applied.
+
+**Q4: A Teams meeting invitation sent to an external guest is not working — the guest cannot join. What are the likely causes?**
+
+Work through this in order: confirm external access is enabled in the Teams Admin Center under Users → External access; confirm guest access is enabled under Users → Guest access; confirm the meeting organiser's meeting policy allows external participants; and confirm the guest has not been blocked at the tenant level. For guests joining from a corporate network, their organisation's firewall may be blocking the Teams media ports (UDP 3478–3481). The guest should try joining from a personal device or network to isolate whether the issue is on their end.
+
+**Q5: Teams channels are showing but messages sent in a channel are not being received by some team members. What is happening?**
+
+This is almost always a notification settings issue rather than a permissions problem — Teams allows users to mute individual channels, and muted channels show activity only when the user actively opens them. Ask the affected users to right-click the channel in question and check whether it is muted. For persistent issues, check whether the users have set custom notification rules that suppress channel messages. If a specific user genuinely cannot see messages that others can, confirm they have the correct team membership role and that there are no channel-level permissions restrictions applied.
+
+---

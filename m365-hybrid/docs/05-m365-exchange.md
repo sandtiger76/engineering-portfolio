@@ -4,6 +4,16 @@
 
 # 05 — Microsoft 365 & Exchange Online
 
+## Overview — What This Document Covers
+
+Email is still the backbone of business communication, and for most organisations Microsoft 365 is where it lives. Rather than running an email server in a back room, Exchange Online hosts everything in Microsoft's cloud — and the organisation simply pays a per-user monthly subscription.
+
+Getting email to work correctly involves more than just switching it on. The internet needs to know that messages addressed to the company's domain should be delivered to Microsoft's servers, not somewhere else. It also needs to be able to verify that emails claiming to come from the company actually did — otherwise anyone could send a convincing fake. This document covers all of that: licence assignment, the DNS records that route and authenticate email, and shared mailboxes for team inboxes like IT support.
+
+By the end of this document, all users have working email, outbound messages are cryptographically signed, and the environment has a clear path to rejecting fraudulent emails entirely.
+
+---
+
 ## Introduction
 
 Microsoft 365 is the suite of cloud-based productivity tools that most modern businesses run on. It includes email (Exchange Online), file storage (OneDrive and SharePoint), communication (Teams), device management (Intune), and security (Defender). Rather than maintaining these services on local servers, Microsoft hosts everything in their global data centres and organisations pay a per-user monthly subscription.
@@ -246,4 +256,26 @@ By default, DC01 queries its own local DNS server which only knows about interna
 
 ---
 
-[← 04 — Hybrid Identity](04-hybrid-identity.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [06 — SharePoint & OneDrive →](06-sharepoint-onedrive.md)
+## Common Questions & Troubleshooting
+
+**Q1: A user can receive email but cannot send. Outbound messages sit in the Outbox or bounce with a relay denied error. What is wrong?**
+
+This almost always means the user does not have an Exchange Online licence assigned, or their mailbox has not finished provisioning. Confirm the licence is assigned in the Microsoft 365 Admin Center under Billing → Licences. If the licence is assigned but the mailbox is very recently created, wait 5–10 minutes and try again — mailbox provisioning is asynchronous. Also confirm the domain's MX and SPF records are pointing to Microsoft's servers and not a previous mail provider.
+
+**Q2: DKIM is enabled in the Defender portal but external recipients are still reporting that messages fail DKIM checks. What should I verify?**
+
+First confirm both CNAME records are resolving correctly from an external DNS server — run `Resolve-DnsName selector1._domainkey.yourdomain.com -Type CNAME -Server 1.1.1.1` and check the result points to Microsoft's DKIM infrastructure. If the records resolve correctly, check whether any third-party services (marketing platforms, helpdesk tools, CRMs) are sending email on behalf of your domain — those services need their own DKIM configuration or need to be added to your SPF record. A DMARC aggregate report will identify which sending sources are failing.
+
+**Q3: Emails from the company are landing in recipients' junk folders despite SPF and DKIM being correctly configured. What else can be done?**
+
+SPF and DKIM passing is necessary but not sufficient for inbox delivery. Check whether DMARC is published — without it, receiving servers have no policy to follow even if authentication passes. Also check the domain's reputation using a tool like MXToolbox — a new domain with no sending history will have low reputation initially and needs time to build trust. Ensure the domain is not on any blocklists, and consider a gradual warm-up of outbound mail volume if sending large volumes from a new domain.
+
+**Q4: A shared mailbox is not appearing automatically in Outlook for users who have been given Full Access. What is the cause?**
+
+Shared mailboxes with Full Access delegation auto-map in Outlook, but this can take up to an hour to appear after delegation is applied. If it has been longer than an hour, check that the delegation was applied in the Exchange Admin Center (not just in Entra ID), and confirm the user's Outlook profile has been restarted. In some cases, removing and re-adding the Full Access permission forces the auto-mapping to refresh. Auto-mapping can also be disabled per-mailbox — confirm it has not been turned off with `Add-MailboxPermission -AutoMapping $true`.
+
+**Q5: The DMARC record is published but no aggregate reports are arriving at the `rua` address. What should I check?**
+
+DMARC aggregate reports are sent by receiving mail servers on a 24-hour cycle — they are not immediate. Allow at least 24–48 hours after publishing the record before expecting reports. Also confirm the `rua` email address in the record is a valid, deliverable mailbox — if the address does not exist, reports will bounce silently. If the mailbox exists but reports are not arriving after 48 hours, use a DMARC monitoring service such as dmarcian or Postmark's DMARC analyser to verify the record is being read correctly by external servers.
+
+---

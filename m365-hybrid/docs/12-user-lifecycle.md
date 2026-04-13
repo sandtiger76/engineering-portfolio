@@ -4,6 +4,16 @@
 
 # 12 — User Lifecycle: Onboarding & Offboarding
 
+## Overview — What This Document Covers
+
+Two of the most operationally important moments in any organisation's IT are when someone joins and when someone leaves. Get onboarding wrong and a new employee's first day is spent waiting for access rather than being productive. Get offboarding wrong and a former employee may still be able to access company email, files, and systems long after they have left — which is both a security risk and a potential compliance issue.
+
+In a hybrid environment like this one, both processes involve multiple layers: the on-premises directory, the cloud identity, email and licences, device management, and active login sessions. None of these are automatically connected — each layer has to be handled in the right order.
+
+This document defines the standard procedures for both processes and provides PowerShell scripts to handle the repetitive steps consistently. A process that is scripted and documented is one that can be followed correctly every time, by anyone, under pressure — which is exactly what good operational practice looks like.
+
+---
+
 ## Introduction
 
 One of the most operationally important processes in any IT environment is user lifecycle management — what happens when someone joins the organisation, and what happens when they leave. Done well, onboarding means a new employee has everything they need from day one: an account, a device, access to the right systems, and a working email address. Done poorly, it means their first day is spent waiting for IT to sort things out.
@@ -241,4 +251,26 @@ A well-executed onboarding means a new user is productive from their first hour.
 
 ---
 
-[← 11 — Defender for Business](11-defender.md) &nbsp;|&nbsp; [🏠 README](../README.md)
+## Common Questions & Troubleshooting
+
+**Q1: The onboarding script ran successfully and the user account was created in AD, but the account is not appearing in Entra ID after the sync cycle. What should I check?**
+
+First confirm the user was created in an OU that is within the Cloud Sync scope — accounts created outside the scoped OUs will not synchronise regardless of how long you wait. Run `Get-ADUser -Identity <samaccountname> -Properties DistinguishedName` to confirm the account's location. If the OU is correct, trigger a manual delta sync with `Start-ADSyncSyncCycle -PolicyType Delta` on DC01 and wait 2–3 minutes. If the account still does not appear, check the Cloud Sync agent health in Entra Admin Center under Identity → Hybrid management → Cloud sync.
+
+**Q2: During offboarding, the script disabled the AD account and triggered a sync, but the user's Entra ID account still shows as enabled and they can still sign in. What is happening?**
+
+AD account disable synchronises to Entra ID, but it does not immediately revoke active session tokens. A user with a valid token can continue to access services until that token expires — which can be up to an hour for standard tokens. To cut access immediately, the Entra ID session revocation must be done manually and separately from the AD disable: in the Entra Admin Center go to Users → [User] → Revoke sessions. This invalidates all active tokens immediately. This step is called out explicitly in the offboarding script output as a required manual action.
+
+**Q3: A user's mailbox needs to be preserved after they leave but their licence has already been removed. Now the mailbox has disappeared. How can it be recovered?**
+
+When a licence is removed, the mailbox enters a soft-delete state and is retained for 30 days before being permanently deleted. To recover it, reassign the licence temporarily, convert the mailbox to a shared mailbox (which does not require a licence), then remove the licence again. The shared mailbox will persist without a licence indefinitely as long as it is under 50GB. If the 30-day window has passed, the mailbox data may still be recoverable through the Microsoft 365 compliance centre using Content Search, depending on your retention policies.
+
+**Q4: A new user went through Windows Autopilot OOBE but the device is showing as non-compliant in Intune immediately after enrolment. Should this be addressed before handing the device to the user?**
+
+This is normal immediately after enrolment — compliance policies need time to evaluate after the device first checks in, and some settings (particularly BitLocker encryption) take time to complete on first boot. Allow 30–60 minutes after enrolment for the device to reach a compliant state. If the device is still non-compliant after an hour, open it in Intune Admin Center under Devices → [Device] → Device compliance to see exactly which setting is failing and address that specific issue before issuing the device. Handing out a non-compliant device means Conditional Access will block the user from M365 apps, which makes for a poor first day.
+
+**Q5: During offboarding, the remote wipe command was sent to a corporate Windows laptop but the device was offline. How is this tracked and what happens when it comes back online?**
+
+Intune queues the wipe command and delivers it the next time the device connects to the internet and checks in with Intune. The wipe status in Intune Admin Center will show as "Pending" until the device receives and executes the command. For devices that may not come back online (for example, a laptop taken by a departing employee), the pending wipe provides protection if the device ever connects to any network — it does not require the company's network specifically. In the meantime, the combination of disabled AD account, revoked Entra ID sessions, and removed licence means the device cannot be used to access any company data even while the wipe is pending.
+
+---

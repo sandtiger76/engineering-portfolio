@@ -4,6 +4,16 @@
 
 # 09 — Intune: iOS Mobile Application Management (MAM)
 
+## Overview — What This Document Covers
+
+Most people carry a smartphone, and most people use that smartphone to check work email or messages — whether the company officially supports it or not. The question for IT is not whether personal devices access company data, but how to make it safe when they do.
+
+The challenge is that a personal phone is not a company device. The organisation cannot wipe it, cannot control what apps are installed, and cannot monitor what the user does with it. But it still needs to protect the company data on it — especially if the phone is lost or the person leaves.
+
+Mobile Application Management (MAM) is the answer. Rather than managing the entire device, Intune manages only the specific work apps — Outlook, Teams, OneDrive — and the company data within them. The personal side of the phone is completely untouched. This document covers setting up that protection: the policies that control what users can do with company data in those apps, and how to remove company data remotely without affecting anything personal.
+
+---
+
 ## Introduction
 
 Not every device that accesses company data is owned by the company. In many organisations, employees use their personal smartphones to check email, access Teams, and read documents. This is called BYOD — Bring Your Own Device.
@@ -117,4 +127,26 @@ Users experience minimal friction — they install familiar apps from the App St
 
 ---
 
-[← 08 — Intune: Windows](08-intune-windows.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [10 — Conditional Access & MFA →](10-conditional-access.md)
+## Common Questions & Troubleshooting
+
+**Q1: A user signed into Outlook on their personal iPhone but was never prompted to set a PIN. The MAM policy does not appear to have applied. What should I check?**
+
+First confirm the App Protection Policy is assigned to a group that includes the user — check in Intune Admin Center under Apps → App protection policies → [Policy] → Assignments. Then confirm the user signed in with their work account (not a personal Microsoft account). MAM policies only apply when the user authenticates with an account that is targeted by the policy. If the assignment looks correct, ask the user to sign out of the Outlook app completely and sign back in — the policy is re-evaluated at sign-in. Check Apps → App protection status to see whether the policy is showing as applied for that user.
+
+**Q2: Users are complaining they cannot attach files to emails from their personal iPhone. Is this a MAM policy effect or something else?**
+
+This is expected behaviour if the MAM policy has "Save copies of org data" set to Block and "Send org data to other apps" set to Policy managed apps only. Users can attach files that are stored within managed apps (such as OneDrive) but cannot attach files from personal storage like the iOS Photos app or iCloud Drive. If this is causing significant friction, review the policy settings — some organisations allow attachments from personal storage while still blocking paste and copy operations. The trade-off is documented in the Data Protection tab of the App Protection Policy.
+
+**Q3: The "Wipe only organisation data" option removed company email from the device but the user says their Teams messages are still visible. Is the wipe incomplete?**
+
+Selective wipe removes the authentication token and locally cached data for managed apps, but some Teams content may persist briefly in cache before the app fully clears. Ask the user to open the Teams app — it should prompt them to sign in again, and once they do with a personal account (or cannot, because the work account is wiped), the company content will no longer be accessible. If Teams is still showing work content after the user confirms the app prompted for re-authentication, the wipe may need to be re-triggered from the Intune Admin Center.
+
+**Q4: A user's personal iPhone was recently replaced. The MAM policy is assigned but it is not applying to the new device. What is needed?**
+
+MAM policies apply at the app and account level, not at the device level — so there is no device registration required for MAM. The policy should apply automatically when the user signs into the managed apps (Outlook, Teams, OneDrive) on the new device with their work account. If it is not applying, ask the user to sign out and back in, and check Apps → App protection status in Intune to confirm the policy is being received. No IT action is typically required for a device replacement in a MAM-only environment.
+
+**Q5: The organisation wants to allow users to use FaceID instead of a PIN for Outlook on iPhone, but the current policy requires a numeric PIN. How is this changed?**
+
+In the App Protection Policy under the Access Requirements tab, the setting "Biometrics instead of PIN" can be set to Allow. When enabled, users can authenticate to managed apps using FaceID or TouchID instead of entering their PIN. The PIN remains as a fallback if biometrics fail or are unavailable. This change applies at next policy refresh — the user does not need to reinstall the app. Policy refresh happens at app launch and periodically based on the "Recheck access requirements after inactivity" setting.
+
+---

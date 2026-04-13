@@ -4,6 +4,16 @@
 
 # 06 — SharePoint & OneDrive
 
+## Overview — What This Document Covers
+
+One of the most visible changes when a business moves to Microsoft 365 is what happens to files. Instead of a shared drive on a server in the office, files live in the cloud — accessible from any device, from any location, with built-in version history and the ability for multiple people to work on the same document at the same time.
+
+Microsoft 365 provides two file storage services. OneDrive is personal storage — each user gets their own space in the cloud, equivalent to a "My Documents" folder that follows them everywhere. SharePoint is shared team storage — each department or office gets a shared site where the whole team can store and collaborate on documents.
+
+This document covers setting both up and, critically, how to migrate existing files from a traditional file server into the cloud — which is the real-world challenge most organisations face when making this transition. Two different migration tools are used and compared, reflecting the current Microsoft-recommended approach for each scenario.
+
+---
+
 ## Introduction
 
 When organisations move to Microsoft 365, one of the most significant changes is what happens to file storage. Traditionally, files lived on a file server in the office — a physical or virtual server with shared folders that users mapped as network drives. Microsoft 365 replaces this with two cloud services: OneDrive for personal files and SharePoint for shared team files.
@@ -360,4 +370,26 @@ The Migration Manager CSV format differs from SPMT. It requires a header row and
 
 ---
 
-[← 05 — Microsoft 365 & Exchange Online](05-m365-exchange.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [07 — Microsoft Teams →](07-teams.md)
+## Common Questions & Troubleshooting
+
+**Q1: Files migrated successfully but users cannot see them in SharePoint or OneDrive. What should I check?**
+
+First confirm the migration completed without errors in the tool's report — a "completed" status does not always mean all files transferred successfully. Check the migration log for skipped or failed items. Then confirm the destination path is correct: OneDrive personal sites follow the format `https://tenant-my.sharepoint.com/personal/firstname_lastname_domain_com` and any typo will result in files landing in the wrong location or failing silently. Have the affected user sign into OneDrive in a browser and check the exact URL of their personal site.
+
+**Q2: Migration is extremely slow — hundreds of files per hour rather than thousands. What can be done to improve throughput?**
+
+Migration speed is affected by several factors: file count matters more than total size (many small files migrate slower than fewer large files due to per-file overhead), network bandwidth between the source and Microsoft's datacentres, and the time of day (Microsoft throttles migration traffic during business hours in some regions). For large migrations, schedule bulk transfers overnight or over weekends. SPMT supports parallel task execution — run multiple tasks simultaneously for different source paths rather than one large task. Migration Manager distributes work across multiple agent machines, which is the more scalable approach for large environments.
+
+**Q3: Some files failed to migrate with a "file name contains invalid characters" error. How should these be handled?**
+
+SharePoint Online does not support certain characters in file and folder names that Windows file systems allow — including `# % & * : < > ? / \ { | }` and names that end in a space or period. The migration tools generate a report of failed items. The cleanest approach is to fix the names at the source before re-running the migration, rather than renaming in SharePoint after the fact. PowerShell can be used to scan and rename problematic files in bulk before migration begins.
+
+**Q4: After migration, files in SharePoint show the migration service account as the author rather than the original user. Can this be corrected?**
+
+This is expected behaviour when migrating with a service account — SharePoint records the account that uploaded the file as the modifier. SPMT and Migration Manager both support a `-SPUserMappingFile` or user mapping option that maps source usernames to destination Microsoft 365 accounts, which preserves original authorship metadata. This mapping must be configured before the migration runs — it cannot be applied retroactively to already-migrated content without re-migrating.
+
+**Q5: OneDrive Known Folder Move (KFM) is configured via Intune but users' desktops and documents are not syncing. What should I check?**
+
+KFM requires the OneDrive sync client to be signed in with the user's work account and running on the device. Confirm the sync client is installed, signed in, and not paused. In the Intune policy, verify the tenant ID in the KFM configuration profile is correct — a wrong tenant ID will cause KFM to silently fail. Also check that the user does not have a Group Policy or registry setting blocking KFM from a previous configuration, and that the folders being redirected do not contain paths longer than 260 characters, which OneDrive cannot sync.
+
+---

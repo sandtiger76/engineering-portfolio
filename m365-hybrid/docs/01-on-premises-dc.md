@@ -4,6 +4,16 @@
 
 # 01 — On-Premises Infrastructure
 
+## Overview — What This Document Covers
+
+Before a business can use Microsoft 365 or any cloud service, it needs a reliable foundation for managing who its people are. In the Microsoft world, that foundation is called Active Directory — a central directory that holds every user account, every computer, and every permission in the organisation.
+
+This document covers setting up a Windows Server that acts as the organisation's identity anchor. Think of it as the master phonebook for the business — every user account is created here first, and from here it gets synchronised into the cloud. The server also handles DNS, which is the system that translates names like "qcbhomelab.online" into the actual network addresses computers use to talk to each other.
+
+This is the starting point for everything else in the project. Without this server running correctly, nothing that follows — cloud identities, email, Teams, device management — will work properly.
+
+---
+
 ## Introduction
 
 Most organisations that use Microsoft 365 in the cloud still have some form of on-premises Windows Server infrastructure. The reason is identity. When a company has years of user accounts, passwords, and permissions stored in Active Directory on a local server, they do not simply abandon that when moving to the cloud. Instead, they connect the two environments together — this is called a hybrid identity model.
@@ -168,4 +178,26 @@ After completing these steps, QCBHC-DC01 is a fully functioning domain controlle
 
 ---
 
-[← README — Project Overview](../README.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [02 — AD Provisioning Scripts →](02-ad-scripts.md)
+## Common Questions & Troubleshooting
+
+**Q1: After promoting the server to domain controller, I can no longer resolve external DNS names like google.com. What is wrong?**
+
+When a server is promoted to a domain controller, it sets itself as its own DNS server (127.0.0.1). If DNS forwarders are not configured, the server can only resolve internal names and has nowhere to send external queries. Run `Add-DnsServerForwarder -IPAddress 1.1.1.1` and `Add-DnsServerForwarder -IPAddress 8.8.8.8` to add upstream resolvers. Verify with `Resolve-DnsName google.com` from the server.
+
+**Q2: I set the preferred DNS on the server to 127.0.0.1 but external DNS resolution from client machines is still failing. Why?**
+
+Client machines resolve through the domain controller, which in turn forwards external queries upstream. If the forwarders are not set on the DC, clients will fail to resolve external names even if the DC itself is reachable. Confirm forwarders are in place using `Get-DnsServerForwarder` on the DC. Also confirm the client's DNS server is pointing to the DC's IP, not to 127.0.0.1 (that only works on the DC itself).
+
+**Q3: The `Install-ADDSForest` command completes but the server does not restart automatically. Is something wrong?**
+
+The `-Force` parameter suppresses the confirmation prompt but does not always guarantee an automatic restart in all environments. If the server does not restart within a few minutes, restart it manually. The promotion process completes on the next boot — log in as `DOMAIN\Administrator` rather than the local Administrator account after restart.
+
+**Q4: I renamed the server with `Rename-Computer` but after the restart, Active Directory still shows the old name. What happened?**
+
+This is normal if the rename was done after AD DS was already installed. Always rename the server before promoting it to a domain controller. If you have already promoted it with the wrong name, the cleanest fix is to demote the DC, rename the server, and re-promote. In a lab environment this is straightforward; in production it requires more care to avoid replication issues.
+
+**Q5: `Resolve-DnsName qcbhomelab.online` returns no results from a client machine on the network, even though the domain controller is reachable. What should I check?**
+
+Work through this in order: confirm the client's DNS server setting points to the DC's IP address (not the router); confirm the DC's DNS service is running (`Get-Service DNS` on the DC); confirm the forward lookup zone for the domain exists in DNS Manager; and confirm there are no firewall rules blocking UDP/TCP port 53 between the client and the DC. A quick test is to run `Resolve-DnsName qcbhomelab.online -Server <DC_IP>` from the client — if that returns a result, the issue is the client's DNS configuration, not the DC itself.
+
+---

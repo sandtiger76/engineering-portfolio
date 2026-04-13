@@ -4,6 +4,16 @@
 
 # 03 — Azure Resource Setup
 
+## Overview — What This Document Covers
+
+Microsoft Azure is Microsoft's cloud platform — a global network of data centres where organisations can run infrastructure, store data, and connect services without managing physical hardware. Where Microsoft 365 handles the day-to-day tools people use (email, Teams, file storage), Azure handles the infrastructure underneath.
+
+This document covers setting up the Azure foundations for the project: the logical containers that keep cloud resources organised, the private network that would host cloud-based servers, and the monitoring workspace that collects security data from across the environment.
+
+A useful way to think about it: if Microsoft 365 is the office the business works in, Azure is the building services underneath it — the wiring, the security system, and the facilities management. Most users never see it, but it has to be set up correctly for everything above it to work reliably.
+
+---
+
 ## Introduction
 
 Microsoft Azure is Microsoft's cloud platform — a global network of data centres where you can run virtual machines, store data, manage identities, and much more, paying only for what you use. Where Microsoft 365 handles the productivity layer (email, Teams, SharePoint), Azure handles the infrastructure layer.
@@ -304,4 +314,26 @@ The empty resource groups (RG-Identity, RG-UserServices, RG-Shared) are intentio
 
 ---
 
-[← 02 — AD Provisioning Scripts](02-ad-scripts.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [04 — Hybrid Identity →](04-hybrid-identity.md)
+## Common Questions & Troubleshooting
+
+**Q1: `az group create` completes successfully but the resource group does not appear in the Azure Portal. What should I check?**
+
+The most common cause is a subscription mismatch — the CLI is pointing at a different subscription than the one you are viewing in the portal. Run `az account show` to confirm which subscription is active in the CLI, and check the subscription filter in the portal (top right — it is easy to have the portal filtered to show only certain subscriptions). Run `az account set --subscription "Your Subscription Name"` to correct the CLI if needed.
+
+**Q2: All commands are deploying resources to the wrong region. I specified `uksouth` but resources are appearing in `eastus`. What is happening?**
+
+Azure CLI uses a configured default location that overrides nothing — but if you have a default set to `eastus` from a previous session, any command that does not explicitly include `--location` will use that default. Run `az configure --list-defaults` to see the current default and `az configure --defaults location=uksouth` to correct it. Always verify with `az resource list --output table` after creation.
+
+**Q3: A `NetworkWatcherRG` resource group appeared that I did not create. Should I delete it?**
+
+No. Azure creates this automatically when you interact with networking resources. It contains a Network Watcher that Azure uses for network diagnostics. It is system-managed, costs nothing, and should be left in place. Deleting it will cause it to be recreated the next time you use any networking feature.
+
+**Q4: The Log Analytics workspace was created but I cannot see any data in it. Is something wrong?**
+
+An empty workspace is expected at this stage. Data only appears once a source is connected — in this project, that happens in document 11 when Defender for Business is configured to forward telemetry. The workspace itself being empty is correct. Confirm it exists with `az monitor log-analytics workspace show --workspace-name LAW-QCBHomelab --resource-group RG-Management`.
+
+**Q5: I want to tear down everything and start the Azure setup from scratch. What is the safest way to do this?**
+
+Delete the resource groups in order, which removes all resources inside them: `az group delete --name RG-Networking --yes` and repeat for each group. Do not delete `NetworkWatcherRG` manually — it will be recreated and the deletion sometimes causes temporary errors in the portal. Wait for each deletion to complete before running the next one. Azure resource group deletion is asynchronous; use `az group show --name RG-Networking` to confirm a group is fully gone before recreating it.
+
+---

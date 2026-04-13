@@ -4,6 +4,16 @@
 
 # 04 — Hybrid Identity
 
+## Overview — What This Document Covers
+
+Most organisations that move to Microsoft 365 do not start from scratch — they already have years of user accounts stored on a local server. The challenge is connecting those existing accounts to the cloud without forcing everyone to manage two separate sets of credentials.
+
+Hybrid identity is the solution. It creates a live connection between the organisation's on-premises directory and Microsoft's cloud, so that when someone's account is created, changed, or disabled on the local server, that change is automatically reflected in Microsoft 365 within minutes. Users get a single username and password that works everywhere — on their office computer, in the browser, on their phone.
+
+This document covers setting up that connection: installing the synchronisation agent, choosing the right synchronisation method, and verifying that accounts are flowing correctly from on-premises into the cloud.
+
+---
+
 ## Introduction
 
 Hybrid identity is the bridge between an on-premises Active Directory and Microsoft's cloud identity service, Microsoft Entra ID. It is what allows the same username and password a user types at their office computer to also work when signing into Microsoft 365, Teams, or Azure from anywhere in the world.
@@ -315,4 +325,26 @@ The three cloud-only admin accounts will remain separate from the sync process a
 
 ---
 
-[← 03 — Azure Resource Setup](03-azure-setup.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [05 — Microsoft 365 & Exchange Online →](05-m365-exchange.md)
+## Common Questions & Troubleshooting
+
+**Q1: Users are not appearing in Entra ID after sync. The agent shows as healthy but nothing is synchronising. What should I check first?**
+
+Start with the scoping filter. Cloud Sync only synchronises objects within the configured OU scope — if users are in an OU that is not included in the sync scope, they will not appear in Entra ID regardless of agent health. In the Entra Admin Center, go to the Cloud Sync configuration and verify the OUs listed under scope match where your user accounts actually live. A common mistake is scoping to `OU=Staff` but having contractor accounts in `OU=Contractors` which is outside the scope.
+
+**Q2: A user's password change on-premises is not reflecting in the cloud. They can still sign in using their old password. Why?**
+
+Password Hash Synchronisation runs on its own cycle, separate from the attribute sync cycle. After a password change, it can take up to 2 minutes for the new hash to synchronise. If it is taking longer, check that the Password Hash Sync option is enabled in the Cloud Sync configuration and that the agent on DC01 is running and healthy. Also confirm the user's account is within the sync scope — if the account is out of scope, password hashes will not synchronise even if other attributes did previously.
+
+**Q3: A synced user account is showing in Entra ID but cannot be assigned a Microsoft 365 licence. What is the problem?**
+
+The most common cause is a missing usage location. Microsoft requires a usage location to be set on every user account before a licence can be assigned — it is a compliance requirement related to data residency. Synced accounts do not inherit this from AD automatically. Set it via PowerShell: `Update-MgUser -UserId <UPN> -UsageLocation "GB"` (or the appropriate country code). After setting the usage location, licence assignment should succeed immediately.
+
+**Q4: A user was deleted from Active Directory but their account is still visible and active in Entra ID. Why has it not been removed?**
+
+Deletion synchronisation follows the same cycle as creation, but there is an additional safety mechanism — Entra ID moves deleted accounts to a soft-delete state (the Entra ID Recycle Bin) rather than removing them immediately. This gives a 30-day recovery window. If you need to confirm a deletion has synchronised, check the Entra Admin Center under Deleted users — the account should appear there within a few minutes of the next sync cycle after deletion in AD.
+
+**Q5: The Cloud Sync agent was installed but the Entra Admin Center shows it as disconnected or inactive. How do I get it back online?**
+
+First check the Windows Service on DC01 — open Services and look for the Microsoft Entra Connect Provisioning Agent. If it is stopped, start it and check whether it stays running. If it crashes immediately, check the Windows Event Log under Applications and Services Logs > Microsoft > Azure AD Connect Provisioning Agent. The most common causes are: the service account password has changed, the agent's registration with Entra ID has expired (re-register via the agent installer), or a network change is blocking outbound HTTPS to Microsoft's endpoints.
+
+---

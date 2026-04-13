@@ -4,6 +4,8 @@
 
 # QCB Homelab — Hybrid Microsoft Environment
 
+## What This Project Is — A Plain English Overview
+
 This project documents the design and implementation of a complete hybrid Microsoft environment, built from scratch for a fictional professional services firm called QCB Homelab Consultants. It was created as a hands-on portfolio piece to demonstrate practical, real-world capability across the Microsoft 365 and Azure technology stack.
 
 The environment reflects how a modern SMB would actually operate — cloud-first, identity-driven, and secure by design — rather than a textbook exercise. Every decision made here has a reason behind it, and where there were alternatives, those trade-offs are explained.
@@ -113,6 +115,33 @@ Work through these in order. Each document is self-contained but builds on the o
 ## Security Posture
 
 The environment is built on Zero Trust principles. Access to company data is never assumed based on network location. Every access decision is evaluated against three signals: who the user is, whether their device is compliant, and whether the sign-in looks normal. Multi-factor authentication is enforced for all users with no exceptions.
+
+---
+
+## Security Architecture
+
+Security in this environment is not a single setting — it is a layered posture built across four distinct levels, each reinforcing the others.
+
+**Identity layer**
+Every sign-in is challenged with multi-factor authentication regardless of location or device. Legacy authentication protocols that cannot support MFA are blocked entirely. Admin accounts have no persistent sessions and must re-authenticate every time they are used.
+
+**Device layer**
+Windows laptops are enrolled in Microsoft Intune and must meet a defined compliance policy before they are permitted to access Microsoft 365 applications. Compliance status is fed as a real-time signal into Conditional Access — a device that falls out of compliance loses access automatically. Personal iPhones are governed through Mobile Application Management (MAM) rather than full device enrolment, protecting company data within managed apps without touching personal content.
+
+**Email layer**
+All inbound email attachments are detonated in a sandbox environment by Safe Attachments before reaching users. All links in emails are rewritten and checked in real time at the point of click by Safe Links. Outbound email is cryptographically signed with DKIM, SPF authorises Microsoft's sending infrastructure, and DMARC provides monitoring and a path to enforcement.
+
+**Endpoint layer**
+Microsoft Defender for Business provides endpoint detection and response (EDR) across all managed Windows devices. Behaviour monitoring, network protection, and cloud-delivered protection are all enabled. Telemetry is forwarded to a central Log Analytics workspace, providing a single place to search and analyse security events across the environment.
+
+**Conditional Access policies in force**
+
+| Policy | Purpose |
+|---|---|
+| CA01 — Require MFA for all users | No sign-in is trusted on password alone |
+| CA02 — Block legacy authentication | Eliminates protocols that cannot support MFA |
+| CA03 — Require compliant device for M365 | Blocks unmanaged devices from company data |
+| CA04 — Protect admin accounts | No persistent sessions for privileged roles |
 
 ---
 

@@ -4,6 +4,16 @@
 
 # 02 — Active Directory Provisioning Scripts
 
+## Overview — What This Document Covers
+
+Once the directory service is installed, it is completely empty. Before the organisation can use it, it needs to be populated — user accounts, groups, organisational units, and computer objects all have to be created. In a small organisation, this might be done by hand. In any environment of real scale, it is automated.
+
+This document covers the PowerShell scripts that build the complete Active Directory structure from scratch: the folder structure that organises users and devices, all user accounts, all security groups, and the workstation records. Running these scripts produces a realistic, fully populated directory that mirrors what you would find in a working business environment.
+
+The scripts are also designed to be idempotent — a technical way of saying they can be run more than once without causing problems. If something goes wrong halfway through, you can run them again without creating duplicates or errors.
+
+---
+
 ## Introduction
 
 Once Active Directory is installed, it is an empty directory with only the built-in default objects. In a real environment, populating it manually would take hours and be error-prone. In a lab, doing it manually would also miss the point — the goal is to demonstrate that you can automate the work a senior engineer would be expected to script.
@@ -538,4 +548,26 @@ The directory is now ready for synchronisation to Microsoft Entra ID, covered in
 
 ---
 
-[← 01 — On-Premises Infrastructure](01-on-premises-dc.md) &nbsp;|&nbsp; [🏠 README](../README.md) &nbsp;|&nbsp; [03 — Azure Resource Setup →](03-azure-setup.md)
+## Common Questions & Troubleshooting
+
+**Q1: A script fails with "Access is denied" even though I am running PowerShell as Administrator. What is the issue?**
+
+Running PowerShell as the local Administrator is not the same as running it as a Domain Administrator. On a domain controller, you need to be signed in as a domain admin account (e.g. `QCBHOMELAB\Administrator`) and run PowerShell elevated from that session. If you are remoting in, ensure your PowerShell remoting session is using domain credentials, not local ones.
+
+**Q2: The user creation script throws "The object already exists" for some users but not others. How do I handle this cleanly?**
+
+This happens when the script is run a second time without idempotency checks. The scripts in this document use `Get-ADUser -Filter` to check for existing accounts before creating them. If you are adapting these scripts, always include a pre-creation check and use `Write-Host` to log skipped accounts rather than letting the script fail. Running with `-ErrorAction SilentlyContinue` hides errors but also hides real problems — use conditional logic instead.
+
+**Q3: Groups are created successfully but `Add-ADGroupMember` fails with "Cannot find an object with identity". What is happening?**
+
+This usually means the user account referenced does not yet exist in AD at the time the group membership script runs. If you are running scripts in sequence, add a short `Start-Sleep` between user creation and group assignment, or restructure the script to verify each account exists before attempting to add it. In a slow or loaded environment, AD replication can introduce a brief delay between object creation and availability.
+
+**Q4: The OU structure looks correct in Active Directory Users and Computers but the user accounts are appearing in the wrong OU. What should I check?**
+
+The `New-ADUser -Path` parameter must match the DistinguishedName of the target OU exactly, including capitalisation and spacing. A common mistake is referencing `OU=Staff` when the actual OU is `OU=Accounts`. Use `Get-ADOrganizationalUnit -Filter *` to list all OUs and their exact DistinguishedNames before running user creation scripts, and copy the path directly rather than typing it.
+
+**Q5: I need to reset all user accounts back to a clean state and re-run the scripts. What is the safest way to do this in a lab?**
+
+In a lab environment, the cleanest approach is to remove all objects from the custom OUs and let the scripts recreate them. Use `Get-ADUser -Filter * -SearchBase "OU=Accounts,DC=qcbhomelab,DC=online" | Remove-ADUser -Confirm:$false` to clear users, and similarly for groups and OUs. Never use broad `Remove-ADObject` commands without a specific `-SearchBase` filter — you risk removing built-in objects that are difficult to restore. In a production environment, always take an AD backup before any bulk changes.
+
+---

@@ -29,7 +29,7 @@ Inside: a repeatable blueprint covering the decisions that vendor documentation 
 
 ---
 
-### Hybrid Microsoft Environment(./m365-hybrid/README.md)**
+### [Hybrid Microsoft Environment](./m365-hybrid/README.md)**
 
 
 This project documents the design and implementation of a complete hybrid Microsoft environment, built from scratch for a fictional professional services firm called QCB Homelab Consultants. It was created as a hands-on portfolio piece to demonstrate practical, real-world capability across the Microsoft 365 and Azure technology stack.
